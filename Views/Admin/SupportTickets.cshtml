@@ -1,0 +1,209 @@
+@using DotNetLearning.Models
+@{
+    Layout = null;
+    var tickets = ViewBag.Tickets as IEnumerable<SupportTicket> ?? new List<SupportTicket>();
+}
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>管理後台 - 客服工單</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI','Microsoft JhengHei',sans-serif; background: #16213e; color: #eee; display: flex; min-height: 100vh; }
+        .sidebar { width:240px; background:#1a1a2e; min-height:100vh; padding:20px 0; position:fixed; top:0; left:0; overflow-y:auto; z-index:100; border-right:1px solid rgba(233,69,96,0.2); }
+        .sidebar-brand { text-align:center; padding:16px 20px 24px; border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:12px; }
+        .sidebar-brand .logo { font-size:32px; }
+        .sidebar-brand .title { color:#F9A825; font-size:18px; font-weight:700; margin-top:4px; }
+        .sidebar a { display:flex; align-items:center; padding:11px 24px; color:#aab; text-decoration:none; font-size:14px; transition:all 0.2s; border-left:3px solid transparent; }
+        .sidebar a:hover,.sidebar a.active { background:rgba(233,69,96,0.12); color:#fff; border-left-color:#e94560; }
+        .sidebar a .icon { margin-right:10px; font-size:16px; width:22px; text-align:center; }
+        .sidebar a.logout { color:#e94560; margin-top:16px; border-top:1px solid rgba(255,255,255,0.06); padding-top:16px; }
+        .main { margin-left:240px; flex:1; padding:24px 28px; min-width:0; }
+        .page-title { font-size:22px; font-weight:700; margin-bottom:24px; color:#F9A825; }
+        .card { background:#0f3460; border:1px solid rgba(233,69,96,0.12); border-radius:12px; padding:20px; }
+        .admin-table { width:100%; border-collapse:collapse; font-size:13px; }
+        .admin-table th { text-align:left; padding:8px 10px; background:rgba(26,26,46,0.6); color:#aab; font-weight:600; border-bottom:1px solid rgba(255,255,255,0.08); }
+        .admin-table td { padding:7px 10px; border-bottom:1px solid rgba(255,255,255,0.04); color:#ddd; max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .admin-table tr:hover td { background:rgba(233,69,96,0.06); }
+        .badge { display:inline-block; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:600; }
+        .badge-pending { background:rgba(249,168,37,0.2); color:#F9A825; }
+        .badge-processing { background:rgba(34,153,221,0.2); color:#2299dd; }
+        .badge-resolved { background:rgba(0,200,83,0.2); color:#00c853; }
+        .badge-closed { background:rgba(150,150,150,0.2); color:#999; }
+        .badge-cat-tech { background:rgba(99,102,241,0.2); color:#6366f1; }
+        .badge-cat-payment { background:rgba(233,69,96,0.2); color:#e94560; }
+        .badge-cat-teacher { background:rgba(34,153,221,0.2); color:#2299dd; }
+        .badge-cat-booking { background:rgba(249,168,37,0.2); color:#F9A825; }
+        .badge-cat-feature { background:rgba(0,200,83,0.2); color:#00c853; }
+        .badge-cat-other { background:rgba(150,150,150,0.2); color:#aaa; }
+        .btn-reply { padding:4px 12px; background:rgba(99,102,241,0.15); color:#6366f1; border:1px solid rgba(99,102,241,0.3); border-radius:6px; cursor:pointer; font-size:12px; font-family:inherit; transition:all 0.2s; }
+        .btn-reply:hover { background:rgba(99,102,241,0.3); }
+        .reply-area { display:none; margin-top:6px; }
+        .reply-area textarea { width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); background:#1a1a2e; color:#eee; font-family:inherit; font-size:13px; resize:vertical; min-height:60px; }
+        .reply-area button { margin-top:4px; padding:4px 14px; background:#6366f1; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-family:inherit; }
+        .reply-area button:hover { background:#4f46e5; }
+        .admin-reply-text { background:rgba(0,200,83,0.08); border-left:3px solid #00c853; padding:4px 8px; margin-top:4px; font-size:12px; color:#ccc; white-space:pre-wrap; max-width:300px; }
+        /* Mobile responsive */
+        @@media (max-width: 900px) {
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                z-index: 9999;
+                transition: left 0.3s;
+                height: 100vh;
+                width: 250px;
+            }
+            .sidebar.open {
+                left: 0;
+                box-shadow: 5px 0 30px rgba(0,0,0,0.5);
+            }
+            .main {
+                margin-left: 0 !important;
+                padding: 20px 15px !important;
+            }
+            .mobile-menu-btn {
+                display: block !important;
+            }
+            .mobile-overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 9998;
+            }
+            .mobile-overlay.open {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="mobile-menu-btn" style="display:none;position:fixed;top:10px;left:10px;z-index:9997;background:#e94560;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:20px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.3);" onclick="document.querySelector('.sidebar').classList.toggle('open');document.querySelector('.mobile-overlay').classList.toggle('open');">&#9776;</button>
+    <div class="mobile-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('open');"></div>
+    <nav class="sidebar">
+        <div class="sidebar-brand"><div class="logo">&#x1F6E1;&#xFE0F;</div><div class="title">管理後台</div></div>
+        <a href="/"><span class="icon">&#x1F3E0;</span><span>回首頁</span></a>
+        <a href="@Url.Action("Dashboard")"><span class="icon">&#x1F4CA;</span><span>總覽</span></a>
+        <a href="@Url.Action("Users")"><span class="icon">&#x1F465;</span><span>使用者管理</span></a>
+        <a href="@Url.Action("Teachers")"><span class="icon">&#x1F468;&#x200D;&#x1F3EB;</span><span>老師管理</span></a>
+        <a href="@Url.Action("Bookings")"><span class="icon">&#x1F4C5;</span><span>預約管理</span></a>
+        <a href="@Url.Action("Chapters")"><span class="icon">&#x1F4D6;</span><span>章節管理</span></a>
+        <a href="@Url.Action("Questions")"><span class="icon">&#x2753;</span><span>題庫管理</span></a>
+        <a href="@Url.Action("Quizzes")"><span class="icon">&#x1F4DD;</span><span>測驗紀錄</span></a>
+        <a href="@Url.Action("Ideas")"><span class="icon">&#x1F4A1;</span><span>想法分享</span></a>
+        <a href="@Url.Action("ChatMessages")"><span class="icon">&#x1F4AC;</span><span>聊天紀錄</span></a>
+        <a href="@Url.Action("BugChallenges")"><span class="icon">&#x1F41B;</span><span>偵探遊戲</span></a>
+        <a href="@Url.Action("SpeedRuns")"><span class="icon">&#x26A1;</span><span>速度挑戰</span></a>
+        <a href="@Url.Action("DailyChallenges")"><span class="icon">&#x1F4C5;</span><span>每日一題</span></a>
+        <a href="@Url.Action("ArenaSubmissions")"><span class="icon">&#x1F3C6;</span><span>擂台管理</span></a>
+        <a href="@Url.Action("StudyBuddies")"><span class="icon">&#x1F91D;</span><span>學習夥伴</span></a>
+        <a href="@Url.Action("AuditLogs")"><span class="icon">&#x1F4CB;</span><span>操作紀錄</span></a>
+        <a href="@Url.Action("SupportTickets")" class="active"><span class="icon">&#x1F4DE;</span><span>客服工單</span></a>
+        <a href="@Url.Action("ErrorLogs")"><span class="icon">&#x1F6A8;</span><span>錯誤日誌</span></a>
+        <a href="@Url.Action("AIWorkLogs")"><span class="icon">&#x1F916;</span><span>AI 工作紀錄</span></a>
+        <a href="@Url.Action("Logout")" class="logout"><span class="icon">&#x1F6AA;</span><span>登出</span></a>
+    </nav>
+
+    <div class="main">
+        <div class="page-title">&#x1F4DE; 客服工單</div>
+
+        <div class="card">
+            <div style="overflow-x:auto;">
+                <table class="admin-table" id="ticketTable">
+                    <thead>
+                        <tr><th>ID</th><th>用戶名</th><th>電郵</th><th>分類</th><th>內容</th><th>狀態</th><th>管理員回覆</th><th>時間</th><th>操作</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in tickets)
+                        {
+                            var catClass = t.Category switch {
+                                "技術問題" => "badge-cat-tech",
+                                "付款問題" => "badge-cat-payment",
+                                "老師相關" => "badge-cat-teacher",
+                                "預約問題" => "badge-cat-booking",
+                                "功能建議" => "badge-cat-feature",
+                                _ => "badge-cat-other"
+                            };
+                            var statusClass = t.Status switch {
+                                "pending" => "badge-pending",
+                                "processing" => "badge-processing",
+                                "resolved" => "badge-resolved",
+                                "closed" => "badge-closed",
+                                _ => "badge-pending"
+                            };
+                            var statusText = t.Status switch {
+                                "pending" => "待處理",
+                                "processing" => "處理中",
+                                "resolved" => "已回覆",
+                                "closed" => "已關閉",
+                                _ => t.Status
+                            };
+                            <tr id="row-@t.Id">
+                                <td>@t.Id</td>
+                                <td>@t.UserName</td>
+                                <td title="@t.UserEmail">@(t.UserEmail.Length > 20 ? t.UserEmail.Substring(0, 20) + "..." : t.UserEmail)</td>
+                                <td><span class="badge @catClass">@t.Category</span></td>
+                                <td title="@t.Content">@(t.Content.Length > 40 ? t.Content.Substring(0, 40) + "..." : t.Content)</td>
+                                <td><span class="badge @statusClass" id="status-@t.Id">@statusText</span></td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(t.AdminReply))
+                                    {
+                                        <div class="admin-reply-text">@(t.AdminReply.Length > 50 ? t.AdminReply.Substring(0, 50) + "..." : t.AdminReply)</div>
+                                    }
+                                    else
+                                    {
+                                        <span style="color:#666;">-</span>
+                                    }
+                                </td>
+                                <td>@t.CreatedAt.ToString("MM/dd HH:mm")</td>
+                                <td>
+                                    @if (t.Status == "pending" || t.Status == "processing")
+                                    {
+                                        <button class="btn-reply" onclick="toggleReply(@t.Id)">回覆</button>
+                                        <div class="reply-area" id="reply-@t.Id">
+                                            <textarea id="replyText-@t.Id" placeholder="輸入回覆..."></textarea>
+                                            <button onclick="submitReply(@t.Id)">送出回覆</button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span style="color:#666;font-size:12px;">已處理</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleReply(id) {
+            var el = document.getElementById('reply-' + id);
+            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        }
+        function submitReply(id) {
+            var reply = document.getElementById('replyText-' + id).value.trim();
+            if (!reply) { alert('請輸入回覆內容'); return; }
+            fetch('/Admin/ReplyTicket', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, reply: reply })
+            }).then(r => r.json()).then(d => {
+                if (d.success) {
+                    document.getElementById('status-' + id).className = 'badge badge-resolved';
+                    document.getElementById('status-' + id).textContent = '已回覆';
+                    document.getElementById('reply-' + id).style.display = 'none';
+                    location.reload();
+                }
+            }).catch(e => alert('回覆失敗'));
+        }
+    </script>
+
+<script>document.querySelectorAll('.sidebar a').forEach(a=>{a.addEventListener('click',()=>{if(window.innerWidth<=900){document.querySelector('.sidebar').classList.remove('open');document.querySelector('.mobile-overlay').classList.remove('open');}});});</script>
+</body>
+</html>

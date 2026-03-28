@@ -1,0 +1,527 @@
+@{
+    ViewData["Title"] = "簽到 & 成就";
+}
+
+<style>
+    .checkin-page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 4rem;
+    }
+
+    .checkin-hero {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .checkin-hero h1 {
+        font-size: 2rem;
+        color: var(--text);
+        margin-bottom: .5rem;
+    }
+
+    .checkin-hero p {
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    /* ── 簽到卡片 ── */
+    .checkin-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .checkin-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: .6rem;
+        padding: 1rem 2.5rem;
+        font-size: 1.3rem;
+        font-weight: 700;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        background: var(--accent);
+        color: #fff;
+        transition: all .3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, .35);
+    }
+
+    .checkin-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, .5);
+    }
+
+    .checkin-btn:disabled {
+        opacity: .6;
+        cursor: default;
+    }
+
+    .checkin-btn.done {
+        background: #22c55e;
+        box-shadow: 0 4px 15px rgba(34, 197, 94, .35);
+    }
+
+    .checkin-btn.done:hover {
+        box-shadow: 0 4px 15px rgba(34, 197, 94, .35);
+        transform: none;
+    }
+
+    .streak-display {
+        margin-top: 1.2rem;
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .streak-item {
+        text-align: center;
+    }
+
+    .streak-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--accent);
+    }
+
+    .streak-label {
+        font-size: .85rem;
+        color: var(--text-muted);
+        margin-top: .2rem;
+    }
+
+    /* ── 月曆 ── */
+    .calendar-section {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .calendar-header h2 {
+        font-size: 1.2rem;
+        color: var(--text);
+        margin: 0;
+    }
+
+    .calendar-nav {
+        display: flex;
+        gap: .5rem;
+    }
+
+    .calendar-nav button {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 8px;
+        padding: .4rem .8rem;
+        cursor: pointer;
+        font-size: .9rem;
+        transition: background .2s;
+    }
+
+    .calendar-nav button:hover {
+        background: var(--accent);
+        color: #fff;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+    }
+
+    .calendar-day-header {
+        text-align: center;
+        font-size: .75rem;
+        color: var(--text-muted);
+        padding: .4rem 0;
+        font-weight: 600;
+    }
+
+    .calendar-day {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-size: .85rem;
+        color: var(--text-muted);
+        position: relative;
+    }
+
+    .calendar-day.empty {
+        visibility: hidden;
+    }
+
+    .calendar-day.checked-in {
+        background: rgba(34, 197, 94, .2);
+        color: #22c55e;
+        font-weight: 700;
+    }
+
+    .calendar-day.checked-in::after {
+        content: '';
+        position: absolute;
+        bottom: 3px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #22c55e;
+    }
+
+    .calendar-day.today {
+        border: 2px solid var(--accent);
+    }
+
+    /* ── 成就 ── */
+    .achievements-section {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+    }
+
+    .achievements-section h2 {
+        font-size: 1.3rem;
+        color: var(--text);
+        margin-bottom: 1rem;
+    }
+
+    .achievements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .achievement-card {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        transition: transform .2s, box-shadow .2s;
+    }
+
+    .achievement-card.unlocked {
+        border-color: rgba(34, 197, 94, .4);
+    }
+
+    .achievement-card.unlocked:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(34, 197, 94, .15);
+    }
+
+    .achievement-card.locked {
+        opacity: .4;
+        filter: grayscale(1);
+    }
+
+    .achievement-icon {
+        font-size: 2rem;
+        margin-bottom: .4rem;
+    }
+
+    .achievement-title {
+        font-weight: 700;
+        color: var(--text);
+        font-size: .95rem;
+        margin-bottom: .2rem;
+    }
+
+    .achievement-desc {
+        font-size: .8rem;
+        color: var(--text-muted);
+    }
+
+    .achievement-date {
+        font-size: .7rem;
+        color: var(--text-muted);
+        margin-top: .4rem;
+    }
+
+    /* ── 通知 toast ── */
+    .checkin-toast {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        background: var(--bg2);
+        border: 1px solid #22c55e;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        z-index: 9999;
+        box-shadow: 0 8px 30px rgba(0,0,0,.4);
+        animation: slideIn .4s ease;
+        max-width: 340px;
+    }
+
+    .checkin-toast h3 {
+        color: #22c55e;
+        margin: 0 0 .5rem;
+        font-size: 1rem;
+    }
+
+    .checkin-toast p {
+        color: var(--text);
+        margin: .2rem 0;
+        font-size: .9rem;
+    }
+
+    .toast-achievements {
+        margin-top: .5rem;
+        padding-top: .5rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .toast-achievements span {
+        display: block;
+        color: var(--accent);
+        font-size: .85rem;
+    }
+
+    @@keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to   { transform: translateX(0);    opacity: 1; }
+    }
+
+    @@media (max-width: 640px) {
+        .checkin-page { padding: 1rem 1rem 3rem; }
+        .achievements-grid { grid-template-columns: repeat(2, 1fr); }
+        .streak-display { gap: 1rem; }
+    }
+</style>
+
+<div class="checkin-page">
+    <!-- Hero -->
+    <div class="checkin-hero">
+        <h1>每日簽到 & 成就</h1>
+        <p>每天簽到累積積分，解鎖學習成就</p>
+    </div>
+
+    <!-- 簽到卡片 -->
+    <div class="checkin-card">
+        <button id="checkinBtn" class="checkin-btn" onclick="doCheckIn()">
+            <span id="checkinIcon">📝</span>
+            <span id="checkinText">簽到</span>
+        </button>
+
+        <div class="streak-display">
+            <div class="streak-item">
+                <div class="streak-value" id="streakCount">0</div>
+                <div class="streak-label">🔥 連續天數</div>
+            </div>
+            <div class="streak-item">
+                <div class="streak-value" id="totalCheckIns">0</div>
+                <div class="streak-label">📅 累計簽到</div>
+            </div>
+            <div class="streak-item">
+                <div class="streak-value" id="todayPoints">0</div>
+                <div class="streak-label">⭐ 今日積分</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 月曆 -->
+    <div class="calendar-section">
+        <div class="calendar-header">
+            <h2 id="calendarTitle">2026 年 3 月</h2>
+            <div class="calendar-nav">
+                <button onclick="changeMonth(-1)">&larr; 上月</button>
+                <button onclick="changeMonth(1)">下月 &rarr;</button>
+            </div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <!-- 成就 -->
+    <div class="achievements-section">
+        <h2>🏆 學習成就</h2>
+        <div class="achievements-grid" id="achievementsGrid">
+            <div style="color:var(--text-muted)">載入中...</div>
+        </div>
+    </div>
+</div>
+
+<div id="toastContainer"></div>
+
+<script>
+    let calYear, calMonth;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const now = new Date();
+        calYear = now.getFullYear();
+        calMonth = now.getMonth() + 1;
+        loadStatus();
+        loadCalendar();
+        loadAchievements();
+    });
+
+    // ── 載入狀態 ──
+    async function loadStatus() {
+        try {
+            const res = await fetch('/CheckIn/Status');
+            const d = await res.json();
+            document.getElementById('streakCount').textContent = d.streak;
+            document.getElementById('totalCheckIns').textContent = d.totalCheckIns;
+            document.getElementById('todayPoints').textContent = d.todayPoints;
+            if (d.checkedInToday) {
+                setCheckedIn();
+            }
+        } catch (e) { console.error('loadStatus error', e); }
+    }
+
+    // ── 簽到 ──
+    async function doCheckIn() {
+        const btn = document.getElementById('checkinBtn');
+        if (btn.disabled) return;
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/CheckIn/DoCheckIn', { method: 'POST' });
+            const d = await res.json();
+
+            if (d.alreadyDone) {
+                setCheckedIn();
+                return;
+            }
+
+            if (!d.success) {
+                alert(d.message || '簽到失敗');
+                btn.disabled = false;
+                return;
+            }
+
+            setCheckedIn();
+            document.getElementById('streakCount').textContent = d.streak;
+            document.getElementById('todayPoints').textContent = d.points;
+
+            // toast
+            showToast(d.streak, d.points, d.newAchievements || []);
+
+            // 重新載入
+            loadStatus();
+            loadCalendar();
+            loadAchievements();
+        } catch (e) {
+            console.error('doCheckIn error', e);
+            btn.disabled = false;
+        }
+    }
+
+    function setCheckedIn() {
+        const btn = document.getElementById('checkinBtn');
+        btn.classList.add('done');
+        btn.disabled = true;
+        document.getElementById('checkinIcon').textContent = '✅';
+        document.getElementById('checkinText').textContent = '已簽到';
+    }
+
+    function showToast(streak, points, achievements) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'checkin-toast';
+        let html = `<h3>🎉 簽到成功！</h3>
+                     <p>🔥 連續 ${streak} 天</p>
+                     <p>⭐ 獲得 ${points} 積分</p>`;
+        if (achievements.length > 0) {
+            html += '<div class="toast-achievements">';
+            achievements.forEach(a => {
+                html += `<span>${a.icon} 解鎖成就：${a.title}</span>`;
+            });
+            html += '</div>';
+        }
+        toast.innerHTML = html;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    }
+
+    // ── 月曆 ──
+    async function loadCalendar() {
+        document.getElementById('calendarTitle').textContent = `${calYear} 年 ${calMonth} 月`;
+        const grid = document.getElementById('calendarGrid');
+
+        const dayHeaders = ['日', '一', '二', '三', '四', '五', '六'];
+        let html = dayHeaders.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
+
+        const firstDay = new Date(calYear, calMonth - 1, 1).getDay();
+        const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+        // 取得簽到紀錄
+        let checkedDates = {};
+        try {
+            const res = await fetch(`/CheckIn/Calendar?year=${calYear}&month=${calMonth}`);
+            const records = await res.json();
+            records.forEach(r => { checkedDates[r.date] = r.streak; });
+        } catch (e) { console.error('loadCalendar error', e); }
+
+        // 空白填充
+        for (let i = 0; i < firstDay; i++) {
+            html += '<div class="calendar-day empty"></div>';
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${calYear}-${String(calMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const isToday = dateStr === todayStr;
+            const isChecked = checkedDates.hasOwnProperty(dateStr);
+            let cls = 'calendar-day';
+            if (isToday) cls += ' today';
+            if (isChecked) cls += ' checked-in';
+            html += `<div class="${cls}" title="${isChecked ? '連續 ' + checkedDates[dateStr] + ' 天' : ''}">${day}</div>`;
+        }
+
+        grid.innerHTML = html;
+    }
+
+    function changeMonth(delta) {
+        calMonth += delta;
+        if (calMonth > 12) { calMonth = 1; calYear++; }
+        if (calMonth < 1) { calMonth = 12; calYear--; }
+        loadCalendar();
+    }
+
+    // ── 成就 ──
+    async function loadAchievements() {
+        const grid = document.getElementById('achievementsGrid');
+        try {
+            const res = await fetch('/CheckIn/MyAchievements');
+            const list = await res.json();
+
+            if (list.length === 0) {
+                grid.innerHTML = '<div style="color:var(--text-muted)">尚無成就資料</div>';
+                return;
+            }
+
+            grid.innerHTML = list.map(a => {
+                const unlocked = a.unlocked;
+                const cls = unlocked ? 'achievement-card unlocked' : 'achievement-card locked';
+                const dateStr = unlocked && a.unlockedAt
+                    ? `<div class="achievement-date">${new Date(a.unlockedAt).toLocaleDateString('zh-TW')}</div>`
+                    : '';
+                return `<div class="${cls}">
+                    <div class="achievement-icon">${a.icon}</div>
+                    <div class="achievement-title">${a.title}</div>
+                    <div class="achievement-desc">${a.description}</div>
+                    ${dateStr}
+                </div>`;
+            }).join('');
+        } catch (e) {
+            console.error('loadAchievements error', e);
+            grid.innerHTML = '<div style="color:var(--text-muted)">載入失敗</div>';
+        }
+    }
+</script>

@@ -1,0 +1,487 @@
+@model List<DotNetLearning.Models.Chapter>
+@{
+    ViewData["Title"] = ".NET 學習平台";
+
+    // ── 核心路線（有順序的三大主軸）──
+    var corePath = new[]
+    {
+        new { Key = "csharp",   Name = "C# 基礎",          Icon = "🔷", Color = "#9B59B6", Desc = "語言根基：變數、OOP、LINQ、非同步" },
+        new { Key = "aspnet",   Name = "ASP.NET Core MVC",  Icon = "🌐", Color = "#3498DB", Desc = "Web 開發：路由、Controller、DI、API" },
+        new { Key = "database", Name = "資料庫 & ORM",      Icon = "🗄️", Color = "#E74C3C", Desc = "資料層：SQL、EF Core、Dapper、優化" },
+    };
+
+    // ── 進階擴充（獨立模組）──
+    var advancedModules = new Dictionary<string, (string Name, string Icon, string Color, string Desc)>
+    {
+        ["frontend"]       = ("前端基礎",          "🎨", "#E91E63", "HTML / CSS / JavaScript 與前後端整合"),
+        ["git"]            = ("Git 版本控制",      "📝", "#F57C00", "版本管理、分支、GitHub 協作"),
+        ["server"]         = ("架 Server 概念",    "🖥️", "#00897B", "Nginx、反向代理、負載平衡、監控"),
+        ["patterns"]       = ("設計模式 & SOLID",  "🏛️", "#E67E22", "架構思維：SOLID、GoF、Clean Architecture"),
+        ["infrastructure"] = ("快取 & 日誌 & 效能","⚡", "#9B59B6", "系統調校：Caching、Serilog、Profiling"),
+        ["network"]        = ("網路 TCP/IP",       "🌍", "#27AE60", "通訊基礎：OSI、HTTP、DNS、WebSocket"),
+        ["security"]       = ("資安",              "🔒", "#F39C12", "安全開發：JWT、加密、OWASP Top 10"),
+        ["docker"]         = ("Docker & 部署",     "🐳", "#1ABC9C", "容器化：Docker、CI/CD、雲端部署"),
+        ["ai"]             = ("AI 應用",           "🤖", "#FF6B6B", "AI 輔助：Prompt、MCP、Claude Code"),
+        ["aimodel"]        = ("AI 模型與語言",     "🧠", "#7C4DFF", "LLM、RAG、Embedding、IPAS 知識"),
+        ["claudecode"]     = ("Claude Code 工具",  "🔌", "#00BCD4", "不用 CMD 做專案、No-Code 流程"),
+        ["project"]        = ("專案實戰",          "🛒", "#4CAF50", "電商、部落格、API 微服務完整開發"),
+    };
+}
+
+<div class="home-layout">
+
+    <!-- ══════════ Hero ══════════ -->
+    <section class="hero" style="background:linear-gradient(135deg, rgba(0,184,148,0.8), rgba(9,132,227,0.7)), url('/images/hero-coding.jpg') center/cover no-repeat;">
+        <div class="hero-bg" style="background:none;"></div>
+        <div class="hero-content">
+            <div class="hero-badge">完整 .NET 學習路徑</div>
+            <h1>從零開始，<br><span class="highlight">完整學會 .NET</span></h1>
+            <p class="hero-desc">
+                C# / ASP.NET Core / 資料庫 / 設計模式 / Docker / AI<br>
+                每章附詳細說明、程式碼範例、常見錯誤分析與隨機測驗
+            </p>
+            <div class="hero-cta">
+                <a href="/Home/Chapter/csharp-intro" class="btn-cta-primary">開始學習</a>
+                <a href="#quick-challenge" class="btn-cta-secondary">隨機挑戰</a>
+                <a href="/Scores" class="btn-cta-ghost">成績總覽</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat"><span class="stat-num clr-1">@Model.Count</span><small>章節內容</small></div>
+                <div class="stat"><span class="stat-num clr-2">@(corePath.Length + advancedModules.Count)</span><small>主題分類</small></div>
+                <div class="stat"><span class="stat-num clr-3">Free</span><small>完全免費</small></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ 網站功能導覽 ══════════ -->
+    <section style="padding:50px 24px;max-width:1100px;margin:0 auto;">
+        <h2 style="text-align:center;font-size:1.6rem;font-weight:800;margin-bottom:8px;">平台功能導覽</h2>
+        <p style="text-align:center;color:var(--text-muted);margin-bottom:32px;">一站式學習 + 互動 + 媒合，所有功能免費使用</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;">
+            <a href="#core-path" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;text-decoration:none;color:var(--text);transition:border-color .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+                <div style="font-size:1.5rem;margin-bottom:8px;">📚</div>
+                <div style="font-weight:700;margin-bottom:4px;">學習章節</div>
+                <div style="font-size:.8rem;color:var(--text-muted);">93 章完整教學，含程式碼範例與錯誤分析</div>
+            </a>
+            <a href="/Speed" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;text-decoration:none;color:var(--text);transition:border-color .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+                <div style="font-size:1.5rem;margin-bottom:8px;">🎮</div>
+                <div style="font-weight:700;margin-bottom:4px;">互動遊戲</div>
+                <div style="font-size:.8rem;color:var(--text-muted);">速度挑戰、偵探、填字、每日一題、擂台</div>
+            </a>
+            <a href="/Teacher" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;text-decoration:none;color:var(--text);transition:border-color .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+                <div style="font-size:1.5rem;margin-bottom:8px;">👨‍🏫</div>
+                <div style="font-weight:700;margin-bottom:4px;">找老師</div>
+                <div style="font-size:.8rem;color:var(--text-muted);">瀏覽老師、預約課程、一對一教學</div>
+            </a>
+            <a href="/CheckIn" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;text-decoration:none;color:var(--text);transition:border-color .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+                <div style="font-size:1.5rem;margin-bottom:8px;">📅</div>
+                <div style="font-weight:700;margin-bottom:4px;">每日簽到</div>
+                <div style="font-size:.8rem;color:var(--text-muted);">連續簽到拿積分，解鎖 14 種成就</div>
+            </a>
+            <a href="/Analytics" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;text-decoration:none;color:var(--text);transition:border-color .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+                <div style="font-size:1.5rem;margin-bottom:8px;">📊</div>
+                <div style="font-weight:700;margin-bottom:4px;">學習分析</div>
+                <div style="font-size:.8rem;color:var(--text-muted);">熱力圖、弱點分析、學習時間統計</div>
+            </a>
+            <a href="/QnA" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;text-decoration:none;color:var(--text);transition:border-color .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+                <div style="font-size:1.5rem;margin-bottom:8px;">💬</div>
+                <div style="font-weight:700;margin-bottom:4px;">社群互動</div>
+                <div style="font-size:.8rem;color:var(--text-muted);">問答區、想法分享、即時聊天室、私訊</div>
+            </a>
+            <a href="/Flashcard" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;text-decoration:none;color:var(--text);transition:border-color .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+                <div style="font-size:1.5rem;margin-bottom:8px;">🛠</div>
+                <div style="font-weight:700;margin-bottom:4px;">學習工具</div>
+                <div style="font-size:.8rem;color:var(--text-muted);">暗記卡片、程式碼收藏、筆記分享</div>
+            </a>
+            <a href="/Leaderboard" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;text-decoration:none;color:var(--text);transition:border-color .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+                <div style="font-size:1.5rem;margin-bottom:8px;">🏆</div>
+                <div style="font-weight:700;margin-bottom:4px;">排行榜</div>
+                <div style="font-size:.8rem;color:var(--text-muted);">積分排名、等級徽章、學習競賽</div>
+            </a>
+        </div>
+    </section>
+
+    <!-- ══════════ 特色區塊 ══════════ -->
+    <section style="padding:60px 0;max-width:1100px;margin:0 auto;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;padding:0 24px;">
+            <div>
+                <h2 style="font-size:1.8rem;font-weight:800;margin-bottom:16px;">從零開始的完整學習路徑</h2>
+                <p style="color:var(--text-muted);line-height:1.8;margin-bottom:20px;">
+                    82 個章節涵蓋 C#、ASP.NET Core、資料庫、Docker、AI 等完整技術棧。
+                    每個章節都有程式碼範例、常見錯誤分析和隨機測驗。
+                </p>
+                <a href="#core-path" style="color:var(--accent);font-weight:600;text-decoration:none;">開始學習 →</a>
+            </div>
+            <div style="border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4);">
+                <img src="/images/code-screen.jpg" alt="程式碼學習" style="width:100%;height:280px;object-fit:cover;" />
+            </div>
+        </div>
+    </section>
+
+    <section style="padding:60px 0;max-width:1100px;margin:0 auto;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;padding:0 24px;">
+            <div style="border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4);">
+                <img src="/images/team-learning.jpg" alt="團隊學習" style="width:100%;height:280px;object-fit:cover;" />
+            </div>
+            <div>
+                <h2 style="font-size:1.8rem;font-weight:800;margin-bottom:16px;">找到最適合你的老師</h2>
+                <p style="color:var(--text-muted);line-height:1.8;margin-bottom:20px;">
+                    專業老師一對一教學，根據你的程度量身打造課程。
+                    支援線上即時聊天、預約管理、學習追蹤。
+                </p>
+                <a href="/Teacher" style="color:var(--accent);font-weight:600;text-decoration:none;">瀏覽老師 →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ 特色介紹（帶圖片）══════════ -->
+    <section style="padding:60px 24px;max-width:1100px;margin:0 auto;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;margin-bottom:60px;">
+            <div>
+                <h2 style="font-size:1.8rem;font-weight:800;margin-bottom:16px;color:var(--text);">從零開始的完整學習路徑</h2>
+                <p style="color:var(--text-muted);line-height:1.8;margin-bottom:20px;">
+                    82 個章節涵蓋 C#、ASP.NET Core、資料庫、Docker、AI 等完整技術棧。
+                    每個章節都有程式碼範例、常見錯誤分析和隨機測驗。
+                </p>
+                <a href="#core-path" style="color:var(--accent);font-weight:600;text-decoration:none;">開始學習 →</a>
+            </div>
+            <div style="border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4);">
+                <img src="/images/code-screen.jpg" alt="程式碼學習" style="width:100%;height:280px;object-fit:cover;" />
+            </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;">
+            <div style="border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4);">
+                <img src="/images/tech-bg.jpg" alt="互動學習" style="width:100%;height:280px;object-fit:cover;" />
+            </div>
+            <div>
+                <h2 style="font-size:1.8rem;font-weight:800;margin-bottom:16px;color:var(--text);">邊玩邊學，不再枯燥</h2>
+                <p style="color:var(--text-muted);line-height:1.8;margin-bottom:20px;">
+                    速度挑戰、程式碼偵探、填字遊戲、每日一題...
+                    用遊戲化方式學程式，積分排行榜讓你越學越上癮。
+                </p>
+                <a href="/Speed" style="color:var(--accent);font-weight:600;text-decoration:none;">開始挑戰 →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ 核心學習路線 ══════════ -->
+    <section class="section-block" id="core-path">
+        <div class="section-header">
+            <h2 class="section-title">核心學習路線</h2>
+            <p class="section-subtitle">按順序學習這三個主題，打好 .NET 開發基礎</p>
+        </div>
+
+        <!-- 視覺化路徑 -->
+        <div class="learning-path">
+            @for (int i = 0; i < corePath.Length; i++)
+            {
+                var cp = corePath[i];
+                var chapters = Model.Where(c => c.Category == cp.Key).OrderBy(c => c.Order).ToList();
+                <div class="path-node" style="--node-color: @cp.Color">
+                    <div class="path-step-num">STEP @(i + 1)</div>
+                    <div class="path-icon">@cp.Icon</div>
+                    <h3>@cp.Name</h3>
+                    <p class="path-desc">@cp.Desc</p>
+                    <div class="path-meta">@chapters.Count 個章節</div>
+                    <a href="/Home/Chapter/@(chapters.FirstOrDefault()?.Slug ?? "#")" class="path-start-btn">開始 →</a>
+                </div>
+                @if (i < corePath.Length - 1)
+                {
+                    <div class="path-arrow">
+                        <svg width="40" height="24" viewBox="0 0 40 24"><path d="M0 12h32M26 4l8 8-8 8" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                }
+            }
+        </div>
+
+        <!-- 核心路線展開卡片 -->
+        <div class="core-cards">
+            @for (int i = 0; i < corePath.Length; i++)
+            {
+                var cp = corePath[i];
+                var chapters = Model.Where(c => c.Category == cp.Key).OrderBy(c => c.Order).ToList();
+                if (!chapters.Any()) { continue; }
+                <div class="category-card" style="--cat-color: @cp.Color">
+                    <div class="category-header">
+                        <div class="cat-icon-wrap">@cp.Icon</div>
+                        <div>
+                            <h2>@cp.Name</h2>
+                            <small>@chapters.Count 個章節 · STEP @(i + 1)</small>
+                        </div>
+                        <a href="/Note/DownloadAll/@cp.Key" class="dl-all-btn">📥 筆記</a>
+                    </div>
+                    <ul class="chapter-list">
+                        @foreach (var ch in chapters)
+                        {
+                            string label = ch.Level switch { "beginner" => "初學", "intermediate" => "中級", "advanced" => "進階", _ => "" };
+                            string cls   = ch.Level switch { "beginner" => "badge-green", "intermediate" => "badge-blue", "advanced" => "badge-red", _ => "" };
+                            <li>
+                                <a href="/Home/Chapter/@ch.Slug" class="chapter-link">
+                                    <span class="ch-icon">@ch.Icon</span>
+                                    <span class="ch-title">@ch.Title</span>
+                                    <span class="badge @cls">@label</span>
+                                    <span class="ch-arrow">›</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- ══════════ 進階擴充模組 ══════════ -->
+    <section class="section-block" id="advanced-modules">
+        <div class="section-header">
+            <h2 class="section-title">進階擴充模組</h2>
+            <p class="section-subtitle">核心路線學完後，依需求選擇深入的方向</p>
+        </div>
+
+        <div class="courses-container">
+            @foreach (var mod in advancedModules)
+            {
+                var chapters = Model.Where(c => c.Category == mod.Key).OrderBy(c => c.Order).ToList();
+                if (!chapters.Any()) { continue; }
+                <div class="category-card" style="--cat-color: @mod.Value.Color">
+                    <div class="category-header">
+                        <div class="cat-icon-wrap">@mod.Value.Icon</div>
+                        <div>
+                            <h2>@mod.Value.Name</h2>
+                            <small>@chapters.Count 個章節</small>
+                        </div>
+                        <a href="/Note/DownloadAll/@mod.Key" class="dl-all-btn">📥 筆記</a>
+                    </div>
+                    <ul class="chapter-list">
+                        @foreach (var ch in chapters)
+                        {
+                            string label = ch.Level switch { "beginner" => "初學", "intermediate" => "中級", "advanced" => "進階", _ => "" };
+                            string cls   = ch.Level switch { "beginner" => "badge-green", "intermediate" => "badge-blue", "advanced" => "badge-red", _ => "" };
+                            <li>
+                                <a href="/Home/Chapter/@ch.Slug" class="chapter-link">
+                                    <span class="ch-icon">@ch.Icon</span>
+                                    <span class="ch-title">@ch.Title</span>
+                                    <span class="badge @cls">@label</span>
+                                    <span class="ch-arrow">›</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- ══════════ 隨機挑戰 ══════════ -->
+    <section class="section-block" id="quick-challenge">
+        <div class="section-header">
+            <h2 class="section-title">隨機挑戰</h2>
+            <p class="section-subtitle">不用看課程也能測實力！隨機抽題，看看你的程度</p>
+        </div>
+        <div class="challenge-box">
+            <div class="challenge-options">
+                <button class="challenge-btn" onclick="startRandomQuiz(5)">
+                    <span class="cb-num">5</span>
+                    <span class="cb-label">快速挑戰<br><small>3 分鐘</small></span>
+                </button>
+                <button class="challenge-btn" onclick="startRandomQuiz(10)">
+                    <span class="cb-num">10</span>
+                    <span class="cb-label">標準測驗<br><small>8 分鐘</small></span>
+                </button>
+                <button class="challenge-btn" onclick="startRandomQuiz(20)">
+                    <span class="cb-num">20</span>
+                    <span class="cb-label">完整挑戰<br><small>15 分鐘</small></span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ 知識分享牆 ══════════ -->
+    <section class="section-block" id="idea-wall">
+        <div class="section-header">
+            <h2 class="section-title">知識分享牆</h2>
+            <p class="section-subtitle">看看大家的學習心得、筆記和想法</p>
+        </div>
+        <div class="idea-wall-actions">
+            <button class="btn-cta-primary" onclick="postGlobalIdea()" style="font-size:.88rem;padding:10px 22px;">分享你的想法</button>
+        </div>
+        <div id="globalIdeaWall" class="idea-wall-grid">
+            <div class="idea-loading">載入中...</div>
+        </div>
+    </section>
+
+    <!-- ══════════ 老師免費分享 ══════════ -->
+    <section class="section-block" id="teacher-posts">
+        <div class="section-header">
+            <h2 class="section-title">老師免費分享</h2>
+            <p class="section-subtitle">來自平台老師的最新免費文章、影片和資源</p>
+        </div>
+        <div id="teacherPostsGrid" class="idea-wall-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;">
+            <div style="color:var(--text-muted);font-size:13px;">載入中...</div>
+        </div>
+    </section>
+
+    <!-- ══════════ Footer ══════════ -->
+    <footer class="px-footer">
+        <div class="px-footer-inner">
+            <div class="px-footer-brand">
+                <div>
+                    <div class="px-footer-title">DevLearn · .NET 學習平台</div>
+                    <div class="px-footer-sub">.NET Developer Learning Platform</div>
+                </div>
+            </div>
+            <div class="px-footer-links">
+                <a href="/">首頁</a>
+                <a href="/Leaderboard">排行榜</a>
+                <a href="/Scores">成績</a>
+            </div>
+            <div class="px-footer-copy">&copy; 2025 DevLearn. All rights reserved.</div>
+        </div>
+    </footer>
+
+</div>
+
+<!-- 隨機挑戰 Quiz Modal -->
+<div id="quiz-modal" class="quiz-modal" style="display:none;">
+    <div class="quiz-modal-inner">
+        <button class="quiz-close" onclick="closeQuizModal()">✕</button>
+        <div id="quiz-content"></div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function startRandomQuiz(count) {
+    fetch('/Quiz/Random?count=' + count)
+        .then(r => r.json())
+        .then(data => {
+            if (!data.questions || data.questions.length === 0) {
+                alert('目前沒有測驗題目');
+                return;
+            }
+            renderQuizModal(data.questions, count);
+        })
+        .catch(e => alert('載入失敗：' + e.message));
+}
+
+function renderQuizModal(questions, total) {
+    const modal = document.getElementById('quiz-modal');
+    const content = document.getElementById('quiz-content');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    let html = '<h2 class="quiz-title">⚡ 隨機挑戰 (' + questions.length + ' 題)</h2>';
+    html += '<form id="random-quiz-form">';
+    questions.forEach((q, i) => {
+        html += '<div class="quiz-q">';
+        html += '<div class="quiz-q-num">Q' + (i+1) + '</div>';
+        html += '<div class="quiz-q-text">' + q.questionText + '</div>';
+        if (q.type === 'fillin') {
+            html += '<input type="text" name="q_' + q.id + '" class="quiz-input" placeholder="輸入答案..." />';
+        } else if (q.options && q.options.length > 0) {
+            q.options.forEach((opt, j) => {
+                html += '<label class="quiz-option">';
+                html += '<input type="radio" name="q_' + q.id + '" value="' + opt.replace(/"/g,'&quot;') + '" />';
+                html += '<span>' + opt + '</span>';
+                html += '</label>';
+            });
+        }
+        html += '</div>';
+    });
+    html += '<button type="button" class="quiz-submit-btn" onclick="submitRandomQuiz()">提交答案</button>';
+    html += '</form>';
+    content.innerHTML = html;
+    window._quizQuestions = questions;
+}
+
+function submitRandomQuiz() {
+    const form = document.getElementById('random-quiz-form');
+    const answers = {};
+    window._quizQuestions.forEach(q => {
+        const input = form.querySelector('[name="q_' + q.id + '"]');
+        if (q.type === 'fillin') {
+            answers[q.id] = input ? input.value : '';
+        } else {
+            const checked = form.querySelector('[name="q_' + q.id + '"]:checked');
+            answers[q.id] = checked ? checked.value : '';
+        }
+    });
+
+    fetch('/Quiz/SubmitRandom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers: answers })
+    })
+    .then(r => r.json())
+    .then(result => renderQuizResult(result))
+    .catch(e => alert('提交失敗：' + e.message));
+}
+
+function renderQuizResult(result) {
+    const content = document.getElementById('quiz-content');
+    const pct = Math.round((result.score / result.total) * 100);
+    const grade = pct >= 80 ? '🏆 優秀' : pct >= 60 ? '👍 及格' : '💪 加油';
+
+    let html = '<div class="quiz-result">';
+    html += '<div class="result-circle" style="--pct:' + pct + '%"><span>' + result.score + '/' + result.total + '</span></div>';
+    html += '<div class="result-grade">' + grade + ' (' + pct + '%)</div>';
+    html += '</div>';
+
+    result.details.forEach((d, i) => {
+        const icon = d.isCorrect ? '✅' : '❌';
+        html += '<div class="quiz-detail ' + (d.isCorrect ? 'correct' : 'wrong') + '">';
+        html += '<div class="qd-head">' + icon + ' Q' + (i+1) + ': ' + d.questionText + '</div>';
+        if (!d.isCorrect) {
+            html += '<div class="qd-ans">你的答案：<code>' + (d.yourAnswer || '未作答') + '</code></div>';
+            html += '<div class="qd-correct">正確答案：<code>' + d.correctAnswer + '</code></div>';
+        }
+        html += '<div class="qd-explain">💡 ' + d.explanation + '</div>';
+        html += '</div>';
+    });
+
+    html += '<button class="quiz-submit-btn" onclick="closeQuizModal()">關閉</button>';
+    content.innerHTML = html;
+}
+
+function closeQuizModal() {
+    document.getElementById('quiz-modal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// 用 ideas.js 的統一功能載入知識牆
+loadIdeaWall();
+
+// 載入老師免費分享
+(function() {
+    fetch('/Teacher/LatestPosts')
+        .then(r => r.json())
+        .then(posts => {
+            var grid = document.getElementById('teacherPostsGrid');
+            if (!posts || posts.length === 0) {
+                grid.innerHTML = '<div style="color:var(--text-muted);font-size:13px;">目前還沒有老師分享內容</div>';
+                return;
+            }
+            var html = '';
+            posts.forEach(function(p) {
+                var typeName = p.type === 'video' ? '&#x1F3AC; 影片' : p.type === 'resource' ? '&#x1F4E6; 資源' : '&#x1F4DD; 文章';
+                html += '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;transition:border-color 0.2s;cursor:pointer;" onclick="window.location.href=\'/Teacher/Detail/' + p.teacherId + '\'">';
+                html += '  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+                html += '    <span style="font-size:11px;padding:2px 10px;border-radius:10px;background:rgba(99,102,241,0.1);color:var(--accent);">' + typeName + '</span>';
+                html += '    <span style="font-size:11px;color:var(--text-muted);">' + p.createdAt + '</span>';
+                html += '  </div>';
+                html += '  <div style="font-size:15px;font-weight:700;margin-bottom:8px;">' + p.title + '</div>';
+                html += '  <div style="font-size:13px;color:var(--text-muted);line-height:1.5;margin-bottom:12px;">' + p.preview + '</div>';
+                html += '  <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-muted);">';
+                html += '    <span>&#x1F468;&#x200D;&#x1F3EB; ' + p.teacherName + '</span>';
+                html += '    <span>&#x2764;&#xFE0F; ' + p.likes + ' 讚</span>';
+                html += '  </div>';
+                html += '  <div style="margin-top:10px;text-align:right;"><span style="font-size:13px;color:var(--accent);">閱讀更多 &rarr;</span></div>';
+                html += '</div>';
+            });
+            grid.innerHTML = html;
+        })
+        .catch(function() {
+            document.getElementById('teacherPostsGrid').innerHTML = '<div style="color:var(--text-muted);font-size:13px;">載入失敗</div>';
+        });
+})();
+</script>
+}

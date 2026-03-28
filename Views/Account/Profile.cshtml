@@ -1,0 +1,699 @@
+@model DotNetLearning.Models.SiteUser
+@{
+    Layout = null;
+    var user = Model;
+    var badgeEmoji = user?.BadgeLevel switch {
+        "newbie" => "🌱",
+        "bronze" => "🥉",
+        "silver" => "🥈",
+        "gold" => "🥇",
+        "diamond" => "💎",
+        "master" => "👑",
+        _ => "🌱"
+    };
+    var badgeLabel = user?.BadgeLevel switch {
+        "newbie" => "新手",
+        "bronze" => "銅牌",
+        "silver" => "銀牌",
+        "gold" => "金牌",
+        "diamond" => "鑽石",
+        "master" => "大師",
+        _ => "新手"
+    };
+    var isRegistered = user?.IsRegistered ?? false;
+}
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>個人檔案 — .NET 學習平台</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans TC', 'Segoe UI', sans-serif; background: #16213e; color: #eee; display: flex; min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar { width:240px; background:#1a1a2e; min-height:100vh; padding:20px 0; position:fixed; top:0; left:0; overflow-y:auto; z-index:100; border-right:1px solid rgba(34,153,221,0.2); }
+        .sidebar-brand { text-align:center; padding:16px 20px 24px; border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:12px; }
+        .sidebar-brand .avatar { font-size:48px; }
+        .sidebar-brand .avatar img { width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid #2299dd; }
+        .sidebar-brand .title { color:#2299dd; font-size:16px; font-weight:700; margin-top:8px; }
+        .sidebar-brand .subtitle { color:#aab; font-size:12px; margin-top:2px; }
+
+        .sidebar-section-label { padding:10px 20px 6px; font-size:11px; font-weight:700; color:#F9A825; text-transform:uppercase; letter-spacing:1px; border-top:1px solid rgba(255,255,255,0.06); margin-top:8px; }
+        .sidebar-section-label:first-of-type { border-top:none; margin-top:0; }
+        .sidebar a { display:flex; align-items:center; padding:9px 24px 9px 32px; color:#aab; text-decoration:none; font-size:13px; transition:all 0.2s; border-left:3px solid transparent; }
+        .sidebar a:hover, .sidebar a.active { background:rgba(34,153,221,0.12); color:#fff; border-left-color:#2299dd; }
+        .sidebar a .icon { margin-right:10px; font-size:15px; width:22px; text-align:center; }
+        .sidebar a.logout { color:#e94560; margin-top:8px; border-top:1px solid rgba(255,255,255,0.06); padding-top:12px; }
+        .sidebar a.home { color:#F9A825; padding-left:24px; font-size:14px; }
+        .sidebar a.home .icon { font-size:16px; }
+        .sidebar-divider { height:1px; background:rgba(255,255,255,0.08); margin:8px 16px; }
+
+        /* Main content */
+        .main { margin-left:240px; flex:1; padding:24px 28px; min-width:0; margin-top:56px; }
+
+        /* Content sections */
+        .content-section { display:none; }
+        .content-section.active { display:block; }
+        .page-title { font-size:22px; font-weight:700; margin-bottom:24px; color:#2299dd; }
+
+        /* Stats */
+        .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:28px; }
+        .stat-card { background:#0f3460; border:1px solid rgba(34,153,221,0.15); border-radius:12px; padding:20px; text-align:center; }
+        .stat-card .value { font-size:32px; font-weight:800; color:#2299dd; }
+        .stat-card .label { font-size:13px; color:#aab; margin-top:4px; }
+
+        /* Card */
+        .card { background:#0f3460; border:1px solid rgba(34,153,221,0.12); border-radius:12px; padding:20px; margin-bottom:20px; }
+        .card-title { font-size:15px; font-weight:700; color:#2299dd; margin-bottom:14px; }
+
+        /* Badges */
+        .badge { display:inline-block; padding:4px 14px; border-radius:20px; font-size:13px; font-weight:600; }
+        .badge-registered { background:rgba(56,189,114,.15); color:#38bd72; border:1px solid rgba(56,189,114,.3); }
+        .badge-anonymous { background:rgba(139,148,158,.15); color:#8b949e; border:1px solid rgba(139,148,158,.3); }
+        .badge-level { background:rgba(34,153,221,.15); color:#2299dd; border:1px solid rgba(34,153,221,.3); margin-left:6px; }
+
+        /* Info section */
+        .info-section { background:rgba(15,52,96,0.8); border:1px solid rgba(34,153,221,0.12); border-radius:12px; padding:20px; margin-bottom:16px; }
+        .info-section h3 { font-size:15px; font-weight:600; margin-bottom:12px; color:#aab; }
+        .info-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.06); font-size:14px; }
+        .info-row:last-child { border-bottom:none; }
+        .info-label { color:#aab; }
+        .info-value { color:#eee; font-weight:500; }
+
+        /* Profile form */
+        .profile-form label { display:block; font-size:13px; font-weight:600; color:#aab; margin-bottom:6px; }
+        .profile-form input[type="text"],
+        .profile-form input[type="email"],
+        .profile-form input[type="file"] {
+            width:100%; padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.15);
+            background:rgba(22,33,62,0.8); color:#eee; font-size:14px; font-family:'Noto Sans TC',sans-serif;
+        }
+        .profile-form input:focus { border-color:#2299dd; outline:none; }
+
+        /* CRUD items */
+        .crud-item {
+            background:rgba(15,52,96,0.8); border:1px solid rgba(34,153,221,0.12); border-radius:10px;
+            padding:14px 16px; margin-bottom:10px; position:relative;
+        }
+        .crud-item-content { font-size:14px; color:#eee; line-height:1.6; margin-bottom:6px; }
+        .crud-item-meta { font-size:12px; color:#aab; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+        .crud-item-actions { display:flex; gap:6px; margin-top:8px; }
+        .crud-btn {
+            padding:4px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.15);
+            background:transparent; color:#aab; font-size:12px; cursor:pointer;
+            font-family:'Noto Sans TC',sans-serif; transition:all .2s;
+        }
+        .crud-btn:hover { border-color:#58a6ff; color:#58a6ff; }
+        .crud-btn-danger:hover { border-color:#f85149; color:#f85149; }
+        .crud-edit-area {
+            width:100%; padding:8px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.15);
+            background:rgba(22,33,62,0.8); color:#eee; font-size:13px; font-family:'Noto Sans TC',sans-serif;
+            resize:vertical; margin-top:8px; min-height:60px;
+        }
+        .crud-edit-area:focus { border-color:#2299dd; outline:none; }
+        .crud-empty { text-align:center; color:#aab; padding:40px; font-size:14px; }
+        .crud-loading { text-align:center; color:#aab; padding:30px; }
+        .crud-badge { display:inline-block; padding:1px 8px; border-radius:8px; font-size:11px; font-weight:600; }
+        .crud-badge-green { background:rgba(56,189,114,.15); color:#38bd72; }
+        .crud-badge-yellow { background:rgba(227,179,65,.15); color:#e3b341; }
+        .crud-badge-blue { background:rgba(34,153,221,.12); color:#2299dd; }
+
+        /* Buttons */
+        .btn { display:inline-block; padding:10px 24px; border-radius:10px; font-size:14px; font-weight:600; text-decoration:none; cursor:pointer; border:none; font-family:'Noto Sans TC',sans-serif; transition:all .2s; }
+        .btn-primary { background:#2299dd; color:#fff; }
+        .btn-primary:hover { background:#1a7fc4; }
+        .btn-outline { background:transparent; color:#58a6ff; border:1px solid rgba(255,255,255,0.15); }
+        .btn-outline:hover { background:rgba(88,166,255,.1); }
+
+        /* Guest CTA */
+        .guest-cta {
+            background:linear-gradient(135deg,rgba(34,153,221,.1),rgba(34,153,221,.05));
+            border:1px solid rgba(34,153,221,.3); border-radius:12px;
+            padding:30px; text-align:center; margin-top:20px;
+        }
+        .guest-cta h3 { color:#2299dd; margin-bottom:8px; }
+        .guest-cta p { color:#aab; font-size:14px; margin-bottom:16px; }
+
+        /* Confirm dialog */
+        .confirm-overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:9999;
+            display:flex; align-items:center; justify-content:center;
+        }
+        .confirm-box {
+            background:#1a1a2e; border:1px solid rgba(255,255,255,0.15); border-radius:12px;
+            padding:24px; max-width:360px; text-align:center;
+        }
+        .confirm-box p { margin-bottom:16px; font-size:14px; }
+        .confirm-btns { display:flex; gap:10px; justify-content:center; }
+
+        /* Mobile responsive */
+        @@media (max-width: 900px) {
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                z-index: 9999;
+                transition: left 0.3s;
+                height: 100vh;
+                width: 250px;
+            }
+            .sidebar.open {
+                left: 0;
+                box-shadow: 5px 0 30px rgba(0,0,0,0.5);
+            }
+            .main {
+                margin-left: 0 !important;
+                padding: 20px 15px !important;
+            }
+            .mobile-menu-btn {
+                display: block !important;
+            }
+            .mobile-overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 9998;
+            }
+            .mobile-overlay.open {
+                display: block;
+            }
+            .sidebar-section-label { display:none; }
+        }
+    </style>
+</head>
+<body>
+    <button class="mobile-menu-btn" style="display:none;position:fixed;top:66px;left:10px;z-index:9997;background:#2299dd;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:20px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.3);" onclick="document.querySelector('.sidebar').classList.toggle('open');document.querySelector('.mobile-overlay').classList.toggle('open');">&#9776;</button>
+    <div class="mobile-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('open');"></div>
+    @await Html.PartialAsync("_Navbar")
+
+    <nav class="sidebar" style="top:56px;min-height:calc(100vh - 56px);">
+        <div class="sidebar-brand">
+            <div class="avatar">
+                @if (user != null && !string.IsNullOrEmpty(user.AvatarUrl))
+                {
+                    <img src="@user.AvatarUrl" alt="頭像" />
+                }
+                else
+                {
+                    <span style="font-size:48px;">&#x1F464;</span>
+                }
+            </div>
+            <div class="title">@(user?.Nickname ?? "用戶")</div>
+            <div class="subtitle">
+                @if (isRegistered)
+                { <span>已註冊會員</span> }
+                else
+                { <span>匿名用戶</span> }
+            </div>
+        </div>
+
+        <a href="/" class="home"><span class="icon">&#x1F3E0;</span><span>回首頁</span></a>
+        <div class="sidebar-divider"></div>
+
+        <div class="sidebar-section-label">&#x1F464; 個人中心</div>
+        <a href="#" class="active" data-section="profile" onclick="showSection('profile',this)"><span class="icon">&#x1F4CB;</span><span>個人資料</span></a>
+        @if (isRegistered)
+        {
+            <a href="#" data-section="favteachers" onclick="showSection('favteachers',this)"><span class="icon">&#x2764;&#xFE0F;</span><span>我的收藏</span></a>
+            <a href="#" data-section="bookings" onclick="showSection('bookings',this)"><span class="icon">&#x1F4C5;</span><span>我的預約</span></a>
+            <a href="#" data-section="ideas" onclick="showSection('ideas',this)"><span class="icon">&#x1F4A1;</span><span>我的想法</span></a>
+            <a href="#" data-section="qna" onclick="showSection('qna',this)"><span class="icon">&#x2753;</span><span>我的問答</span></a>
+            <a href="#" data-section="chat" onclick="showSection('chat',this)"><span class="icon">&#x1F4AC;</span><span>我的聊天</span></a>
+            <a href="#" data-section="quiz" onclick="showSection('quiz',this)"><span class="icon">&#x1F4DD;</span><span>我的測驗</span></a>
+            <div class="sidebar-divider"></div>
+            <a href="/Account/Logout" class="logout" onclick="return confirm('確定要登出嗎？登出後將使用新的匿名身份')"><span class="icon">&#x1F6AA;</span><span>登出</span></a>
+        }
+        else
+        {
+            <div class="sidebar-divider"></div>
+            <a href="/Account/Register" style="color:#38bd72;"><span class="icon">&#x1F4DD;</span><span>註冊升級</span></a>
+        }
+    </nav>
+
+    <div class="main">
+        @if (user != null)
+        {
+            <!-- ===== Section: 個人資料 ===== -->
+            <div class="content-section active" id="section-profile">
+                <div class="page-title">&#x1F4CB; 個人資料</div>
+
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="value">@user.TotalScore</div>
+                        <div class="label">總分數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value">@user.QuizzesTaken</div>
+                        <div class="label">測驗次數</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value">@user.ChaptersCompleted</div>
+                        <div class="label">完成章節</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">帳號資訊</div>
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                        @if (user.IsRegistered)
+                        { <span class="badge badge-registered">已註冊 ✅</span> }
+                        else
+                        { <span class="badge badge-anonymous">匿名用戶</span> }
+                        <span class="badge badge-level">@badgeEmoji @badgeLabel</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">匿名 ID</span>
+                        <span class="info-value" style="font-size:12px;font-family:monospace;">@user.AnonymousId[..8]...</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">建立時間</span>
+                        <span class="info-value">@user.CreatedAt.ToString("yyyy/MM/dd HH:mm")</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">最後活動</span>
+                        <span class="info-value">@user.LastActiveAt.ToString("yyyy/MM/dd HH:mm")</span>
+                    </div>
+                    @if (isRegistered && !string.IsNullOrEmpty(user.Email))
+                    {
+                        <div class="info-row">
+                            <span class="info-label">Email</span>
+                            <span class="info-value">@user.Email</span>
+                        </div>
+                    }
+                </div>
+
+                @if (isRegistered)
+                {
+                    <div class="card">
+                        <div class="card-title">&#x270F;&#xFE0F; 編輯個人資料</div>
+                        <form method="post" action="/Account/UpdateProfile" enctype="multipart/form-data" class="profile-form">
+                            <div style="text-align:center;margin-bottom:16px;">
+                                @if (!string.IsNullOrEmpty(user.AvatarUrl))
+                                {
+                                    <img id="avatarPreview" src="@user.AvatarUrl" alt="頭像" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid #2299dd;" />
+                                }
+                                else
+                                {
+                                    <div id="avatarPreview" style="width:80px;height:80px;border-radius:50%;background:#0f3460;border:2px solid rgba(34,153,221,0.3);display:inline-flex;align-items:center;justify-content:center;font-size:36px;">&#x1F464;</div>
+                                }
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <label>&#x1F4F7; 上傳/更換頭像</label>
+                                <input type="file" name="avatar" accept="image/*" onchange="previewAvatar(this)" />
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <label>&#x270F;&#xFE0F; 暱稱</label>
+                                <input type="text" name="nickname" value="@user.Nickname" />
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <label>&#x1F4E7; Email</label>
+                                <input type="email" name="email" value="@user.Email" />
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;font-size:15px;">&#x1F4BE; 儲存修改</button>
+                        </form>
+                    </div>
+                }
+
+                @if (!isRegistered)
+                {
+                    <div class="guest-cta">
+                        <h3>&#x1F680; 註冊升級</h3>
+                        <p>註冊後可以管理你的想法、問答、聊天紀錄和測驗歷史！</p>
+                        <a href="/Account/Register" class="btn btn-primary">&#x1F4DD; 立即註冊</a>
+                    </div>
+                }
+            </div>
+
+            @if (isRegistered)
+            {
+                <!-- ===== Section: 我的收藏 ===== -->
+                <div class="content-section" id="section-favteachers">
+                    <div class="page-title">&#x2764;&#xFE0F; 我的收藏</div>
+                    <div id="favTeachersList" class="crud-loading">載入中...</div>
+                </div>
+
+                <!-- ===== Section: 我的預約 ===== -->
+                <div class="content-section" id="section-bookings">
+                    <div class="page-title">&#x1F4C5; 我的預約</div>
+                    <div id="bookingsList" class="crud-loading">載入中...</div>
+                </div>
+
+                <!-- ===== Section: 我的想法 ===== -->
+                <div class="content-section" id="section-ideas">
+                    <div class="page-title">&#x1F4A1; 我的想法</div>
+                    <div id="ideasList" class="crud-loading">載入中...</div>
+                </div>
+
+                <!-- ===== Section: 我的問答 ===== -->
+                <div class="content-section" id="section-qna">
+                    <div class="page-title">&#x2753; 我的問答</div>
+                    <div id="qnaList" class="crud-loading">載入中...</div>
+                </div>
+
+                <!-- ===== Section: 我的聊天 ===== -->
+                <div class="content-section" id="section-chat">
+                    <div class="page-title">&#x1F4AC; 我的聊天</div>
+                    <div id="chatList" class="crud-loading">載入中...</div>
+                </div>
+
+                <!-- ===== Section: 我的測驗 ===== -->
+                <div class="content-section" id="section-quiz">
+                    <div class="page-title">&#x1F4DD; 我的測驗</div>
+                    <div id="quizList" class="crud-loading">載入中...</div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="card" style="text-align:center;padding:60px;">
+                <div style="font-size:48px;margin-bottom:16px;">&#x2753;</div>
+                <div style="font-size:18px;font-weight:700;margin-bottom:12px;">找不到用戶資料</div>
+                <a href="/" class="btn btn-primary">回首頁</a>
+            </div>
+        }
+    </div>
+
+    <script>
+    // === Section navigation (same pattern as Teacher Dashboard) ===
+    var loadedSections = {};
+
+    function showSection(name, link) {
+        // Hide all sections
+        document.querySelectorAll('.content-section').forEach(function(s){ s.classList.remove('active'); });
+        // Show target
+        var section = document.getElementById('section-' + name);
+        if (section) section.classList.add('active');
+        // Update sidebar active state
+        document.querySelectorAll('.sidebar a').forEach(function(a){ a.classList.remove('active'); });
+        if (link) link.classList.add('active');
+        // Lazy load data
+        if (!loadedSections[name]) {
+            loadedSections[name] = true;
+            if (name === 'favteachers') loadMyFavoriteTeachers();
+            if (name === 'bookings') loadMyBookings();
+            if (name === 'ideas') loadMyIdeas();
+            if (name === 'qna') loadMyQuestions();
+            if (name === 'chat') loadMyChats();
+            if (name === 'quiz') loadMyQuizzes();
+        }
+        return false;
+    }
+
+    function esc(s){ var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+    function fmtDate(s){ var d=new Date(s); return d.toLocaleDateString('zh-TW') + ' ' + d.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}); }
+
+    // ── 我的收藏老師 ──
+    async function loadMyFavoriteTeachers(){
+        var el = document.getElementById('favTeachersList');
+        try {
+            var res = await fetch('/Account/MyFavoriteTeachers');
+            var items = await res.json();
+            if(!items.length){ el.innerHTML = '<div class="crud-empty">還沒有收藏老師</div>'; return; }
+            el.innerHTML = items.map(function(t){
+                var stars = '';
+                for(var i=0;i<5;i++) stars += i < Math.floor(t.averageRating) ? '\u2605' : '\u2606';
+                return '<div class="crud-item" id="fav-' + t.favId + '">' +
+                    '<div style="display:flex;gap:14px;align-items:center;">' +
+                        '<div style="width:48px;height:48px;border-radius:12px;background:#0f3460;border:1px solid rgba(34,153,221,0.12);display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;flex-shrink:0;">' +
+                            (t.photoUrl ? '<img src="' + esc(t.photoUrl) + '" style="width:100%;height:100%;object-fit:cover;" />' : '\uD83D\uDC68\u200D\uD83C\uDFEB') +
+                        '</div>' +
+                        '<div style="flex:1;min-width:0;">' +
+                            '<div style="font-weight:700;font-size:15px;">' + esc(t.name) + '</div>' +
+                            '<div style="font-size:13px;color:#aab;">' + esc(t.title) + '</div>' +
+                            '<div style="font-size:13px;margin-top:4px;">' +
+                                '<span style="color:#F9A825;">' + stars + '</span> ' +
+                                '<span style="color:#aab;">' + (t.averageRating||0).toFixed(1) + '</span>' +
+                                '<span style="color:#2299dd;margin-left:12px;">NT$' + t.hourlyRate + '/hr</span>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="crud-item-actions">' +
+                        '<a href="/Teacher/Detail/' + t.id + '" class="crud-btn" style="text-decoration:none;">查看詳情</a>' +
+                        '<a href="/Teacher/Detail/' + t.id + '" class="crud-btn" style="text-decoration:none;border-color:#2299dd;color:#2299dd;">預約課程</a>' +
+                        '<button class="crud-btn crud-btn-danger" onclick="unfavoriteTeacher(' + t.favId + ')">取消收藏</button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        } catch(e){ el.innerHTML = '<div class="crud-empty">載入失敗</div>'; }
+    }
+
+    async function unfavoriteTeacher(favId){
+        try {
+            var res = await fetch('/Account/UnfavoriteTeacher', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({favId: favId})
+            });
+            if(res.ok){
+                var el = document.getElementById('fav-' + favId);
+                if(el) el.remove();
+                var list = document.getElementById('favTeachersList');
+                if(!list.querySelector('.crud-item')) list.innerHTML = '<div class="crud-empty">還沒有收藏老師</div>';
+            }
+        } catch(e){ alert('取消收藏失敗'); }
+    }
+
+    // ── 我的預約 ──
+    async function loadMyBookings(){
+        var el = document.getElementById('bookingsList');
+        try {
+            var res = await fetch('/Account/MyBookings');
+            var items = await res.json();
+            if(!items.length){ el.innerHTML = '<div class="crud-empty">還沒有預約紀錄</div>'; return; }
+            el.innerHTML = items.map(function(b){
+                var statusMap = {pending:'待確認',confirmed:'已確認',completed:'已完成',cancelled:'已取消'};
+                var colorMap = {pending:'crud-badge-yellow',confirmed:'crud-badge-green',completed:'crud-badge-blue',cancelled:'crud-badge-danger'};
+                var statusText = statusMap[b.status] || b.status;
+                var badgeClass = colorMap[b.status] || 'crud-badge-yellow';
+                if(b.status === 'cancelled') badgeClass = '';
+                var badgeStyle = b.status === 'cancelled' ? 'background:rgba(220,53,69,.15);color:#f85149;' : '';
+                var actions = '';
+                if(b.status === 'pending'){
+                    actions = '<button class="crud-btn crud-btn-danger" onclick="cancelBooking(' + b.id + ')">取消預約</button>';
+                }
+                if(b.status === 'completed' && !b.hasReview){
+                    actions = '<a href="/Teacher/Detail/' + b.teacherId + '" class="crud-btn" style="text-decoration:none;border-color:#F9A825;color:#F9A825;">寫評價</a>';
+                }
+                return '<div class="crud-item" id="booking-' + b.id + '">' +
+                    '<div class="crud-item-content" style="margin-bottom:2px;">' +
+                        '<span style="font-weight:600;">' + esc(b.teacherName) + '</span>' +
+                    '</div>' +
+                    '<div class="crud-item-meta">' +
+                        '<span class="crud-badge ' + badgeClass + '"' + (badgeStyle ? ' style="' + badgeStyle + '"' : '') + '>' + statusText + '</span>' +
+                        '<span>' + fmtDate(b.bookingDate) + '</span>' +
+                        '<span>' + esc(b.timeSlot) + '</span>' +
+                    '</div>' +
+                    (actions ? '<div class="crud-item-actions">' + actions + '</div>' : '') +
+                '</div>';
+            }).join('');
+        } catch(e){ el.innerHTML = '<div class="crud-empty">載入失敗</div>'; }
+    }
+
+    async function cancelBooking(bookingId){
+        if(!confirm('確定要取消此預約嗎？')) return;
+        try {
+            var res = await fetch('/Account/CancelBooking', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({bookingId: bookingId})
+            });
+            if(res.ok){
+                loadedSections['bookings'] = false;
+                loadMyBookings();
+            } else {
+                var d = await res.json().catch(function(){return {};});
+                alert(d.error || '取消失敗');
+            }
+        } catch(e){ alert('取消失敗'); }
+    }
+
+    // ── 我的想法 ──
+    async function loadMyIdeas(){
+        var el = document.getElementById('ideasList');
+        try {
+            var res = await fetch('/Account/MyIdeas');
+            var items = await res.json();
+            if(!items.length){ el.innerHTML = '<div class="crud-empty">還沒有發過想法</div>'; return; }
+            el.innerHTML = items.map(function(i){
+                return '<div class="crud-item" id="idea-' + i.id + '">' +
+                    '<div class="crud-item-content" id="idea-content-' + i.id + '">' + esc(i.content) + '</div>' +
+                    '<div class="crud-item-meta">' +
+                        (i.chapterTitle ? '<span>\u{1F4D6} ' + esc(i.chapterTitle) + '</span>' : '') +
+                        '<span>\u{1F4AC} ' + i.replyCount + ' \u5247\u56DE\u8986</span>' +
+                        '<span>' + fmtDate(i.createdAt) + '</span>' +
+                    '</div>' +
+                    '<div class="crud-item-actions">' +
+                        '<button class="crud-btn" onclick="editIdea(' + i.id + ')">✏️ 編輯</button>' +
+                        '<button class="crud-btn crud-btn-danger" onclick="confirmDelete(\'idea\',' + i.id + ')">🗑️ 刪除</button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        } catch(e){ el.innerHTML = '<div class="crud-empty">載入失敗</div>'; }
+    }
+
+    function editIdea(id){
+        var contentEl = document.getElementById('idea-content-' + id);
+        var current = contentEl.textContent;
+        var item = document.getElementById('idea-' + id);
+        if(item.querySelector('.crud-edit-area')) return;
+        var ta = document.createElement('textarea');
+        ta.className = 'crud-edit-area';
+        ta.value = current;
+        ta.id = 'idea-edit-' + id;
+        var btnDiv = document.createElement('div');
+        btnDiv.style.cssText = 'display:flex;gap:6px;margin-top:6px;';
+        btnDiv.innerHTML = '<button class="crud-btn" onclick="saveIdea(' + id + ')" style="border-color:#38bd72;color:#38bd72;">💾 儲存</button>' +
+            '<button class="crud-btn" onclick="cancelEditIdea(' + id + ')">取消</button>';
+        contentEl.style.display = 'none';
+        contentEl.after(ta, btnDiv);
+    }
+
+    function cancelEditIdea(id){
+        var item = document.getElementById('idea-' + id);
+        var ta = item.querySelector('.crud-edit-area');
+        var btns = ta?.nextElementSibling;
+        if(ta) ta.remove();
+        if(btns) btns.remove();
+        document.getElementById('idea-content-' + id).style.display = '';
+    }
+
+    async function saveIdea(id){
+        var ta = document.getElementById('idea-edit-' + id);
+        if(!ta || !ta.value.trim()) return;
+        try {
+            var res = await fetch('/Account/UpdateIdea', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({id: id, content: ta.value.trim()})
+            });
+            if(res.ok){
+                loadedSections['ideas'] = false;
+                loadMyIdeas();
+            } else { alert('更新失敗'); }
+        } catch(e){ alert('更新失敗'); }
+    }
+
+    // ── 我的問答 ──
+    async function loadMyQuestions(){
+        var el = document.getElementById('qnaList');
+        try {
+            var res = await fetch('/Account/MyQuestions');
+            var items = await res.json();
+            if(!items.length){ el.innerHTML = '<div class="crud-empty">還沒有發過問題</div>'; return; }
+            el.innerHTML = items.map(function(q){
+                var statusBadge = q.isSolved
+                    ? '<span class="crud-badge crud-badge-green">\u2705 \u5DF2\u89E3\u6C7A</span>'
+                    : '<span class="crud-badge crud-badge-yellow">\u{23F3} \u672A\u89E3\u6C7A</span>';
+                return '<div class="crud-item" id="qna-' + q.id + '">' +
+                    '<div class="crud-item-content">' + esc(q.question) + '</div>' +
+                    '<div class="crud-item-meta">' +
+                        statusBadge +
+                        '<span>\u{1F4AC} ' + q.answerCount + ' \u5247\u56DE\u7B54</span>' +
+                        '<span>' + fmtDate(q.createdAt) + '</span>' +
+                    '</div>' +
+                    '<div class="crud-item-actions">' +
+                        '<button class="crud-btn crud-btn-danger" onclick="confirmDelete(\'question\',' + q.id + ')">\u{1F5D1}\uFE0F \u522A\u9664</button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        } catch(e){ el.innerHTML = '<div class="crud-empty">載入失敗</div>'; }
+    }
+
+    // ── 我的聊天 ──
+    async function loadMyChats(){
+        var el = document.getElementById('chatList');
+        try {
+            var res = await fetch('/Account/MyChats');
+            var items = await res.json();
+            if(!items.length){ el.innerHTML = '<div class="crud-empty">還沒有聊天紀錄</div>'; return; }
+            el.innerHTML = items.map(function(c){
+                return '<div class="crud-item" id="chat-' + c.id + '">' +
+                    '<div class="crud-item-content">' + esc(c.message) + '</div>' +
+                    '<div class="crud-item-meta">' +
+                        '<span>' + fmtDate(c.sentAt) + '</span>' +
+                    '</div>' +
+                    '<div class="crud-item-actions">' +
+                        '<button class="crud-btn crud-btn-danger" onclick="confirmDelete(\'chat\',' + c.id + ')">\u{1F5D1}\uFE0F \u522A\u9664</button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        } catch(e){ el.innerHTML = '<div class="crud-empty">載入失敗</div>'; }
+    }
+
+    // ── 我的測驗 ──
+    async function loadMyQuizzes(){
+        var el = document.getElementById('quizList');
+        try {
+            var res = await fetch('/Account/MyQuizzes');
+            var items = await res.json();
+            if(!items.length){ el.innerHTML = '<div class="crud-empty">還沒有測驗紀錄</div>'; return; }
+            el.innerHTML = items.map(function(q){
+                var pct = q.total > 0 ? Math.round(q.score / q.total * 100) : 0;
+                var color = pct >= 60 ? 'crud-badge-green' : 'crud-badge-yellow';
+                return '<div class="crud-item">' +
+                    '<div class="crud-item-meta" style="margin-bottom:0;">' +
+                        '<span class="crud-badge ' + color + '">' + q.score + '/' + q.total + ' (' + pct + '%)</span>' +
+                        '<span>\u{1F4DA} \u7AE0\u7BC0 #' + q.chapterId + '</span>' +
+                        '<span>' + fmtDate(q.takenAt) + '</span>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        } catch(e){ el.innerHTML = '<div class="crud-empty">載入失敗</div>'; }
+    }
+
+    // ── 頭像預覽 ──
+    function previewAvatar(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var preview = document.getElementById('avatarPreview');
+                if (preview.tagName === 'IMG') {
+                    preview.src = e.target.result;
+                } else {
+                    var img = document.createElement('img');
+                    img.id = 'avatarPreview';
+                    img.src = e.target.result;
+                    img.style.cssText = 'width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid #2299dd;';
+                    preview.parentNode.replaceChild(img, preview);
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // ── 刪除確認 ──
+    function confirmDelete(type, id){
+        var overlay = document.createElement('div');
+        overlay.className = 'confirm-overlay';
+        overlay.innerHTML = '<div class="confirm-box">' +
+            '<p>\u78BA\u5B9A\u8981\u522A\u9664\u55CE\uFF1F\u6B64\u64CD\u4F5C\u7121\u6CD5\u5FA9\u539F\u3002</p>' +
+            '<div class="confirm-btns">' +
+                '<button class="btn btn-primary" style="background:#f85149;padding:8px 20px;font-size:13px;" id="confirmYes">\u{1F5D1}\uFE0F \u522A\u9664</button>' +
+                '<button class="btn btn-outline" style="padding:8px 20px;font-size:13px;" id="confirmNo">\u53D6\u6D88</button>' +
+            '</div>' +
+        '</div>';
+        document.body.appendChild(overlay);
+        document.getElementById('confirmNo').onclick = function(){ overlay.remove(); };
+        document.getElementById('confirmYes').onclick = async function(){
+            overlay.remove();
+            var url = type === 'idea' ? '/Account/DeleteIdea'
+                    : type === 'question' ? '/Account/DeleteQuestion'
+                    : '/Account/DeleteChat';
+            try {
+                var res = await fetch(url, {
+                    method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({id: id})
+                });
+                if(res.ok){
+                    var el = document.getElementById(type + '-' + id);
+                    if(el) el.remove();
+                } else { alert('\u522A\u9664\u5931\u6557'); }
+            } catch(e){ alert('\u522A\u9664\u5931\u6557'); }
+        };
+    }
+    </script>
+
+<script>document.querySelectorAll('.sidebar a').forEach(a=>{a.addEventListener('click',()=>{if(window.innerWidth<=900){document.querySelector('.sidebar').classList.remove('open');document.querySelector('.mobile-overlay').classList.remove('open');}});});</script>
+</body>
+</html>

@@ -1,0 +1,551 @@
+@{
+    ViewData["Title"] = "程式碼填字遊戲";
+}
+
+<style>
+    .puzzle-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .puzzle-header {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+    .puzzle-header h2 {
+        color: #e0e0e0;
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+    }
+    .puzzle-header p {
+        color: #888;
+        font-size: 0.95rem;
+    }
+
+    /* Difficulty Tabs */
+    .diff-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+    .diff-tab {
+        padding: 10px 28px;
+        border: 2px solid #444;
+        border-radius: 8px;
+        background: #1e1e2e;
+        color: #ccc;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+    .diff-tab:hover { border-color: #666; background: #2a2a3e; }
+    .diff-tab.active-beginner { border-color: #4caf50; background: #1b3a1b; color: #6fcf6f; }
+    .diff-tab.active-intermediate { border-color: #ff9800; background: #3a2e1b; color: #ffb74d; }
+    .diff-tab.active-advanced { border-color: #f44336; background: #3a1b1b; color: #ef9a9a; }
+
+    /* Puzzle Info Bar */
+    .puzzle-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: #1e1e2e;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        border: 1px solid #333;
+    }
+    .puzzle-title {
+        font-size: 1.1rem;
+        color: #e0e0e0;
+        font-weight: 600;
+    }
+    .puzzle-category {
+        color: #888;
+        font-size: 0.85rem;
+        background: #2a2a3e;
+        padding: 3px 10px;
+        border-radius: 12px;
+    }
+    .timer {
+        color: #80cbc4;
+        font-family: 'Consolas', monospace;
+        font-size: 1.1rem;
+        min-width: 60px;
+        text-align: right;
+    }
+
+    /* Code Editor Area */
+    .code-editor {
+        background: #0d1117;
+        border: 1px solid #333;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 16px;
+    }
+    .code-editor-header {
+        background: #161b22;
+        padding: 8px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 1px solid #333;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .code-body {
+        padding: 16px;
+        overflow-x: auto;
+    }
+    .code-lines {
+        display: table;
+        width: 100%;
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 0.92rem;
+        line-height: 1.8;
+    }
+    .code-line {
+        display: table-row;
+    }
+    .line-num {
+        display: table-cell;
+        width: 40px;
+        text-align: right;
+        padding-right: 16px;
+        color: #555;
+        user-select: none;
+        vertical-align: top;
+    }
+    .line-content {
+        display: table-cell;
+        color: #e0e0e0;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+
+    /* Inline blank inputs */
+    .blank-input {
+        background: #1a1a2e;
+        border: 2px solid #555;
+        border-radius: 4px;
+        color: #80cbc4;
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 0.9rem;
+        padding: 2px 6px;
+        min-width: 60px;
+        width: auto;
+        outline: none;
+        transition: border-color 0.2s;
+        vertical-align: baseline;
+    }
+    .blank-input:focus {
+        border-color: #80cbc4;
+        box-shadow: 0 0 6px rgba(128,203,196,0.3);
+    }
+    .blank-input.correct {
+        border-color: #4caf50;
+        background: #1b3a1b;
+        color: #6fcf6f;
+    }
+    .blank-input.wrong {
+        border-color: #f44336;
+        background: #3a1b1b;
+        color: #ef9a9a;
+    }
+    .blank-label {
+        display: inline-block;
+        font-size: 0.7rem;
+        color: #80cbc4;
+        vertical-align: super;
+        margin-right: 2px;
+    }
+    .correct-answer-tag {
+        font-size: 0.8rem;
+        color: #4caf50;
+        margin-left: 4px;
+        font-family: 'Consolas', monospace;
+    }
+
+    /* Buttons */
+    .btn-row {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+    }
+    .btn-puzzle {
+        padding: 10px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-submit {
+        background: #4caf50;
+        color: #fff;
+    }
+    .btn-submit:hover { background: #388e3c; }
+    .btn-submit:disabled { background: #555; cursor: not-allowed; }
+    .btn-hint {
+        background: #2a2a3e;
+        color: #ffb74d;
+        border: 1px solid #555;
+    }
+    .btn-hint:hover { background: #3a3a4e; }
+    .btn-next {
+        background: #1976d2;
+        color: #fff;
+    }
+    .btn-next:hover { background: #1565c0; }
+
+    /* Hint box */
+    .hint-box {
+        background: #2a2a1e;
+        border: 1px solid #665500;
+        border-radius: 8px;
+        padding: 12px 16px;
+        color: #ffb74d;
+        margin-bottom: 16px;
+        display: none;
+    }
+    .hint-box.show { display: block; }
+
+    /* Result */
+    .result-box {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 16px;
+        display: none;
+    }
+    .result-box.show { display: block; }
+    .result-score {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    .result-score.perfect { color: #4caf50; }
+    .result-score.good { color: #ffb74d; }
+    .result-score.fail { color: #f44336; }
+    .result-time {
+        color: #888;
+        font-size: 0.9rem;
+    }
+
+    /* Stats */
+    .stats-bar {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+    .stat-card {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 12px 20px;
+        text-align: center;
+        min-width: 100px;
+    }
+    .stat-val {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #80cbc4;
+    }
+    .stat-label {
+        font-size: 0.75rem;
+        color: #888;
+        margin-top: 4px;
+    }
+
+    /* Loading */
+    .loading-spinner {
+        text-align: center;
+        padding: 40px;
+        color: #888;
+        font-size: 1.1rem;
+    }
+</style>
+
+<div class="puzzle-container">
+    <div class="puzzle-header">
+        <h2>程式碼填字遊戲</h2>
+        <p>閱讀程式碼，填入被挖空的部分，測試你的 C# 知識！</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar" id="statsBar">
+        <div class="stat-card"><div class="stat-val" id="statAttempts">-</div><div class="stat-label">挑戰次數</div></div>
+        <div class="stat-card"><div class="stat-val" id="statAccuracy">-</div><div class="stat-label">正確率</div></div>
+        <div class="stat-card"><div class="stat-val" id="statPerfect">-</div><div class="stat-label">滿分次數</div></div>
+        <div class="stat-card"><div class="stat-val" id="statAvgTime">-</div><div class="stat-label">平均秒數</div></div>
+    </div>
+
+    <!-- Difficulty Tabs -->
+    <div class="diff-tabs">
+        <button class="diff-tab active-beginner" data-diff="beginner" onclick="switchDifficulty('beginner')">初級 🟢</button>
+        <button class="diff-tab" data-diff="intermediate" onclick="switchDifficulty('intermediate')">中級 🟡</button>
+        <button class="diff-tab" data-diff="advanced" onclick="switchDifficulty('advanced')">高級 🔴</button>
+    </div>
+
+    <!-- Puzzle Info -->
+    <div class="puzzle-info" id="puzzleInfo" style="display:none;">
+        <div>
+            <span class="puzzle-title" id="puzzleTitle"></span>
+            <span class="puzzle-category" id="puzzleCategory"></span>
+        </div>
+        <div class="timer" id="timer">00:00</div>
+    </div>
+
+    <!-- Code Editor -->
+    <div class="code-editor" id="codeEditor" style="display:none;">
+        <div class="code-editor-header">
+            <span class="dot dot-r"></span>
+            <span class="dot dot-y"></span>
+            <span class="dot dot-g"></span>
+            <span style="color:#888;font-size:0.85rem;margin-left:8px;" id="editorLabel">puzzle.cs</span>
+        </div>
+        <div class="code-body">
+            <div class="code-lines" id="codeLines"></div>
+        </div>
+    </div>
+
+    <!-- Hint -->
+    <div class="hint-box" id="hintBox"></div>
+
+    <!-- Buttons -->
+    <div class="btn-row" id="btnRow" style="display:none;">
+        <button class="btn-puzzle btn-hint" onclick="toggleHint()">💡 提示</button>
+        <button class="btn-puzzle btn-submit" id="btnSubmit" onclick="submitAnswers()">提交答案</button>
+        <button class="btn-puzzle btn-next" id="btnNext" style="display:none;" onclick="loadPuzzle()">下一題 ➜</button>
+    </div>
+
+    <!-- Result -->
+    <div class="result-box" id="resultBox">
+        <div class="result-score" id="resultScore"></div>
+        <div class="result-time" id="resultTime"></div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-spinner" id="loadingSpinner">載入中...</div>
+</div>
+
+<script>
+    let currentDifficulty = 'beginner';
+    let currentPuzzle = null;
+    let timerInterval = null;
+    let elapsedSeconds = 0;
+    let submitted = false;
+
+    const circledNums = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
+
+    function switchDifficulty(diff) {
+        currentDifficulty = diff;
+        document.querySelectorAll('.diff-tab').forEach(t => {
+            t.className = 'diff-tab' + (t.dataset.diff === diff ? ` active-${diff}` : '');
+        });
+        loadPuzzle();
+    }
+
+    async function loadPuzzle() {
+        submitted = false;
+        clearInterval(timerInterval);
+        elapsedSeconds = 0;
+        document.getElementById('timer').textContent = '00:00';
+        document.getElementById('resultBox').classList.remove('show');
+        document.getElementById('hintBox').classList.remove('show');
+        document.getElementById('btnNext').style.display = 'none';
+        document.getElementById('btnSubmit').disabled = false;
+        document.getElementById('loadingSpinner').style.display = 'block';
+        document.getElementById('codeEditor').style.display = 'none';
+        document.getElementById('puzzleInfo').style.display = 'none';
+        document.getElementById('btnRow').style.display = 'none';
+
+        try {
+            const res = await fetch(`/Puzzle/GetPuzzle?difficulty=${currentDifficulty}`);
+            const data = await res.json();
+            if (data.error) {
+                document.getElementById('loadingSpinner').textContent = data.error;
+                return;
+            }
+            currentPuzzle = data;
+            renderPuzzle(data);
+        } catch (e) {
+            document.getElementById('loadingSpinner').textContent = '載入失敗，請重試';
+        }
+    }
+
+    function renderPuzzle(puzzle) {
+        document.getElementById('loadingSpinner').style.display = 'none';
+        document.getElementById('codeEditor').style.display = 'block';
+        document.getElementById('puzzleInfo').style.display = 'flex';
+        document.getElementById('btnRow').style.display = 'flex';
+        document.getElementById('puzzleTitle').textContent = puzzle.title;
+        document.getElementById('puzzleCategory').textContent = puzzle.category;
+        document.getElementById('hintBox').textContent = '💡 ' + puzzle.hint;
+
+        // Parse code lines and insert blank inputs
+        const code = puzzle.codeWithBlanks;
+        const lines = code.split('\n');
+        let blankIdx = 0;
+        const container = document.getElementById('codeLines');
+        container.innerHTML = '';
+
+        lines.forEach((line, li) => {
+            const row = document.createElement('div');
+            row.className = 'code-line';
+            const numCell = document.createElement('span');
+            numCell.className = 'line-num';
+            numCell.textContent = li + 1;
+            row.appendChild(numCell);
+
+            const contentCell = document.createElement('span');
+            contentCell.className = 'line-content';
+
+            // Replace ___ with input fields
+            const parts = line.split('___');
+            for (let pi = 0; pi < parts.length; pi++) {
+                contentCell.appendChild(document.createTextNode(parts[pi]));
+                if (pi < parts.length - 1) {
+                    const label = document.createElement('span');
+                    label.className = 'blank-label';
+                    label.textContent = circledNums[blankIdx] || `[${blankIdx+1}]`;
+                    contentCell.appendChild(label);
+
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'blank-input';
+                    input.dataset.blankIndex = blankIdx;
+                    input.setAttribute('autocomplete', 'off');
+                    input.setAttribute('spellcheck', 'false');
+                    const origLen = puzzle.blanks[blankIdx]?.length || 6;
+                    input.style.width = Math.max(60, origLen * 10) + 'px';
+                    contentCell.appendChild(input);
+                    blankIdx++;
+                }
+            }
+
+            row.appendChild(contentCell);
+            container.appendChild(row);
+        });
+
+        // Start timer
+        startTimer();
+
+        // Focus first input
+        const firstInput = container.querySelector('.blank-input');
+        if (firstInput) firstInput.focus();
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        elapsedSeconds = 0;
+        timerInterval = setInterval(() => {
+            elapsedSeconds++;
+            const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+            const s = String(elapsedSeconds % 60).padStart(2, '0');
+            document.getElementById('timer').textContent = `${m}:${s}`;
+        }, 1000);
+    }
+
+    function toggleHint() {
+        document.getElementById('hintBox').classList.toggle('show');
+    }
+
+    async function submitAnswers() {
+        if (submitted || !currentPuzzle) return;
+        submitted = true;
+        clearInterval(timerInterval);
+        document.getElementById('btnSubmit').disabled = true;
+
+        const inputs = document.querySelectorAll('.blank-input');
+        const answers = Array.from(inputs).map(i => i.value);
+
+        try {
+            const res = await fetch('/Puzzle/Submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    codePuzzleId: currentPuzzle.id,
+                    answers: answers,
+                    timeTaken: elapsedSeconds
+                })
+            });
+            const result = await res.json();
+            showResult(result, inputs);
+        } catch (e) {
+            alert('提交失敗，請重試');
+            submitted = false;
+            document.getElementById('btnSubmit').disabled = false;
+        }
+    }
+
+    function showResult(result, inputs) {
+        // Color inputs
+        result.details.forEach(d => {
+            const input = inputs[d.blankIndex];
+            if (!input) return;
+            input.classList.add(d.isCorrect ? 'correct' : 'wrong');
+            input.readOnly = true;
+            if (!d.isCorrect) {
+                const tag = document.createElement('span');
+                tag.className = 'correct-answer-tag';
+                tag.textContent = ` ✓ ${d.correctAnswer}`;
+                input.parentNode.insertBefore(tag, input.nextSibling);
+            }
+        });
+
+        // Show score
+        const scoreDiv = document.getElementById('resultScore');
+        const ratio = result.correctCount / result.totalBlanks;
+        scoreDiv.textContent = `${result.correctCount} / ${result.totalBlanks} 正確`;
+        scoreDiv.className = 'result-score ' + (ratio === 1 ? 'perfect' : ratio >= 0.5 ? 'good' : 'fail');
+
+        const m = Math.floor(result.timeTaken / 60);
+        const s = result.timeTaken % 60;
+        document.getElementById('resultTime').textContent =
+            `用時 ${m > 0 ? m + ' 分 ' : ''}${s} 秒` +
+            (ratio === 1 ? ' — 完美！🎉' : '');
+
+        document.getElementById('resultBox').classList.add('show');
+        document.getElementById('btnNext').style.display = 'inline-block';
+
+        loadStats();
+    }
+
+    async function loadStats() {
+        try {
+            const res = await fetch('/Puzzle/MyStats');
+            const s = await res.json();
+            document.getElementById('statAttempts').textContent = s.totalAttempts;
+            document.getElementById('statAccuracy').textContent = s.accuracy + '%';
+            document.getElementById('statPerfect').textContent = s.perfectCount;
+            document.getElementById('statAvgTime').textContent = s.averageTimeSeconds + 's';
+        } catch {}
+    }
+
+    // Handle Enter key to move to next blank
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !submitted) {
+            const inputs = Array.from(document.querySelectorAll('.blank-input'));
+            const idx = inputs.indexOf(document.activeElement);
+            if (idx >= 0 && idx < inputs.length - 1) {
+                inputs[idx + 1].focus();
+            } else if (idx === inputs.length - 1) {
+                submitAnswers();
+            }
+        }
+    });
+
+    // Init
+    loadStats();
+    loadPuzzle();
+</script>

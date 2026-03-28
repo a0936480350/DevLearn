@@ -1,0 +1,819 @@
+@{
+    ViewData["Title"] = "學習夥伴配對";
+}
+
+<style>
+    .buddy-page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 24px 16px 60px;
+        font-family: 'Segoe UI', sans-serif;
+        color: #e0e0e0;
+    }
+
+    .buddy-header {
+        text-align: center;
+        margin-bottom: 36px;
+    }
+
+    .buddy-header h1 {
+        font-size: 2rem;
+        color: #f5c542;
+        margin-bottom: 8px;
+    }
+
+    .buddy-header p {
+        color: #aaa;
+        font-size: 1.05rem;
+    }
+
+    /* ── 註冊表單 ── */
+    .reg-card {
+        background: #1e1e2e;
+        border-radius: 16px;
+        padding: 32px;
+        max-width: 560px;
+        margin: 0 auto;
+        box-shadow: 0 4px 24px rgba(0,0,0,.4);
+    }
+
+    .reg-card h2 {
+        color: #f5c542;
+        margin-bottom: 20px;
+        font-size: 1.3rem;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        color: #ccc;
+        margin-bottom: 6px;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .form-group input[type="text"],
+    .form-group textarea {
+        width: 100%;
+        padding: 10px 14px;
+        background: #2a2a3e;
+        border: 1px solid #444;
+        border-radius: 10px;
+        color: #e0e0e0;
+        font-size: 1rem;
+        box-sizing: border-box;
+        transition: border-color .2s;
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #f5c542;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 70px;
+    }
+
+    /* 等級選擇 */
+    .level-options {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .level-btn {
+        flex: 1;
+        min-width: 120px;
+        padding: 12px 8px;
+        background: #2a2a3e;
+        border: 2px solid #444;
+        border-radius: 12px;
+        color: #ccc;
+        font-size: 0.95rem;
+        cursor: pointer;
+        text-align: center;
+        transition: all .2s;
+    }
+
+    .level-btn:hover {
+        border-color: #f5c542;
+        background: #33334a;
+    }
+
+    .level-btn.active {
+        border-color: #f5c542;
+        background: #3a3522;
+        color: #f5c542;
+    }
+
+    .level-btn .level-emoji {
+        font-size: 1.6rem;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    /* 興趣 checkbox */
+    .interest-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 8px;
+    }
+
+    .interest-chip {
+        padding: 8px 12px;
+        background: #2a2a3e;
+        border: 2px solid #444;
+        border-radius: 10px;
+        color: #ccc;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-align: center;
+        transition: all .2s;
+        user-select: none;
+    }
+
+    .interest-chip:hover {
+        border-color: #8be9fd;
+    }
+
+    .interest-chip.selected {
+        border-color: #8be9fd;
+        background: #1a2f3a;
+        color: #8be9fd;
+    }
+
+    .btn-register {
+        display: block;
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #f5c542, #e0a520);
+        color: #1a1a2e;
+        font-size: 1.1rem;
+        font-weight: 700;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: transform .15s, box-shadow .15s;
+        margin-top: 8px;
+    }
+
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(245, 197, 66, .4);
+    }
+
+    .btn-register:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* ── 已註冊：主面板 ── */
+    .section-title {
+        color: #f5c542;
+        font-size: 1.25rem;
+        margin: 32px 0 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .profile-card {
+        background: #1e1e2e;
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        box-shadow: 0 4px 20px rgba(0,0,0,.3);
+        position: relative;
+    }
+
+    .profile-avatar {
+        font-size: 3rem;
+        width: 72px;
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #2a2a3e;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .profile-info {
+        flex: 1;
+    }
+
+    .profile-info h3 {
+        font-size: 1.2rem;
+        color: #fff;
+        margin: 0 0 6px;
+    }
+
+    .level-badge {
+        display: inline-block;
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .level-beginner { background: #2d4a2d; color: #90ee90; }
+    .level-intermediate { background: #2d3a4a; color: #87ceeb; }
+    .level-advanced { background: #4a2d3a; color: #ee90b0; }
+
+    .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 8px 0;
+    }
+
+    .tag {
+        padding: 3px 10px;
+        background: #333350;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        color: #8be9fd;
+    }
+
+    .goal-text {
+        color: #aaa;
+        font-size: 0.9rem;
+        margin-top: 6px;
+        font-style: italic;
+    }
+
+    .contact-info {
+        color: #50fa7b;
+        font-size: 0.85rem;
+        margin-top: 4px;
+    }
+
+    /* ── 夥伴卡片 ── */
+    .buddy-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+    }
+
+    .buddy-card {
+        background: #1e1e2e;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 2px 12px rgba(0,0,0,.3);
+        transition: transform .2s, box-shadow .2s;
+        position: relative;
+    }
+
+    .buddy-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 24px rgba(0,0,0,.4);
+    }
+
+    .buddy-card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+
+    .buddy-card-avatar {
+        font-size: 2rem;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #2a2a3e;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .buddy-card-name {
+        font-size: 1.05rem;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .btn-match {
+        display: inline-block;
+        padding: 8px 20px;
+        background: linear-gradient(135deg, #ff79c6, #bd93f9);
+        color: #fff;
+        font-weight: 700;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        margin-top: 10px;
+        transition: transform .15s, box-shadow .15s;
+    }
+
+    .btn-match:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(189, 147, 249, .4);
+    }
+
+    .btn-match:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* ── 篩選列 ── */
+    .filter-bar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+    }
+
+    .filter-btn {
+        padding: 6px 16px;
+        background: #2a2a3e;
+        border: 1px solid #444;
+        border-radius: 20px;
+        color: #ccc;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all .2s;
+    }
+
+    .filter-btn:hover { border-color: #f5c542; }
+    .filter-btn.active { background: #3a3522; border-color: #f5c542; color: #f5c542; }
+
+    /* ── 配對動畫 ── */
+    .match-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,.75);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .match-overlay.show {
+        display: flex;
+    }
+
+    .match-anim {
+        text-align: center;
+        animation: matchPop .6s ease-out;
+    }
+
+    .match-anim .match-emoji {
+        font-size: 5rem;
+        display: block;
+        margin-bottom: 16px;
+    }
+
+    .match-anim .match-text {
+        color: #f5c542;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .match-anim .match-names {
+        color: #ccc;
+        font-size: 1.1rem;
+        margin-top: 8px;
+    }
+
+    .match-anim .match-close {
+        margin-top: 24px;
+        padding: 10px 28px;
+        background: #f5c542;
+        color: #1a1a2e;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    @@keyframes matchPop {
+        0% { transform: scale(0.3); opacity: 0; }
+        60% { transform: scale(1.1); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #888;
+        font-size: 1rem;
+    }
+
+    .empty-state .empty-emoji {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 30px;
+        color: #888;
+    }
+
+    .edit-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: #333;
+        border: 1px solid #555;
+        color: #ccc;
+        padding: 4px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+    .edit-btn:hover { border-color: #f5c542; color: #f5c542; }
+</style>
+
+<div class="buddy-page">
+    <div class="buddy-header">
+        <h1>🤝 學習夥伴配對</h1>
+        <p>找到和你志同道合的學習夥伴，一起成長！</p>
+    </div>
+
+    <!-- 載入中 -->
+    <div id="loadingState" class="loading">載入中...</div>
+
+    <!-- ============ 未註冊：註冊表單 ============ -->
+    <div id="registerSection" style="display:none;">
+        <div class="reg-card">
+            <h2>加入學習夥伴計畫</h2>
+
+            <div class="form-group">
+                <label>你的暱稱</label>
+                <input type="text" id="regNickname" placeholder="取個喜歡的名字" maxlength="20">
+            </div>
+
+            <div class="form-group">
+                <label>你的程度</label>
+                <div class="level-options">
+                    <div class="level-btn" data-level="beginner" onclick="selectLevel(this)">
+                        <span class="level-emoji">🌱</span>初學者
+                    </div>
+                    <div class="level-btn" data-level="intermediate" onclick="selectLevel(this)">
+                        <span class="level-emoji">🌿</span>中級者
+                    </div>
+                    <div class="level-btn" data-level="advanced" onclick="selectLevel(this)">
+                        <span class="level-emoji">🌳</span>進階者
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>你有興趣的領域（可複選）</label>
+                <div class="interest-grid">
+                    <div class="interest-chip" data-val="csharp" onclick="toggleInterest(this)">C#</div>
+                    <div class="interest-chip" data-val="aspnet" onclick="toggleInterest(this)">ASP.NET</div>
+                    <div class="interest-chip" data-val="database" onclick="toggleInterest(this)">資料庫</div>
+                    <div class="interest-chip" data-val="frontend" onclick="toggleInterest(this)">前端</div>
+                    <div class="interest-chip" data-val="git" onclick="toggleInterest(this)">Git</div>
+                    <div class="interest-chip" data-val="docker" onclick="toggleInterest(this)">Docker</div>
+                    <div class="interest-chip" data-val="ai" onclick="toggleInterest(this)">AI</div>
+                    <div class="interest-chip" data-val="security" onclick="toggleInterest(this)">資安</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>你的學習目標是什麼？</label>
+                <textarea id="regGoal" placeholder="例如：想在三個月內學會 ASP.NET Core 做出一個完整專案"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>LINE ID 或 Discord（配對成功後才會顯示給對方）</label>
+                <input type="text" id="regContact" placeholder="例如：myline123 或 user#1234">
+            </div>
+
+            <button class="btn-register" onclick="doRegister()">🚀 開始尋找夥伴</button>
+        </div>
+    </div>
+
+    <!-- ============ 已註冊：主面板 ============ -->
+    <div id="dashboardSection" style="display:none;">
+
+        <!-- 我的資料卡 -->
+        <h2 class="section-title">📋 我的資料</h2>
+        <div class="profile-card" id="myProfileCard"></div>
+
+        <!-- 已配對夥伴 -->
+        <h2 class="section-title">💜 你的學習夥伴</h2>
+        <div id="matchedBuddies"></div>
+
+        <!-- 推薦夥伴 -->
+        <h2 class="section-title">✨ 推薦夥伴</h2>
+        <div id="recommendedBuddies"></div>
+
+        <!-- 所有夥伴 -->
+        <h2 class="section-title">🌐 所有正在找夥伴的人</h2>
+        <div class="filter-bar" id="filterBar">
+            <button class="filter-btn active" data-level="all" onclick="filterAll(this)">全部</button>
+            <button class="filter-btn" data-level="beginner" onclick="filterAll(this)">🌱 初學者</button>
+            <button class="filter-btn" data-level="intermediate" onclick="filterAll(this)">🌿 中級者</button>
+            <button class="filter-btn" data-level="advanced" onclick="filterAll(this)">🌳 進階者</button>
+        </div>
+        <div id="allBuddies"></div>
+    </div>
+
+    <!-- 配對成功動畫 -->
+    <div class="match-overlay" id="matchOverlay" onclick="closeMatchAnim()">
+        <div class="match-anim">
+            <span class="match-emoji">🎉</span>
+            <div class="match-text">配對成功！</div>
+            <div class="match-names" id="matchNames"></div>
+            <button class="match-close" onclick="closeMatchAnim()">太棒了！</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const LEVEL_MAP = {
+        beginner: { label: '初學者', emoji: '🌱', css: 'level-beginner' },
+        intermediate: { label: '中級者', emoji: '🌿', css: 'level-intermediate' },
+        advanced: { label: '進階者', emoji: '🌳', css: 'level-advanced' }
+    };
+
+    const INTEREST_MAP = {
+        csharp: 'C#', aspnet: 'ASP.NET', database: '資料庫', frontend: '前端',
+        git: 'Git', docker: 'Docker', ai: 'AI', security: '資安'
+    };
+
+    let selectedLevel = '';
+    let selectedInterests = new Set();
+    let myProfile = null;
+    let matchedIds = new Set();
+
+    // ── 初始化 ──
+    document.addEventListener('DOMContentLoaded', init);
+
+    async function init() {
+        try {
+            const res = await fetch('/Buddy/MyProfile');
+            const data = await res.json();
+            document.getElementById('loadingState').style.display = 'none';
+
+            if (data.registered) {
+                myProfile = data.profile;
+                matchedIds = new Set((data.matches || []).map(m => m.id));
+                showDashboard(data);
+            } else {
+                document.getElementById('registerSection').style.display = '';
+            }
+        } catch (e) {
+            document.getElementById('loadingState').textContent = '載入失敗，請重新整理';
+        }
+    }
+
+    // ── 等級選擇 ──
+    function selectLevel(el) {
+        document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        selectedLevel = el.dataset.level;
+    }
+
+    // ── 興趣選擇 ──
+    function toggleInterest(el) {
+        const val = el.dataset.val;
+        if (selectedInterests.has(val)) {
+            selectedInterests.delete(val);
+            el.classList.remove('selected');
+        } else {
+            selectedInterests.add(val);
+            el.classList.add('selected');
+        }
+    }
+
+    // ── 註冊 ──
+    async function doRegister() {
+        const nickname = document.getElementById('regNickname').value.trim();
+        if (!nickname) return alert('請輸入暱稱');
+        if (!selectedLevel) return alert('請選擇程度');
+        if (selectedInterests.size === 0) return alert('請至少選擇一個興趣');
+
+        const btn = document.querySelector('.btn-register');
+        btn.disabled = true;
+        btn.textContent = '配對中...';
+
+        try {
+            const res = await fetch('/Buddy/Register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nickname,
+                    level: selectedLevel,
+                    interests: [...selectedInterests],
+                    goal: document.getElementById('regGoal').value.trim(),
+                    contactInfo: document.getElementById('regContact').value.trim()
+                })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                myProfile = data.profile;
+                matchedIds = new Set((data.matches || []).map(m => m.id));
+
+                // 如果有自動配對，顯示動畫
+                if (data.matches && data.matches.length > 0) {
+                    const names = data.matches.map(m => m.nickname).join('、');
+                    showMatchAnim(`你和 ${names} 配對成功了！`);
+                }
+
+                document.getElementById('registerSection').style.display = 'none';
+                // 重新載入完整面板
+                const profileRes = await fetch('/Buddy/MyProfile');
+                const profileData = await profileRes.json();
+                showDashboard(profileData);
+            } else {
+                alert(data.message || '註冊失敗');
+                btn.disabled = false;
+                btn.textContent = '🚀 開始尋找夥伴';
+            }
+        } catch (e) {
+            alert('發生錯誤，請重試');
+            btn.disabled = false;
+            btn.textContent = '🚀 開始尋找夥伴';
+        }
+    }
+
+    // ── 顯示已註冊面板 ──
+    async function showDashboard(data) {
+        document.getElementById('dashboardSection').style.display = '';
+
+        // 我的資料
+        renderMyProfile(data.profile);
+
+        // 已配對
+        renderMatchedBuddies(data.matches || []);
+
+        // 推薦
+        await loadRecommended();
+
+        // 全部
+        await loadAllBuddies('all');
+    }
+
+    function renderMyProfile(p) {
+        const lv = LEVEL_MAP[p.level] || LEVEL_MAP.beginner;
+        const interests = (p.interests || []).map(i => `<span class="tag">${INTEREST_MAP[i] || i}</span>`).join('');
+
+        document.getElementById('myProfileCard').innerHTML = `
+            <div class="profile-avatar">${lv.emoji}</div>
+            <div class="profile-info">
+                <h3>${esc(p.nickname)}</h3>
+                <span class="level-badge ${lv.css}">${lv.emoji} ${lv.label}</span>
+                <div class="tag-list">${interests}</div>
+                ${p.goal ? `<div class="goal-text">「${esc(p.goal)}」</div>` : ''}
+                ${p.contactInfo ? `<div class="contact-info">📱 ${esc(p.contactInfo)}</div>` : ''}
+            </div>
+        `;
+    }
+
+    function renderMatchedBuddies(matches) {
+        const el = document.getElementById('matchedBuddies');
+        if (!matches.length) {
+            el.innerHTML = `<div class="empty-state"><span class="empty-emoji">🔍</span>還沒有配對的夥伴，往下看看推薦吧！</div>`;
+            return;
+        }
+        el.innerHTML = `<div class="buddy-grid">${matches.map(b => buddyCard(b, true)).join('')}</div>`;
+    }
+
+    async function loadRecommended() {
+        try {
+            const res = await fetch('/Buddy/FindMatches');
+            const list = await res.json();
+            const el = document.getElementById('recommendedBuddies');
+            if (!list.length) {
+                el.innerHTML = `<div class="empty-state"><span class="empty-emoji">😊</span>目前沒有新的推薦，邀請朋友加入吧！</div>`;
+                return;
+            }
+            el.innerHTML = `<div class="buddy-grid">${list.map(b => buddyCard(b, false)).join('')}</div>`;
+        } catch (e) {
+            document.getElementById('recommendedBuddies').innerHTML = '<div class="empty-state">載入失敗</div>';
+        }
+    }
+
+    async function loadAllBuddies(level) {
+        try {
+            const res = await fetch(`/Buddy/AllBuddies?level=${level}`);
+            const list = await res.json();
+            const el = document.getElementById('allBuddies');
+            if (!list.length) {
+                el.innerHTML = `<div class="empty-state"><span class="empty-emoji">🌍</span>還沒有其他人加入，你是先驅者！</div>`;
+                return;
+            }
+            el.innerHTML = `<div class="buddy-grid">${list.map(b => buddyCard(b, false)).join('')}</div>`;
+        } catch (e) {
+            document.getElementById('allBuddies').innerHTML = '<div class="empty-state">載入失敗</div>';
+        }
+    }
+
+    // ── 夥伴卡片 ──
+    function buddyCard(b, showContact) {
+        const lv = LEVEL_MAP[b.level] || LEVEL_MAP.beginner;
+        const interests = (b.interests || []).map(i => `<span class="tag">${INTEREST_MAP[i] || i}</span>`).join('');
+        const isMatched = matchedIds.has(b.id);
+
+        let actionHtml = '';
+        if (showContact && b.contactInfo) {
+            actionHtml = `<div class="contact-info">📱 ${esc(b.contactInfo)}</div>`;
+        } else if (!isMatched && myProfile) {
+            actionHtml = `<button class="btn-match" onclick="doMatch(${b.id}, '${esc(b.nickname)}', this)">💜 配對</button>`;
+        } else if (isMatched && !showContact) {
+            actionHtml = `<span style="color:#50fa7b;font-size:0.85rem;">✓ 已配對</span>`;
+        }
+
+        return `
+            <div class="buddy-card">
+                <div class="buddy-card-header">
+                    <div class="buddy-card-avatar">${lv.emoji}</div>
+                    <div>
+                        <div class="buddy-card-name">${esc(b.nickname)}</div>
+                        <span class="level-badge ${lv.css}">${lv.label}</span>
+                    </div>
+                </div>
+                <div class="tag-list">${interests}</div>
+                ${b.goal ? `<div class="goal-text">「${esc(b.goal)}」</div>` : ''}
+                ${actionHtml}
+            </div>
+        `;
+    }
+
+    // ── 手動配對 ──
+    async function doMatch(buddyId, buddyName, btn) {
+        btn.disabled = true;
+        btn.textContent = '配對中...';
+
+        try {
+            const res = await fetch('/Buddy/MatchWith', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ buddyId })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                matchedIds.add(buddyId);
+                showMatchAnim(`你和 ${buddyName} 配對成功了！`);
+
+                // 重新載入面板
+                const profileRes = await fetch('/Buddy/MyProfile');
+                const profileData = await profileRes.json();
+                renderMatchedBuddies(profileData.matches || []);
+                await loadRecommended();
+                await loadAllBuddies(getCurrentFilter());
+            } else {
+                alert(data.message || '配對失敗');
+                btn.disabled = false;
+                btn.textContent = '💜 配對';
+            }
+        } catch (e) {
+            alert('發生錯誤，請重試');
+            btn.disabled = false;
+            btn.textContent = '💜 配對';
+        }
+    }
+
+    // ── 篩選 ──
+    function filterAll(btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadAllBuddies(btn.dataset.level);
+    }
+
+    function getCurrentFilter() {
+        const active = document.querySelector('.filter-btn.active');
+        return active ? active.dataset.level : 'all';
+    }
+
+    // ── 配對動畫 ──
+    function showMatchAnim(text) {
+        document.getElementById('matchNames').textContent = text;
+        document.getElementById('matchOverlay').classList.add('show');
+    }
+
+    function closeMatchAnim() {
+        document.getElementById('matchOverlay').classList.remove('show');
+    }
+
+    // ── 工具 ──
+    function esc(str) {
+        if (!str) return '';
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+</script>

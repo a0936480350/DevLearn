@@ -1,0 +1,120 @@
+@using DotNetLearning.Models
+@{
+    Layout = null;
+    var runs = (List<SpeedRun>)ViewBag.SpeedRuns;
+}
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>管理後台 - 速度挑戰</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:#16213e; color:#eee; display:flex; min-height:100vh; }
+        .sidebar { width:240px; background:#1a1a2e; min-height:100vh; padding:20px 0; position:fixed; top:0; left:0; overflow-y:auto; z-index:100; border-right:1px solid rgba(233,69,96,0.2); }
+        .sidebar-brand { text-align:center; padding:16px 20px 24px; border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:12px; }
+        .sidebar-brand .logo { font-size:32px; } .sidebar-brand .title { color:#F9A825; font-size:18px; font-weight:700; margin-top:4px; }
+        .sidebar a { display:flex; align-items:center; padding:11px 24px; color:#aab; text-decoration:none; font-size:14px; transition:all 0.2s; border-left:3px solid transparent; }
+        .sidebar a:hover,.sidebar a.active { background:rgba(233,69,96,0.12); color:#fff; border-left-color:#e94560; }
+        .sidebar a .icon { margin-right:10px; font-size:16px; width:22px; text-align:center; }
+        .sidebar a.logout { color:#e94560; margin-top:16px; border-top:1px solid rgba(255,255,255,0.06); padding-top:16px; }
+        .main { margin-left:240px; flex:1; padding:24px 28px; }
+        .page-title { font-size:22px; font-weight:700; margin-bottom:24px; color:#F9A825; }
+        .card { background:#0f3460; border:1px solid rgba(233,69,96,0.12); border-radius:12px; padding:20px; }
+        .admin-table { width:100%; border-collapse:collapse; font-size:13px; }
+        .admin-table th { text-align:left; padding:8px 10px; background:rgba(26,26,46,0.6); color:#aab; font-weight:600; border-bottom:1px solid rgba(255,255,255,0.08); }
+        .admin-table td { padding:7px 10px; border-bottom:1px solid rgba(255,255,255,0.04); color:#ddd; }
+        .admin-table tr:hover td { background:rgba(233,69,96,0.06); }
+        /* Mobile responsive */
+        @@media (max-width: 900px) {
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                z-index: 9999;
+                transition: left 0.3s;
+                height: 100vh;
+                width: 250px;
+            }
+            .sidebar.open {
+                left: 0;
+                box-shadow: 5px 0 30px rgba(0,0,0,0.5);
+            }
+            .main {
+                margin-left: 0 !important;
+                padding: 20px 15px !important;
+            }
+            .mobile-menu-btn {
+                display: block !important;
+            }
+            .mobile-overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 9998;
+            }
+            .mobile-overlay.open {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="mobile-menu-btn" style="display:none;position:fixed;top:10px;left:10px;z-index:9997;background:#e94560;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:20px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.3);" onclick="document.querySelector('.sidebar').classList.toggle('open');document.querySelector('.mobile-overlay').classList.toggle('open');">&#9776;</button>
+    <div class="mobile-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('open');"></div>
+    <nav class="sidebar">
+        <div class="sidebar-brand"><div class="logo">&#x1F6E1;&#xFE0F;</div><div class="title">管理後台</div></div>
+        <a href="/"><span class="icon">&#x1F3E0;</span><span>回首頁</span></a>
+        <a href="@Url.Action("Dashboard")"><span class="icon">&#x1F4CA;</span><span>總覽</span></a>
+        <a href="@Url.Action("Users")"><span class="icon">&#x1F465;</span><span>使用者管理</span></a>
+        <a href="@Url.Action("Teachers")"><span class="icon">&#x1F468;&#x200D;&#x1F3EB;</span><span>老師管理</span></a>
+        <a href="@Url.Action("Bookings")"><span class="icon">&#x1F4C5;</span><span>預約管理</span></a>
+        <a href="@Url.Action("Chapters")"><span class="icon">&#x1F4D6;</span><span>章節管理</span></a>
+        <a href="@Url.Action("Questions")"><span class="icon">&#x2753;</span><span>題庫管理</span></a>
+        <a href="@Url.Action("Quizzes")"><span class="icon">&#x1F4DD;</span><span>測驗紀錄</span></a>
+        <a href="@Url.Action("Ideas")"><span class="icon">&#x1F4A1;</span><span>想法分享</span></a>
+        <a href="@Url.Action("ChatMessages")"><span class="icon">&#x1F4AC;</span><span>聊天紀錄</span></a>
+        <a href="@Url.Action("BugChallenges")"><span class="icon">&#x1F41B;</span><span>偵探遊戲</span></a>
+        <a href="@Url.Action("SpeedRuns")" class="active"><span class="icon">&#x26A1;</span><span>速度挑戰</span></a>
+        <a href="@Url.Action("DailyChallenges")"><span class="icon">&#x1F4C5;</span><span>每日一題</span></a>
+        <a href="@Url.Action("ArenaSubmissions")"><span class="icon">&#x1F3C6;</span><span>擂台管理</span></a>
+        <a href="@Url.Action("StudyBuddies")"><span class="icon">&#x1F91D;</span><span>學習夥伴</span></a>
+        <a href="@Url.Action("AuditLogs")"><span class="icon">&#x1F4CB;</span><span>操作紀錄</span></a>
+        <a href="@Url.Action("SupportTickets")"><span class="icon">&#x1F4DE;</span><span>客服工單</span></a>
+        <a href="@Url.Action("ErrorLogs")"><span class="icon">&#x1F6A8;</span><span>錯誤日誌</span></a>
+        <a href="@Url.Action("AIWorkLogs")"><span class="icon">&#x1F916;</span><span>AI 工作紀錄</span></a>
+        <a href="@Url.Action("Logout")" class="logout"><span class="icon">&#x1F6AA;</span><span>登出</span></a>
+    </nav>
+    <div class="main">
+        <div class="page-title">&#x26A1; 速度挑戰排行 (Top 200)</div>
+        <div class="card">
+            <div style="overflow-x:auto;">
+                <table class="admin-table">
+                    <thead><tr><th>#</th><th>暱稱</th><th>分數</th><th>正確</th><th>總題</th><th>分類</th><th>時限</th><th>日期</th></tr></thead>
+                    <tbody>
+                        @{ int rank = 1; }
+                        @foreach (var s in runs)
+                        {
+                            <tr>
+                                <td style="color:#F9A825;font-weight:700;">@rank</td>
+                                <td style="font-weight:600;">@s.Nickname</td>
+                                <td style="color:#F9A825;font-weight:600;">@s.ScorePoints</td>
+                                <td style="color:#4CAF50;">@s.CorrectCount</td>
+                                <td>@s.TotalCount</td>
+                                <td>@s.Category</td>
+                                <td>@(s.TimeLimitSeconds)s</td>
+                                <td>@s.PlayedAt.ToString("MM/dd HH:mm")</td>
+                            </tr>
+                            rank++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<script>document.querySelectorAll('.sidebar a').forEach(a=>{a.addEventListener('click',()=>{if(window.innerWidth<=900){document.querySelector('.sidebar').classList.remove('open');document.querySelector('.mobile-overlay').classList.remove('open');}});});</script>
+</body>
+</html>

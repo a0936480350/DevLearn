@@ -1,0 +1,265 @@
+@{
+    ViewData["Title"] = "申請成為老師";
+}
+
+<style>
+    .apply-page { max-width: 780px; margin: 0 auto; padding: 32px 20px; }
+
+    /* Section A: 平台說明 */
+    .platform-intro { margin-bottom: 36px; }
+    .platform-intro h1 { font-size: 30px; font-weight: 800; margin-bottom: 6px; }
+    .platform-intro .subtitle { color: var(--text-muted); margin-bottom: 24px; font-size: 15px; }
+    .info-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 8px; }
+    .info-card {
+        background: var(--bg3); border: 1px solid var(--border); border-radius: 14px;
+        padding: 20px; transition: border-color 0.2s;
+    }
+    .info-card:hover { border-color: var(--accent); }
+    .info-card .ic-icon { font-size: 28px; margin-bottom: 10px; }
+    .info-card .ic-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+    .info-card .ic-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    /* Section B: 申請表單 */
+    .apply-form { background: var(--bg3); border: 1px solid var(--border); border-radius: 16px; padding: 32px; }
+    .form-section-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: var(--accent); }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+    .form-group label small { font-weight: 400; color: var(--text-muted); }
+    .form-group input[type="text"], .form-group input[type="number"], .form-group input[type="url"],
+    .form-group textarea, .form-group select {
+        width: 100%; padding: 10px 14px; background: var(--bg2); border: 1px solid var(--border);
+        border-radius: 10px; color: var(--text); font-size: 14px; font-family: inherit;
+    }
+    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
+    .form-group textarea { min-height: 120px; resize: vertical; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* File upload */
+    .file-upload-area {
+        border: 2px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center;
+        cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+    }
+    .file-upload-area:hover { border-color: var(--accent); background: rgba(34,153,221,0.05); }
+    .file-upload-area input[type="file"] {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
+    }
+    .file-upload-area .fu-icon { font-size: 32px; margin-bottom: 8px; }
+    .file-upload-area .fu-text { font-size: 13px; color: var(--text-muted); }
+    .file-upload-area .fu-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    .photo-preview {
+        width: 120px; height: 120px; border-radius: 12px; object-fit: cover;
+        display: none; margin: 10px auto 0; border: 2px solid var(--accent);
+    }
+    .diploma-filename {
+        display: none; margin-top: 8px; font-size: 13px; color: var(--accent);
+        text-align: center;
+    }
+
+    /* Skill checkboxes */
+    .skill-checkboxes { display: flex; flex-wrap: wrap; gap: 10px; }
+    .skill-checkboxes label {
+        display: flex; align-items: center; gap: 6px; padding: 7px 14px;
+        background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+        cursor: pointer; font-size: 13px; font-weight: 400; transition: all 0.2s;
+    }
+    .skill-checkboxes label:hover { border-color: var(--accent); }
+    .skill-checkboxes label.checked { border-color: var(--accent); background: rgba(34,153,221,0.12); }
+    .skill-checkboxes input { display: none; }
+
+    /* Terms checkbox */
+    .terms-check { display: flex; align-items: center; gap: 10px; margin: 20px 0; }
+    .terms-check input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
+    .terms-check label { font-size: 14px; cursor: pointer; }
+
+    .submit-btn {
+        display: block; width: 100%; padding: 14px; background: var(--accent); color: #fff;
+        border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer;
+        margin-top: 8px; font-family: inherit; transition: all 0.2s;
+    }
+    .submit-btn:hover { background: var(--accent2); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .msg-box { padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; }
+    .msg-error { background: rgba(220,53,69,0.15); color: #ff6b6b; border: 1px solid rgba(220,53,69,0.3); }
+    .msg-success { background: rgba(76,175,80,0.15); color: #4CAF50; border: 1px solid rgba(76,175,80,0.3); }
+</style>
+
+<div class="apply-page">
+    <a href="/" style="color:#2299dd;text-decoration:none;display:block;margin-bottom:20px;font-size:14px;">&#x1F3E0; &#x2190; 回首頁</a>
+    <!-- Section A: 平台說明 -->
+    <div class="platform-intro">
+        <h1>&#x1F393; 成為平台老師</h1>
+        <div class="subtitle">加入我們的教學團隊，分享您的專業知識</div>
+
+        <div class="info-cards">
+            <div class="info-card">
+                <div class="ic-icon">&#x1F4CB;</div>
+                <div class="ic-title">必要文件</div>
+                <div class="ic-desc">需上傳：最高學歷證書、個人照片</div>
+            </div>
+            <div class="info-card">
+                <div class="ic-icon">&#x1F4DA;</div>
+                <div class="ic-title">教學範圍</div>
+                <div class="ic-desc">不限於程式！可教授任何技術領域：程式開發、資料分析、AI、設計、語言等</div>
+            </div>
+            <div class="info-card">
+                <div class="ic-icon">&#x1F4B0;</div>
+                <div class="ic-title">平台抽成</div>
+                <div class="ic-desc">平台收取 15% 服務費，包含金流處理、學生媒合、平台維護</div>
+            </div>
+        </div>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="msg-box msg-error">@ViewBag.Error</div>
+    }
+    @if (ViewBag.Success != null)
+    {
+        <div class="msg-box msg-success">@ViewBag.Success</div>
+    }
+
+    <!-- Section B: 申請表單 -->
+    <form method="post" class="apply-form" enctype="multipart/form-data" onsubmit="return prepareSubmit()">
+        <div class="form-section-title">&#x1F4DD; 申請資料</div>
+
+        <div class="form-group">
+            <label>姓名 *</label>
+            <input type="text" name="name" required placeholder="您的真實姓名或暱稱" />
+        </div>
+
+        <div class="form-group">
+            <label>頭銜 * <small>例如：資深.NET工程師</small></label>
+            <input type="text" name="title" required placeholder="資深.NET工程師" />
+        </div>
+
+        <div class="form-group">
+            <label>自我介紹 * <small>(最多 500 字)</small></label>
+            <textarea name="bio" required maxlength="500" placeholder="請介紹您的教學經驗、專業背景和教學理念..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>最高學歷 *</label>
+            <input type="text" name="education" required placeholder="台灣大學資訊工程學系" />
+        </div>
+
+        <div class="form-group">
+            <label>教學年資 *</label>
+            <input type="number" name="experienceYears" required min="0" max="50" placeholder="3" />
+        </div>
+
+        <!-- 照片上傳 -->
+        <div class="form-group">
+            <label>&#x1F4F7; 個人照片上傳 *</label>
+            <div class="file-upload-area" id="photoUploadArea">
+                <div class="fu-icon">&#x1F4F7;</div>
+                <div class="fu-text">點擊或拖拽上傳個人照片</div>
+                <div class="fu-hint">支援 JPG、PNG 格式</div>
+                <input type="file" name="photo" accept="image/*" required id="photoInput" onchange="previewPhoto(this)" />
+            </div>
+            <img class="photo-preview" id="photoPreview" />
+        </div>
+
+        <!-- 學歷證書上傳 -->
+        <div class="form-group">
+            <label>&#x1F4C4; 學歷證書上傳 *</label>
+            <div class="file-upload-area" id="diplomaUploadArea">
+                <div class="fu-icon">&#x1F4C4;</div>
+                <div class="fu-text">點擊或拖拽上傳學歷證書</div>
+                <div class="fu-hint">支援 JPG、PNG、PDF 格式</div>
+                <input type="file" name="diploma" accept="image/*,.pdf" required id="diplomaInput" onchange="showDiplomaName(this)" />
+            </div>
+            <div class="diploma-filename" id="diplomaFilename"></div>
+        </div>
+
+        <!-- 專長技能 -->
+        <div class="form-group">
+            <label>專長技能 *</label>
+            <div class="skill-checkboxes" id="skillCheckboxes">
+                @foreach (var s in new[] { "C#", "ASP.NET Core", "SQL/資料庫", "JavaScript/前端", "Python", "Java", "Docker/DevOps", "AI/ML", "系統架構", "資安", "UI/UX設計", "英文", "日文" })
+                {
+                    <label onclick="toggleSkill(this)"><input type="checkbox" value="@s" /><span>@s</span></label>
+                }
+            </div>
+            <input type="hidden" name="skillsJson" id="skillsJsonInput" />
+        </div>
+
+        <div class="form-group">
+            <label>額外技能 <small>(選填)</small></label>
+            <input type="text" name="customSkills" placeholder="輸入其他專長，用逗號分隔" />
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>每小時費率 (NTD) *</label>
+                <input type="number" name="hourlyRate" required min="100" placeholder="800" />
+            </div>
+            <div class="form-group">
+                <label>體驗課費率 (NTD) *</label>
+                <input type="number" name="trialPrice" required min="0" placeholder="300" />
+            </div>
+        </div>
+
+        <div class="terms-check">
+            <input type="checkbox" id="agreeTerms" required />
+            <label for="agreeTerms">我同意平台服務條款，包含 15% 平台抽成費用</label>
+        </div>
+
+        <button type="submit" class="submit-btn">提交申請</button>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+    function toggleSkill(label) {
+        setTimeout(function() {
+            var cb = label.querySelector('input');
+            if (cb.checked) {
+                label.classList.add('checked');
+            } else {
+                label.classList.remove('checked');
+            }
+        }, 10);
+    }
+
+    function previewPhoto(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var preview = document.getElementById('photoPreview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function showDiplomaName(input) {
+        if (input.files && input.files[0]) {
+            var el = document.getElementById('diplomaFilename');
+            el.textContent = '&#x2705; ' + input.files[0].name;
+            el.style.display = 'block';
+        }
+    }
+
+    function prepareSubmit() {
+        var checked = [];
+        document.querySelectorAll('#skillCheckboxes input:checked').forEach(function(cb) {
+            checked.push(cb.value);
+        });
+        if (checked.length === 0) {
+            alert('請至少選擇一個專長技能');
+            return false;
+        }
+        document.getElementById('skillsJsonInput').value = JSON.stringify(checked);
+
+        if (!document.getElementById('agreeTerms').checked) {
+            alert('請同意平台服務條款');
+            return false;
+        }
+        return true;
+    }
+</script>
+}

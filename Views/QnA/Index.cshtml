@@ -1,0 +1,524 @@
+@{
+    ViewData["Title"] = "問答討論";
+}
+
+<style>
+    .qna-page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 4rem;
+    }
+
+    .qna-hero {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .qna-hero h1 {
+        font-size: 2rem;
+        color: var(--text);
+        margin-bottom: .5rem;
+    }
+
+    .qna-hero p {
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    /* Toolbar */
+    .qna-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .qna-tabs {
+        display: flex;
+        gap: 4px;
+        background: var(--bg2);
+        border-radius: 8px;
+        padding: 3px;
+    }
+
+    .qna-tab {
+        padding: 6px 16px;
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: .9rem;
+        transition: all .2s;
+    }
+
+    .qna-tab.active {
+        background: var(--accent);
+        color: #fff;
+    }
+
+    .qna-tab:hover:not(.active) {
+        color: var(--text);
+        background: var(--bg3);
+    }
+
+    .qna-category-select {
+        padding: 6px 12px;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 8px;
+        font-size: .9rem;
+    }
+
+    .btn-ask {
+        margin-left: auto;
+        padding: 8px 20px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: .95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity .2s;
+    }
+
+    .btn-ask:hover { opacity: .85; }
+
+    /* Question cards */
+    .qna-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .qna-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        cursor: pointer;
+        transition: border-color .2s, transform .1s;
+        text-decoration: none;
+        display: block;
+        color: inherit;
+    }
+
+    .qna-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-1px);
+    }
+
+    .qna-card-header {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        margin-bottom: .5rem;
+        flex-wrap: wrap;
+    }
+
+    .qna-solved-badge {
+        background: #2e7d32;
+        color: #fff;
+        font-size: .75rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    .qna-unsolved-badge {
+        background: var(--accent3);
+        color: #fff;
+        font-size: .75rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    .qna-chapter-tag {
+        background: var(--bg3);
+        color: var(--accent);
+        font-size: .75rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+
+    .qna-card-question {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: .6rem;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .qna-card-footer {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: .82rem;
+        color: var(--text-muted);
+    }
+
+    .qna-card-footer span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .qna-empty {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+    }
+
+    .qna-empty .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Pagination */
+    .qna-pagination {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 1.5rem;
+    }
+
+    .qna-page-btn {
+        padding: 6px 14px;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: .9rem;
+        transition: all .2s;
+    }
+
+    .qna-page-btn.active {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+    }
+
+    .qna-page-btn:hover:not(.active):not(:disabled) {
+        border-color: var(--accent);
+    }
+
+    .qna-page-btn:disabled {
+        opacity: .4;
+        cursor: not-allowed;
+    }
+
+    /* Ask Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.6);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        width: 90%;
+        max-width: 560px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-box h2 {
+        color: var(--text);
+        margin-bottom: 1.25rem;
+        font-size: 1.3rem;
+    }
+
+    .modal-field {
+        margin-bottom: 1rem;
+    }
+
+    .modal-field label {
+        display: block;
+        font-size: .85rem;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+    }
+
+    .modal-field input,
+    .modal-field textarea,
+    .modal-field select {
+        width: 100%;
+        padding: 10px 12px;
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 8px;
+        font-size: .95rem;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+
+    .modal-field textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: .75rem;
+        margin-top: 1.25rem;
+    }
+
+    .btn-cancel {
+        padding: 8px 20px;
+        background: var(--bg3);
+        color: var(--text-muted);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: .95rem;
+    }
+
+    .btn-submit {
+        padding: 8px 24px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+</style>
+
+<div class="qna-page">
+    <div class="qna-hero">
+        <h1>❓ 問答討論</h1>
+        <p>有問題就問，一起學習成長</p>
+    </div>
+
+    <div class="qna-toolbar">
+        <div class="qna-tabs">
+            <button class="qna-tab active" data-filter="all">全部</button>
+            <button class="qna-tab" data-filter="unsolved">未解決</button>
+            <button class="qna-tab" data-filter="solved">已解決</button>
+        </div>
+        <select class="qna-category-select" id="categoryFilter">
+            <option value="">所有分類</option>
+        </select>
+        <button class="btn-ask" onclick="openAskModal()">✏️ 提問</button>
+    </div>
+
+    <div class="qna-list" id="qnaList"></div>
+    <div class="qna-pagination" id="qnaPagination"></div>
+</div>
+
+<!-- Ask Modal -->
+<div class="modal-overlay" id="askModal">
+    <div class="modal-box">
+        <h2>✏️ 提出問題</h2>
+        <div class="modal-field">
+            <label>暱稱（選填）</label>
+            <input type="text" id="askNickname" placeholder="匿名" maxlength="20" />
+        </div>
+        <div class="modal-field">
+            <label>相關章節（選填）</label>
+            <select id="askChapter">
+                <option value="">不指定</option>
+            </select>
+        </div>
+        <div class="modal-field">
+            <label>問題內容 *</label>
+            <textarea id="askQuestion" placeholder="描述你的問題..." maxlength="2000"></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeAskModal()">取消</button>
+            <button class="btn-submit" id="btnSubmitAsk" onclick="submitAsk()">送出</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentPage = 1;
+    let currentFilter = 'all';
+    let currentCategory = '';
+
+    // Tab click
+    document.querySelectorAll('.qna-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.qna-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentFilter = tab.dataset.filter;
+            currentPage = 1;
+            loadQuestions();
+        });
+    });
+
+    document.getElementById('categoryFilter').addEventListener('change', e => {
+        currentCategory = e.target.value;
+        currentPage = 1;
+        loadQuestions();
+    });
+
+    async function loadQuestions() {
+        const params = new URLSearchParams({ page: currentPage });
+        if (currentCategory) params.set('category', currentCategory);
+        if (currentFilter === 'unsolved') params.set('unsolved', 'true');
+
+        const res = await fetch('/QnA/List?' + params);
+        const data = await res.json();
+
+        const list = document.getElementById('qnaList');
+        let filteredQuestions = data.questions;
+
+        // Client-side filter for "solved" tab
+        if (currentFilter === 'solved') {
+            filteredQuestions = filteredQuestions.filter(q => q.isSolved);
+        }
+
+        if (filteredQuestions.length === 0) {
+            list.innerHTML = '<div class="qna-empty"><div class="empty-icon">🤔</div><p>還沒有問題，來提出第一個問題吧！</p></div>';
+        } else {
+            list.innerHTML = filteredQuestions.map(q => `
+                <a href="/QnA/Detail/${q.id}" class="qna-card">
+                    <div class="qna-card-header">
+                        ${q.isSolved
+                            ? '<span class="qna-solved-badge">✅ 已解決</span>'
+                            : '<span class="qna-unsolved-badge">待解決</span>'}
+                        ${q.chapterTitle ? `<span class="qna-chapter-tag">${escHtml(q.chapterTitle)}</span>` : ''}
+                    </div>
+                    <div class="qna-card-question">${escHtml(q.question)}</div>
+                    <div class="qna-card-footer">
+                        <span>👤 ${escHtml(q.nickname)}</span>
+                        <span>🕐 ${q.timeAgo}</span>
+                        <span>👍 ${q.upvotes}</span>
+                        <span>💬 ${q.answerCount} 個回答</span>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        // Pagination
+        renderPagination(data.totalPages, data.currentPage);
+
+        // Collect categories
+        collectCategories(data.questions);
+    }
+
+    function renderPagination(totalPages, current) {
+        const div = document.getElementById('qnaPagination');
+        if (totalPages <= 1) { div.innerHTML = ''; return; }
+        let html = '';
+        html += `<button class="qna-page-btn" ${current <= 1 ? 'disabled' : ''} onclick="goPage(${current - 1})">‹</button>`;
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="qna-page-btn ${i === current ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+        }
+        html += `<button class="qna-page-btn" ${current >= totalPages ? 'disabled' : ''} onclick="goPage(${current + 1})">›</button>`;
+        div.innerHTML = html;
+    }
+
+    function goPage(p) {
+        currentPage = p;
+        loadQuestions();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function collectCategories(questions) {
+        const sel = document.getElementById('categoryFilter');
+        const existing = new Set([...sel.options].map(o => o.value));
+        questions.forEach(q => {
+            if (q.chapterTitle && !existing.has(q.chapterTitle)) {
+                existing.add(q.chapterTitle);
+                const opt = document.createElement('option');
+                opt.value = q.chapterTitle;
+                opt.textContent = q.chapterTitle;
+                sel.appendChild(opt);
+            }
+        });
+    }
+
+    // Modal
+    function openAskModal() {
+        document.getElementById('askModal').classList.add('open');
+        loadChaptersForModal();
+    }
+
+    function closeAskModal() {
+        document.getElementById('askModal').classList.remove('open');
+    }
+
+    async function loadChaptersForModal() {
+        try {
+            const res = await fetch('/Home/ChapterList');
+            if (!res.ok) return;
+            const chapters = await res.json();
+            const sel = document.getElementById('askChapter');
+            if (sel.options.length <= 1) {
+                chapters.forEach(ch => {
+                    const opt = document.createElement('option');
+                    opt.value = ch.id;
+                    opt.textContent = ch.title;
+                    sel.appendChild(opt);
+                });
+            }
+        } catch {}
+    }
+
+    async function submitAsk() {
+        const btn = document.getElementById('btnSubmitAsk');
+        const question = document.getElementById('askQuestion').value.trim();
+        if (!question) { alert('請輸入問題內容'); return; }
+
+        btn.disabled = true;
+        const body = {
+            nickname: document.getElementById('askNickname').value.trim() || null,
+            chapterId: document.getElementById('askChapter').value ? parseInt(document.getElementById('askChapter').value) : null,
+            question
+        };
+
+        try {
+            const res = await fetch('/QnA/Ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (data.success) {
+                closeAskModal();
+                document.getElementById('askQuestion').value = '';
+                window.location.href = '/QnA/Detail/' + data.id;
+            } else {
+                alert(data.error || '發生錯誤');
+            }
+        } catch {
+            alert('網路錯誤');
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    function escHtml(s) {
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    // Init
+    loadQuestions();
+</script>

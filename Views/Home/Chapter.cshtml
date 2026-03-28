@@ -1,0 +1,243 @@
+@model DotNetLearning.Models.Chapter
+@{
+    ViewData["Title"] = Model.Title;
+    var allChapters = ViewBag.AllChapters as List<DotNetLearning.Models.Chapter> ?? new();
+    var completed = ViewBag.CompletedChapters as List<int> ?? new();
+    int bestScore = ViewBag.BestScore ?? -1;
+    var categories = new Dictionary<string, string>
+    {
+        ["csharp"]="C# 基礎", ["aspnet"]="ASP.NET Core", ["database"]="資料庫",
+        ["frontend"]="前端基礎", ["git"]="Git", ["server"]="Server",
+        ["patterns"]="設計模式", ["infrastructure"]="快取&效能",
+        ["network"]="網路", ["security"]="資安", ["docker"]="Docker",
+        ["ai"]="AI 應用", ["aimodel"]="AI 模型", ["claudecode"]="Claude Code",
+        ["project"]="專案實戰"
+    };
+    var sameCategory = allChapters.Where(c => c.Category == Model.Category).OrderBy(c => c.Order).ToList();
+    var currentIdx = sameCategory.FindIndex(c => c.Id == Model.Id);
+    var prevCh = currentIdx > 0 ? sameCategory[currentIdx - 1] : null;
+    var nextCh = currentIdx < sameCategory.Count - 1 ? sameCategory[currentIdx + 1] : null;
+}
+
+<div class="chapter-layout">
+    <!-- 手機版 sidebar overlay -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <!-- 手機版 sidebar toggle 按鈕 -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰ 目錄</button>
+    <!-- ── 左側邊欄 ── -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="back-home">← 回首頁</a>
+            <div class="sidebar-search">
+                <input id="sidebarSearch" type="text" placeholder="搜尋..." />
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            @foreach (var cat in categories)
+            {
+                var catChapters = allChapters.Where(c => c.Category == cat.Key).OrderBy(c => c.Order).ToList();
+                if (!catChapters.Any()) continue;
+                var isActive = catChapters.Any(c => c.Id == Model.Id);
+                <div class="nav-group @(isActive ? "open" : "")">
+                    <button class="nav-group-toggle" onclick="toggleGroup(this)">
+                        <span>@cat.Value</span>
+                        <span class="toggle-icon">▼</span>
+                    </button>
+                    <ul class="nav-group-items">
+                        @foreach (var ch in catChapters)
+                        {
+                            var isDone = completed.Contains(ch.Id);
+                            var isCurrent = ch.Id == Model.Id;
+                            <li>
+                                <a href="/Home/Chapter/@ch.Slug"
+                                   class="nav-item @(isCurrent ? "active" : "") @(isDone ? "done" : "")">
+                                    <span class="nav-check">@(isDone ? "✅" : "○")</span>
+                                    <span class="nav-title">@ch.Title</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+        </nav>
+    </aside>
+
+    <!-- ── 主內容區 ── -->
+    <main class="chapter-main">
+        <!-- 章節標題列 -->
+        <div class="chapter-toolbar">
+            <div class="chapter-meta">
+                <span class="chapter-cat">@(categories.GetValueOrDefault(Model.Category, Model.Category))</span>
+                <span class="chapter-level level-@Model.Level">
+                    @(Model.Level switch { "beginner"=>"初學","intermediate"=>"中級","advanced"=>"進階",_=>Model.Level })
+                </span>
+                @if (bestScore >= 0)
+                {
+                    <span class="best-score @(bestScore >= 60 ? "passed" : "failed")">
+                        最佳: @bestScore%
+                    </span>
+                }
+            </div>
+            <div class="toolbar-actions">
+                <button onclick="openIdeaForm(@Model.Id)" class="btn-tool" title="分享你的想法或筆記">💡 分享想法</button>
+                <button onclick="openPractice()" class="btn-tool" title="練習打範例程式碼">⌨️ 練習</button>
+                <button onclick="shareChapter()" class="btn-tool" title="分享此章節連結">🔗 分享</button>
+                @if ((bool)ViewBag.HasQuiz)
+                {
+                    <button onclick="openQuiz()" class="btn-tool btn-quiz">🎯 測驗 (@ViewBag.QuestionCount 題)</button>
+                }
+                <button id="markDoneBtn" onclick="markComplete(@Model.Id)" class="btn-tool btn-done
+                    @(completed.Contains(Model.Id) ? "is-done" : "")">
+                    @(completed.Contains(Model.Id) ? "✅ 已完成" : "○ 標記完成")
+                </button>
+            </div>
+        </div>
+
+        <!-- Markdown 內容 -->
+        <article class="chapter-content">
+            @Html.Raw(ViewBag.ContentHtml)
+        </article>
+
+        <!-- 想法分享區 -->
+        <div class="ideas-section">
+            <h3 class="ideas-title">💡 大家的想法 · <span id="ideaCount">0</span> 則</h3>
+            <div id="ideaList" class="idea-list">
+                <div class="idea-loading">載入中...</div>
+            </div>
+        </div>
+
+        <!-- 上下章導航 -->
+        <div class="chapter-nav-footer">
+            @if (prevCh != null)
+            {
+                <a href="/Home/Chapter/@prevCh.Slug" class="nav-prev">← @prevCh.Title</a>
+            }
+            else { <span></span> }
+            @if (nextCh != null)
+            {
+                <a href="/Home/Chapter/@nextCh.Slug" class="nav-next">@nextCh.Title →</a>
+            }
+        </div>
+    </main>
+</div>
+
+<!-- ── 測驗 Modal ── -->
+<div id="quizModal" class="modal hidden">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>🎯 @Model.Title — 測驗</h2>
+            <button onclick="closeQuiz()" class="modal-close">✕</button>
+        </div>
+        <div id="quizContent">
+            <div class="quiz-loading">載入題目中...</div>
+        </div>
+    </div>
+</div>
+<div id="modalOverlay" class="modal-overlay hidden" onclick="closeQuiz()"></div>
+
+<!-- 積分通知 Toast -->
+<div id="scoreToast" class="score-toast hidden">
+    <div class="toast-content">
+        <span class="toast-icon">🎉</span>
+        <span class="toast-text"></span>
+    </div>
+</div>
+
+<!-- ── 練習打字 Modal ── -->
+<div id="practiceModal" class="modal hidden">
+    <div class="modal-box" style="max-width:900px;">
+        <div class="modal-header">
+            <h2>⌨️ 程式碼練習</h2>
+            <button onclick="closePractice()" class="modal-close">✕</button>
+        </div>
+        <div id="practiceContent">
+            <p style="color:var(--text-muted);margin-bottom:1rem;">照著範例打一遍，加深記憶！<code>// TODO</code> 的地方需要你填寫。</p>
+            <div style="display:flex;gap:1rem;margin-bottom:1rem;">
+                <div style="flex:1;">
+                    <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:.3rem;">📖 範例（參考）</div>
+                    <pre id="practiceRef" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;font-size:.82rem;max-height:400px;overflow:auto;white-space:pre-wrap;font-family:var(--font-mono);color:var(--text-muted);"></pre>
+                </div>
+                <div style="flex:1;">
+                    <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:.3rem;">✏️ 你的輸入</div>
+                    <textarea id="practiceInput" style="width:100%;min-height:400px;background:var(--bg);border:1px solid var(--accent);border-radius:8px;padding:1rem;font-size:.82rem;font-family:var(--font-mono);color:var(--text);resize:vertical;" placeholder="在這裡打程式碼..."></textarea>
+                </div>
+            </div>
+            <div style="display:flex;gap:.8rem;justify-content:flex-end;">
+                <button onclick="savePractice('txt')" class="btn-tool">💾 存 TXT</button>
+                <button onclick="savePractice('html')" class="btn-tool">📄 存 HTML</button>
+                <button onclick="closePractice()" class="btn-tool">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const CHAPTER_ID = @Model.Id;
+const SESSION_ID = "@ViewBag.SessionId";
+
+// 分享章節連結
+function shareChapter() {
+    var url = window.location.href;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(function() { alert('✅ 連結已複製！'); });
+    } else {
+        prompt('複製此連結分享：', url);
+    }
+}
+
+// 練習打字功能
+function openPractice() {
+    // 從頁面內容抓所有 code block
+    const codeBlocks = document.querySelectorAll('.chapter-content pre code');
+    let code = '';
+    codeBlocks.forEach((block, i) => {
+        if (i > 0) code += '\n\n// ═══ 範例 ' + (i+1) + ' ═══\n\n';
+        code += block.textContent.trim();
+    });
+    if (!code) {
+        code = '// 此章節沒有程式碼範例\n// 可以自由練習打字！';
+    }
+    document.getElementById('practiceRef').textContent = code;
+    // 預設填入 TODO
+    const todoVersion = code.replace(/\/\/.*/g, '// TODO: 請填寫').replace(/[^\n]+(?=\n|$)/g, line => {
+        if (line.trim().startsWith('//')) return line;
+        if (line.trim() === '' || line.trim() === '{' || line.trim() === '}') return line;
+        return '// TODO: ' + line.trim().substring(0, 20) + '...';
+    });
+    document.getElementById('practiceInput').value = '';
+    document.getElementById('practiceModal').classList.remove('hidden');
+    document.getElementById('modalOverlay').classList.remove('hidden');
+}
+
+function closePractice() {
+    document.getElementById('practiceModal').classList.add('hidden');
+    document.getElementById('modalOverlay').classList.add('hidden');
+}
+
+function savePractice(format) {
+    const content = document.getElementById('practiceInput').value;
+    const title = '@Model.Title'.replace(/[<>]/g, '');
+    if (format === 'txt') {
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        downloadBlob(blob, title + '_練習.txt');
+    } else if (format === 'html') {
+        const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + title + ' 練習</title><style>body{font-family:monospace;background:#1a1b1f;color:#e4e2de;padding:2rem;white-space:pre-wrap;}</style></head><body><h1>' + title + ' — 程式碼練習</h1><pre>' + content.replace(/</g,'&lt;') + '</pre><p style="color:#888;margin-top:2rem;">練習時間：' + new Date().toLocaleString() + '</p></body></html>';
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        downloadBlob(blob, title + '_練習.html');
+    }
+}
+
+function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+// 載入此章節的想法
+loadChapterIdeas(CHAPTER_ID);
+</script>
+<script src="~/js/quiz.js" asp-append-version="true"></script>
+}

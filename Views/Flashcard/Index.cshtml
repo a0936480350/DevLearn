@@ -1,0 +1,591 @@
+@{
+    ViewData["Title"] = "暗記卡片";
+}
+
+<style>
+    .flashcard-page {
+        max-width: 1100px;
+        margin: 80px auto 40px;
+        padding: 0 20px;
+    }
+    .fc-hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .fc-hero h1 {
+        font-size: 1.8rem;
+        color: var(--text-primary, #e0e0e0);
+        margin: 0;
+    }
+    .fc-hero p {
+        color: var(--text-secondary, #aaa);
+        margin: 4px 0 0;
+        font-size: 0.95rem;
+    }
+    .fc-hero-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .btn-fc {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.92rem;
+        cursor: pointer;
+        font-weight: 600;
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-fc:hover { transform: translateY(-2px); }
+    .btn-review {
+        background: linear-gradient(135deg, #00b894, #00cec9);
+        color: #fff;
+    }
+    .btn-manage {
+        background: var(--border, #2a2a3e);
+        color: var(--text-primary, #e0e0e0);
+    }
+    .btn-manage.active, .btn-review.active {
+        box-shadow: 0 0 0 2px #a78bfa;
+    }
+    .btn-add-card {
+        background: linear-gradient(135deg, #6c5ce7, #a855f7);
+        color: #fff;
+    }
+
+    /* Stats */
+    .fc-stats {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+    .fc-stat {
+        background: var(--card-bg, #1e1e2e);
+        border: 1px solid var(--border, #2a2a3e);
+        border-radius: 12px;
+        padding: 16px 24px;
+        text-align: center;
+        min-width: 120px;
+    }
+    .fc-stat-val {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text-primary, #e0e0e0);
+    }
+    .fc-stat-label {
+        font-size: 0.82rem;
+        color: var(--text-secondary, #888);
+        margin-top: 4px;
+    }
+
+    /* Manage grid */
+    .fc-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 16px;
+    }
+    .fc-card-item {
+        background: var(--card-bg, #1e1e2e);
+        border: 1px solid var(--border, #2a2a3e);
+        border-radius: 14px;
+        padding: 18px;
+        transition: transform 0.2s;
+    }
+    .fc-card-item:hover { transform: translateY(-2px); }
+    .fc-card-front {
+        font-weight: 600;
+        color: var(--text-primary, #e0e0e0);
+        margin-bottom: 8px;
+        font-size: 1rem;
+    }
+    .fc-card-back {
+        color: var(--text-secondary, #aaa);
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+        padding: 10px;
+        background: rgba(255,255,255,0.03);
+        border-radius: 8px;
+        white-space: pre-wrap;
+    }
+    .fc-card-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        color: var(--text-secondary, #666);
+    }
+    .fc-category-badge {
+        background: rgba(108, 92, 231, 0.2);
+        color: #a78bfa;
+        padding: 2px 10px;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+    .btn-delete-card {
+        background: rgba(255, 71, 87, 0.15);
+        color: #ff6b81;
+        border: none;
+        padding: 4px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+    .btn-delete-card:hover { background: rgba(255, 71, 87, 0.3); }
+
+    /* Review mode */
+    .review-area {
+        display: none;
+        max-width: 520px;
+        margin: 0 auto;
+        text-align: center;
+    }
+    .review-progress {
+        color: var(--text-secondary, #888);
+        margin-bottom: 16px;
+        font-size: 0.9rem;
+    }
+    .flip-container {
+        perspective: 800px;
+        width: 100%;
+        height: 300px;
+        cursor: pointer;
+        margin-bottom: 24px;
+    }
+    .flip-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+    }
+    .flip-inner.flipped { transform: rotateY(180deg); }
+    .flip-front, .flip-back {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+        border-radius: 18px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 30px;
+        font-size: 1.15rem;
+        line-height: 1.7;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+    .flip-front {
+        background: linear-gradient(135deg, #1e1e2e, #2a2a3e);
+        border: 1px solid var(--border, #2a2a3e);
+        color: var(--text-primary, #e0e0e0);
+        font-weight: 600;
+    }
+    .flip-back {
+        background: linear-gradient(135deg, #0d3349, #1a1a2e);
+        border: 1px solid #1a5276;
+        color: #7dd3fc;
+        transform: rotateY(180deg);
+    }
+    .flip-hint {
+        position: absolute;
+        bottom: 14px;
+        font-size: 0.78rem;
+        color: var(--text-secondary, #666);
+    }
+    .review-buttons {
+        display: none;
+        gap: 16px;
+        justify-content: center;
+    }
+    .review-buttons.show { display: flex; }
+    .btn-correct, .btn-wrong {
+        padding: 14px 36px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.15s;
+    }
+    .btn-correct:hover, .btn-wrong:hover { transform: scale(1.05); }
+    .btn-correct {
+        background: linear-gradient(135deg, #00b894, #00cec9);
+        color: #fff;
+    }
+    .btn-wrong {
+        background: linear-gradient(135deg, #e17055, #d63031);
+        color: #fff;
+    }
+    .review-done {
+        display: none;
+        text-align: center;
+        padding: 40px;
+    }
+    .review-done .done-icon { font-size: 3rem; margin-bottom: 16px; }
+    .review-done p { color: var(--text-secondary, #aaa); font-size: 1.05rem; }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-secondary, #888);
+    }
+    .empty-state .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 16px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+        background: var(--card-bg, #1e1e2e);
+        border: 1px solid var(--border, #2a2a3e);
+        border-radius: 16px;
+        width: 90%;
+        max-width: 500px;
+        padding: 28px;
+    }
+    .modal-box h2 {
+        margin: 0 0 20px;
+        color: var(--text-primary, #e0e0e0);
+        font-size: 1.3rem;
+    }
+    .form-group {
+        margin-bottom: 16px;
+    }
+    .form-group label {
+        display: block;
+        color: var(--text-secondary, #aaa);
+        font-size: 0.88rem;
+        margin-bottom: 6px;
+        font-weight: 500;
+    }
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        background: var(--input-bg, #12121c);
+        border: 1px solid var(--border, #2a2a3e);
+        color: var(--text-primary, #e0e0e0);
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 0.92rem;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+    .form-group textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+    .btn-cancel {
+        background: var(--border, #2a2a3e);
+        color: var(--text-secondary, #aaa);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+    .btn-save {
+        background: linear-gradient(135deg, #6c5ce7, #a855f7);
+        color: #fff;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+</style>
+
+<div class="flashcard-page">
+    <div class="fc-hero">
+        <div>
+            <h1>🧠 暗記卡片</h1>
+            <p>用間隔重複法高效記憶重要觀念</p>
+        </div>
+        <div class="fc-hero-actions">
+            <button class="btn-fc btn-manage active" id="btnManage" onclick="showManage()">📋 管理</button>
+            <button class="btn-fc btn-review" id="btnReview" onclick="startReview()">🔄 複習</button>
+            <button class="btn-fc btn-add-card" onclick="openCreateModal()">＋ 新增卡片</button>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="fc-stats" id="fcStats">
+        <div class="fc-stat">
+            <div class="fc-stat-val" id="statTotal">0</div>
+            <div class="fc-stat-label">卡片總數</div>
+        </div>
+        <div class="fc-stat">
+            <div class="fc-stat-val" id="statDue">0</div>
+            <div class="fc-stat-label">待複習</div>
+        </div>
+        <div class="fc-stat">
+            <div class="fc-stat-val" id="statMastery">0%</div>
+            <div class="fc-stat-label">掌握率</div>
+        </div>
+    </div>
+
+    <!-- Manage Mode -->
+    <div id="manageArea">
+        <div class="fc-grid" id="cardGrid"></div>
+        <div class="empty-state" id="emptyState" style="display:none">
+            <div class="empty-icon">🧠</div>
+            <p>還沒有卡片，點右上角新增第一張暗記卡片吧！</p>
+        </div>
+    </div>
+
+    <!-- Review Mode -->
+    <div class="review-area" id="reviewArea">
+        <div class="review-progress" id="reviewProgress"></div>
+        <div class="flip-container" onclick="flipCard()">
+            <div class="flip-inner" id="flipInner">
+                <div class="flip-front">
+                    <div id="cardFront"></div>
+                    <div class="flip-hint">點擊翻面</div>
+                </div>
+                <div class="flip-back">
+                    <div id="cardBack"></div>
+                </div>
+            </div>
+        </div>
+        <div class="review-buttons" id="reviewButtons">
+            <button class="btn-wrong" onclick="markReview(false)">忘了 ❌</button>
+            <button class="btn-correct" onclick="markReview(true)">記得 ✅</button>
+        </div>
+        <div class="review-done" id="reviewDone">
+            <div class="done-icon">🎉</div>
+            <p>太棒了！所有待複習的卡片都完成了！</p>
+            <button class="btn-fc btn-manage" onclick="showManage()" style="margin-top:16px">返回管理</button>
+        </div>
+    </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal-overlay" id="createModal">
+    <div class="modal-box">
+        <h2>🧠 新增暗記卡片</h2>
+        <div class="form-group">
+            <label>正面（問題）</label>
+            <textarea id="cardFrontInput" placeholder="例：什麼是 SOLID 原則中的 S？"></textarea>
+        </div>
+        <div class="form-group">
+            <label>背面（答案）</label>
+            <textarea id="cardBackInput" placeholder="例：Single Responsibility Principle — 單一職責原則"></textarea>
+        </div>
+        <div class="form-group">
+            <label>分類（選填）</label>
+            <input type="text" id="cardCategory" placeholder="例：設計模式、C# 語法、ASP.NET" />
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeCreateModal()">取消</button>
+            <button class="btn-save" onclick="createCard()">建立</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let allCards = [];
+    let reviewQueue = [];
+    let reviewIndex = 0;
+    let isFlipped = false;
+
+    function loadCards() {
+        fetch('/Flashcard/MyCards')
+            .then(r => r.json())
+            .then(data => {
+                allCards = data;
+                updateStats();
+                renderManage();
+            });
+    }
+
+    function updateStats() {
+        const now = new Date();
+        const due = allCards.filter(c => new Date(c.nextReview) <= now).length;
+        const totalReviews = allCards.reduce((s, c) => s + c.reviewCount, 0);
+        const totalCorrect = allCards.reduce((s, c) => s + c.correctCount, 0);
+        const mastery = totalReviews > 0 ? Math.round(totalCorrect * 100 / totalReviews) : 0;
+
+        document.getElementById('statTotal').textContent = allCards.length;
+        document.getElementById('statDue').textContent = due;
+        document.getElementById('statMastery').textContent = mastery + '%';
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function renderManage() {
+        const grid = document.getElementById('cardGrid');
+        const empty = document.getElementById('emptyState');
+
+        if (!allCards.length) {
+            grid.innerHTML = '';
+            empty.style.display = 'block';
+            return;
+        }
+
+        empty.style.display = 'none';
+        grid.innerHTML = allCards.map(c => {
+            const catHtml = c.category ? `<span class="fc-category-badge">${escapeHtml(c.category)}</span>` : '';
+            return `
+                <div class="fc-card-item">
+                    <div class="fc-card-front">${escapeHtml(c.front)}</div>
+                    <div class="fc-card-back">${escapeHtml(c.back)}</div>
+                    <div class="fc-card-meta">
+                        <div>${catHtml} <span>複習 ${c.reviewCount} 次</span></div>
+                        <button class="btn-delete-card" onclick="deleteCard(${c.id})">🗑 刪除</button>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    function showManage() {
+        document.getElementById('manageArea').style.display = 'block';
+        document.getElementById('reviewArea').style.display = 'none';
+        document.getElementById('btnManage').classList.add('active');
+        document.getElementById('btnReview').classList.remove('active');
+        loadCards();
+    }
+
+    function startReview() {
+        document.getElementById('btnManage').classList.remove('active');
+        document.getElementById('btnReview').classList.add('active');
+        document.getElementById('manageArea').style.display = 'none';
+        document.getElementById('reviewArea').style.display = 'block';
+        document.getElementById('reviewDone').style.display = 'none';
+        document.getElementById('reviewButtons').classList.remove('show');
+
+        fetch('/Flashcard/Review?count=10')
+            .then(r => r.json())
+            .then(data => {
+                reviewQueue = data;
+                reviewIndex = 0;
+                if (reviewQueue.length === 0) {
+                    document.getElementById('flipInner').parentElement.style.display = 'none';
+                    document.getElementById('reviewProgress').textContent = '';
+                    document.getElementById('reviewDone').style.display = 'block';
+                    document.getElementById('reviewDone').querySelector('p').textContent = '目前沒有需要複習的卡片！';
+                } else {
+                    document.getElementById('flipInner').parentElement.style.display = 'block';
+                    showReviewCard();
+                }
+            });
+    }
+
+    function showReviewCard() {
+        if (reviewIndex >= reviewQueue.length) {
+            document.getElementById('flipInner').parentElement.style.display = 'none';
+            document.getElementById('reviewButtons').classList.remove('show');
+            document.getElementById('reviewDone').style.display = 'block';
+            return;
+        }
+
+        const card = reviewQueue[reviewIndex];
+        document.getElementById('reviewProgress').textContent = `第 ${reviewIndex + 1} / ${reviewQueue.length} 張`;
+        document.getElementById('cardFront').textContent = card.front;
+        document.getElementById('cardBack').textContent = card.back;
+
+        isFlipped = false;
+        document.getElementById('flipInner').classList.remove('flipped');
+        document.getElementById('reviewButtons').classList.remove('show');
+    }
+
+    function flipCard() {
+        isFlipped = !isFlipped;
+        document.getElementById('flipInner').classList.toggle('flipped', isFlipped);
+        if (isFlipped) {
+            document.getElementById('reviewButtons').classList.add('show');
+        }
+    }
+
+    function markReview(correct) {
+        const card = reviewQueue[reviewIndex];
+        fetch('/Flashcard/MarkReview', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: card.id, correct })
+        })
+        .then(r => r.json())
+        .then(() => {
+            reviewIndex++;
+            showReviewCard();
+        });
+    }
+
+    function openCreateModal() {
+        document.getElementById('createModal').classList.add('active');
+    }
+
+    function closeCreateModal() {
+        document.getElementById('createModal').classList.remove('active');
+        document.getElementById('cardFrontInput').value = '';
+        document.getElementById('cardBackInput').value = '';
+        document.getElementById('cardCategory').value = '';
+    }
+
+    function createCard() {
+        const front = document.getElementById('cardFrontInput').value.trim();
+        const back = document.getElementById('cardBackInput').value.trim();
+        const category = document.getElementById('cardCategory').value.trim();
+
+        if (!front || !back) {
+            alert('請填入正面和背面內容');
+            return;
+        }
+
+        fetch('/Flashcard/Create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ front, back, category })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.ok) {
+                closeCreateModal();
+                loadCards();
+            }
+        });
+    }
+
+    function deleteCard(id) {
+        if (!confirm('確定要刪除這張卡片嗎？')) return;
+        fetch('/Flashcard/Delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.ok) loadCards();
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCards);
+
+    document.getElementById('createModal').addEventListener('click', function(e) {
+        if (e.target === this) closeCreateModal();
+    });
+</script>

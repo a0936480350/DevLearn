@@ -1,0 +1,10 @@
+publish/
+publish-azure/
+deploy.zip
+*.db
+azure-pub/
+azure-publish/
+azure-app.zip
+azure-deploy.zip
+bin/
+obj/

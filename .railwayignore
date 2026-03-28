@@ -1,0 +1,8 @@
+publish/
+publish-azure/
+deploy.zip
+*.db
+bin/
+obj/
+.git/
+wwwroot/lib/

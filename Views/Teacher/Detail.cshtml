@@ -1,0 +1,800 @@
+@using DotNetLearning.Models
+@{
+    ViewData["Title"] = "老師詳情";
+    var teacher = (Teacher)ViewBag.Teacher;
+    var slots = (List<TeacherSlot>)ViewBag.Slots;
+    var reviews = (List<Review>)ViewBag.Reviews;
+    var skills = System.Text.Json.JsonSerializer.Deserialize<List<string>>(teacher.SkillsJson) ?? new List<string>();
+    var dayNames = new[] { "週日", "週一", "週二", "週三", "週四", "週五", "週六" };
+    var teacherAnonymousId = (string)(ViewBag.TeacherAnonymousId ?? "");
+}
+
+<style>
+    .td-page { max-width: 960px; margin: 0 auto; padding: 32px 20px; }
+    .td-back { color: var(--accent); text-decoration: none; font-size: 14px; margin-bottom: 20px; display: inline-block; }
+    .td-back:hover { text-decoration: underline; }
+
+    .td-hero { display: flex; gap: 32px; margin-bottom: 32px; flex-wrap: wrap; }
+    .td-avatar {
+        width: 160px; height: 160px; border-radius: 20px; background: var(--bg4);
+        display: flex; align-items: center; justify-content: center; font-size: 64px;
+        border: 3px solid var(--accent); overflow: hidden; flex-shrink: 0;
+    }
+    .td-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .td-main { flex: 1; min-width: 280px; }
+    .td-main h1 { font-size: 26px; font-weight: 800; margin-bottom: 4px; }
+    .td-main .td-title { font-size: 16px; color: var(--text-muted); margin-bottom: 12px; }
+    .td-rating { display: flex; align-items: center; gap: 8px; font-size: 16px; margin-bottom: 12px; }
+    .td-rating .stars { color: #F9A825; font-size: 20px; }
+    .td-stats { display: flex; gap: 20px; font-size: 14px; color: var(--text-muted); margin-bottom: 16px; }
+    .td-stats strong { color: var(--text); }
+    .td-skills { display: flex; gap: 8px; flex-wrap: wrap; }
+    .td-skill { padding: 5px 14px; background: rgba(34,153,221,0.12); border: 1px solid rgba(34,153,221,0.3); border-radius: 16px; font-size: 13px; color: var(--accent); }
+
+    .td-section { margin-bottom: 32px; }
+    .td-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+
+    .td-bio { font-size: 15px; line-height: 1.8; color: var(--text); white-space: pre-wrap; }
+
+    .td-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .td-info-item { background: var(--bg3); border-radius: 12px; padding: 16px; }
+    .td-info-item .label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+    .td-info-item .value { font-size: 18px; font-weight: 700; }
+
+    .td-pricing { display: flex; gap: 20px; flex-wrap: wrap; }
+    .td-price-card {
+        flex: 1; min-width: 200px; background: var(--bg3); border: 2px solid var(--border);
+        border-radius: 16px; padding: 24px; text-align: center;
+    }
+    .td-price-card.featured { border-color: var(--accent); background: rgba(34,153,221,0.08); }
+    .td-price-card .price-label { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; }
+    .td-price-card .price-value { font-size: 32px; font-weight: 800; color: var(--accent); }
+    .td-price-card .price-unit { font-size: 13px; color: var(--text-muted); }
+
+    .td-schedule { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+    .td-slot {
+        background: var(--bg3); border: 1px solid var(--border); border-radius: 10px;
+        padding: 10px 14px; text-align: center; font-size: 13px;
+    }
+    .td-slot .day { font-weight: 600; color: var(--accent); margin-bottom: 4px; }
+    .td-slot .time { color: var(--text-muted); }
+
+    /* Calendar Grid Styles */
+    .schedule-grid { width:100%; border-collapse:collapse; font-size:12px; }
+    .schedule-grid th { padding:8px 4px; background:rgba(255,255,255,0.05); color:#8b949e; font-weight:600; text-align:center; position:sticky; top:0; }
+    .schedule-grid td { padding:4px; text-align:center; cursor:pointer; border:1px solid rgba(255,255,255,0.06); min-width:60px; height:28px; transition:all 0.15s; }
+    .schedule-grid td.available { background:rgba(56,189,114,0.25); color:#38bd72; }
+    .schedule-grid td.booked { background:rgba(249,168,37,0.25); color:#F9A825; cursor:not-allowed; }
+    .schedule-grid td:hover:not(.booked) { background:rgba(34,153,221,0.2); }
+    .schedule-grid td.time-label { cursor:default; font-weight:600; color:#8b949e; background:rgba(255,255,255,0.03); min-width:55px; }
+    .schedule-toggle { cursor:pointer; color:#58a6ff; font-size:13px; margin-bottom:8px; display:inline-block; }
+
+    .book-btn {
+        display: block; width: 100%; padding: 14px; background: var(--accent); color: #fff;
+        border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer;
+        margin-top: 16px; font-family: inherit; transition: all 0.2s;
+    }
+    .book-btn:hover { background: var(--accent2); }
+
+    /* Booking Modal */
+    .modal-overlay {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+        background: var(--bg2); border: 1px solid var(--border); border-radius: 16px;
+        padding: 32px; width: 90%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-box h3 { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+    .modal-box label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 4px; margin-top: 12px; }
+    .modal-box input, .modal-box textarea, .modal-box select {
+        width: 100%; padding: 10px 14px; background: var(--bg3); border: 1px solid var(--border);
+        border-radius: 8px; color: var(--text); font-size: 14px; font-family: inherit;
+    }
+    .modal-box input:focus, .modal-box textarea:focus, .modal-box select:focus { outline: none; border-color: var(--accent); }
+    .modal-box textarea { min-height: 80px; resize: vertical; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 20px; }
+    .modal-actions button { flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .modal-actions .cancel-btn { background: var(--bg4); color: var(--text); border: 1px solid var(--border); }
+    .modal-actions .confirm-btn { background: var(--accent); color: #fff; border: none; }
+
+    /* Reviews */
+    .review-item { background: var(--bg3); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+    .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .review-author { font-weight: 600; }
+    .review-date { font-size: 12px; color: var(--text-muted); }
+    .review-stars { color: #F9A825; margin-bottom: 6px; }
+    .review-text { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+    /* Teacher Posts */
+    .post-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 14px; cursor: pointer; transition: border-color 0.2s; }
+    .post-card:hover { border-color: var(--accent); }
+    .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .post-title { font-size: 16px; font-weight: 700; }
+    .post-badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+    .post-badge.article { background: rgba(34,153,221,0.15); color: #2299dd; }
+    .post-badge.video { background: rgba(233,69,96,0.15); color: #e94560; }
+    .post-badge.resource { background: rgba(76,175,80,0.15); color: #4CAF50; }
+    .post-preview { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 10px; }
+    .post-meta { display: flex; gap: 16px; font-size: 13px; color: var(--text-muted); }
+    .post-expanded { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .post-expanded.active { display: block; }
+    .post-content-full { font-size: 14px; line-height: 1.8; white-space: pre-wrap; margin-bottom: 14px; }
+    .post-video-embed { margin: 14px 0; border-radius: 10px; overflow: hidden; }
+    .post-video-embed iframe { width: 100%; height: 360px; border: none; }
+    .post-resource-link { display: inline-block; padding: 8px 18px; background: rgba(76,175,80,0.15); color: #4CAF50; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; margin-bottom: 14px; }
+    .post-resource-link:hover { background: rgba(76,175,80,0.25); }
+    .post-actions { display: flex; gap: 12px; margin-bottom: 14px; }
+    .post-actions button { padding: 6px 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg2); color: var(--text); font-size: 13px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .post-actions button:hover { border-color: var(--accent); color: var(--accent); }
+    .comment-section { margin-top: 12px; }
+    .comment-form { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .comment-form input { flex: 0 0 120px; padding: 8px 12px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; }
+    .comment-form textarea { flex: 1; min-width: 200px; padding: 8px 12px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; font-family: inherit; min-height: 40px; resize: vertical; }
+    .comment-form button { padding: 8px 16px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit; }
+    .comment-item { background: var(--bg2); border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; }
+    .comment-item .cm-head { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+    .comment-item .cm-head strong { color: var(--text); }
+    .comment-item .cm-body { font-size: 13px; line-height: 1.5; }
+    .td-nav-links { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .td-nav-links a { color: var(--accent); text-decoration: none; font-size: 14px; }
+    .td-nav-links a:hover { text-decoration: underline; }
+
+    .legend { display:flex; gap:20px; margin-bottom:12px; font-size:13px; align-items:center; flex-wrap:wrap; }
+    .legend span { display:flex; align-items:center; gap:6px; }
+    .legend-dot { display:inline-block; width:14px; height:14px; border-radius:3px; }
+    .legend-dot.green { background:rgba(56,189,114,0.4); border:1px solid #38bd72; }
+    .legend-dot.orange { background:rgba(249,168,37,0.4); border:1px solid #F9A825; }
+    .legend-dot.gray { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); }
+</style>
+
+<div class="td-page">
+    <div class="td-nav-links">
+        <a href="/Teacher">&larr; 返回老師列表</a>
+        <a href="/Teacher">瀏覽更多老師 &rarr;</a>
+    </div>
+
+    <div class="td-hero">
+        <div class="td-avatar">
+            @if (!string.IsNullOrEmpty(teacher.PhotoUrl))
+            {
+                <img src="@teacher.PhotoUrl" alt="@teacher.Name" />
+            }
+            else
+            {
+                <span>&#x1F468;&#x200D;&#x1F3EB;</span>
+            }
+        </div>
+        <div class="td-main">
+            <h1>@teacher.Name</h1>
+            <div class="td-title">@teacher.Title</div>
+            <div class="td-rating">
+                <span class="stars">@(new string('\u2605', (int)Math.Floor(teacher.AverageRating)))@(new string('\u2606', 5 - (int)Math.Floor(teacher.AverageRating)))</span>
+                <span>@teacher.AverageRating.ToString("F1")</span>
+            </div>
+            <div class="td-stats">
+                <span>&#x1F393; <strong>@teacher.TotalStudents</strong> &#x4F4D;&#x5B78;&#x751F;</span>
+                <span>&#x1F4DA; <strong>@teacher.TotalLessons</strong> &#x5802;&#x8AB2;</span>
+                <span>&#x1F4BC; <strong>@teacher.ExperienceYears</strong> &#x5E74;&#x7D93;&#x9A57;</span>
+            </div>
+            <div class="td-skills">
+                @foreach (var s in skills)
+                {
+                    <span class="td-skill">@s</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="td-section">
+        <h2>&#x1F4DD; &#x95DC;&#x65BC;&#x6211;</h2>
+        <div class="td-bio">@teacher.Bio</div>
+    </div>
+
+    <div class="td-section">
+        <h2>&#x1F393; &#x5B78;&#x6B77;&#x8207;&#x7D93;&#x6B77;</h2>
+        <div class="td-info-grid">
+            <div class="td-info-item">
+                <div class="label">&#x5B78;&#x6B77;</div>
+                <div class="value">@teacher.Education</div>
+            </div>
+            <div class="td-info-item">
+                <div class="label">&#x6559;&#x5B78;&#x7D93;&#x9A57;</div>
+                <div class="value">@teacher.ExperienceYears &#x5E74;</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="td-section">
+        <h2>&#x1F4B0; &#x8AB2;&#x7A0B;&#x50F9;&#x683C;</h2>
+        <div class="td-pricing">
+            <div class="td-price-card featured">
+                <div class="price-label">&#x9AD4;&#x9A57;&#x8AB2;</div>
+                <div class="price-value">NT$@teacher.TrialPrice</div>
+                <div class="price-unit">/ &#x5802;</div>
+            </div>
+            <div class="td-price-card">
+                <div class="price-label">&#x6B63;&#x5F0F;&#x8AB2;&#x7A0B;</div>
+                <div class="price-value">NT$@teacher.HourlyRate</div>
+                <div class="price-unit">/ &#x5C0F;&#x6642;</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="td-section">
+        <h2>&#x1F4C5; &#x53EF;&#x9810;&#x7D04;&#x6642;&#x6BB5;&#xFF08;&#x9EDE;&#x64CA;&#x7DA0;&#x8272;&#x6642;&#x6BB5;&#x9810;&#x7D04;&#xFF09;</h2>
+        <div class="legend">
+            <span><span class="legend-dot green"></span> &#x53EF;&#x9810;&#x7D04;&#xFF08;&#x9EDE;&#x64CA;&#x5373;&#x53EF;&#x9810;&#x7D04;&#xFF09;</span>
+            <span><span class="legend-dot orange"></span> &#x5DF2;&#x88AB;&#x9810;&#x7D04;</span>
+            <span><span class="legend-dot gray"></span> &#x8001;&#x5E2B;&#x672A;&#x958B;&#x653E;</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <button onclick="changeDetailWeek(-1)" style="padding:6px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:13px;font-family:inherit;">&larr; &#x4E0A;&#x9031;</button>
+            <span id="detailWeekLabel" style="font-weight:700;font-size:14px;color:var(--text);"></span>
+            <button onclick="changeDetailWeek(1)" style="padding:6px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:13px;font-family:inherit;">&#x4E0B;&#x9031; &rarr;</button>
+        </div>
+        <span class="schedule-toggle" id="detailGridToggle" onclick="toggleDetailGrid()">&#x25BC; &#x6536;&#x8D77;</span>
+        <div id="detailGridContainer" style="overflow-x:auto;">
+            <table class="schedule-grid" id="detailScheduleGrid">
+                <thead>
+                    <tr>
+                        <th>&#x6642;&#x9593;</th>
+                        <th id="dth0"></th>
+                        <th id="dth1"></th>
+                        <th id="dth2"></th>
+                        <th id="dth3"></th>
+                        <th id="dth4"></th>
+                        <th id="dth5"></th>
+                        <th id="dth6"></th>
+                    </tr>
+                </thead>
+                <tbody id="detailGridBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:16px;">
+        <button class="book-btn" id="favBtn" onclick="toggleFavorite()" style="flex:0 0 auto;width:auto;padding:14px 24px;background:var(--bg3);border:2px solid var(--border);color:var(--text);margin-top:0;">
+            <span id="favIcon">&#x2764;&#xFE0F;</span> <span id="favText">收藏老師</span>
+        </button>
+        <button class="book-btn" onclick="openDmChat()" style="flex:0 0 auto;width:auto;padding:14px 24px;background:var(--bg3);border:2px solid rgba(99,102,241,.4);color:var(--accent);margin-top:0;">
+            &#x1F4AC; &#x806F;&#x7D61;&#x8001;&#x5E2B;
+        </button>
+        <button class="book-btn" onclick="openBooking()" style="flex:1;margin-top:0;">&#x1F4E9; &#x7ACB;&#x5373;&#x9810;&#x7D04;</button>
+    </div>
+
+    <!-- DM Chat Modal -->
+    <div class="modal-overlay" id="dmChatModal">
+        <div class="modal-box" style="display:flex;flex-direction:column;height:70vh;max-height:600px;padding:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);">
+                <span style="font-size:16px;font-weight:700;">&#x1F4AC; &#x8207; @teacher.Name &#x79C1;&#x8A0A;</span>
+                <button onclick="closeDmChat()" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">&#x2715;</button>
+            </div>
+            <div id="dmMessages" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;"></div>
+            <div style="display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);">
+                <input type="text" id="dmInput" placeholder="&#x8F38;&#x5165;&#x8A0A;&#x606F;..." maxlength="500" style="flex:1;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;" />
+                <button onclick="sendDm()" style="padding:10px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">&#x50B3;&#x9001;</button>
+            </div>
+        </div>
+    </div>
+
+    @if (reviews.Count > 0)
+    {
+        <div class="td-section" style="margin-top:32px;">
+            <h2>&#x2B50; 學生評價 (@reviews.Count)</h2>
+            @foreach (var r in reviews)
+            {
+                <div class="review-item">
+                    <div class="review-header">
+                        <span class="review-author">@r.StudentName</span>
+                        <span class="review-date">@r.CreatedAt.ToString("yyyy-MM-dd")</span>
+                    </div>
+                    <div class="review-stars">@(new string('\u2605', r.Rating))@(new string('\u2606', 5 - r.Rating))</div>
+                    <div class="review-text">@r.Comment</div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- 免費分享 -->
+    <div class="td-section" style="margin-top:32px;">
+        <h2>&#x1F4DD; 免費分享</h2>
+        <div id="teacherPosts">
+            <div style="color:var(--text-muted);font-size:13px;">載入中...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Modal -->
+<div class="modal-overlay" id="bookingModal">
+    <div class="modal-box">
+        <h3>&#x1F4E9; &#x9810;&#x7D04;&#x8AB2;&#x7A0B; - @teacher.Name</h3>
+        <form id="bookingForm" onsubmit="return false;">
+            <label>&#x59D3;&#x540D; *</label>
+            <input type="text" name="studentName" id="bkName" placeholder="&#x8ACB;&#x8F38;&#x5165;&#x60A8;&#x7684;&#x59D3;&#x540D;" required />
+            <label>Email *</label>
+            <input type="email" name="studentEmail" id="bkEmail" placeholder="your@@email.com" required />
+            <label>&#x96FB;&#x8A71;</label>
+            <input type="tel" name="studentPhone" id="bkPhone" placeholder="09xx-xxx-xxx" />
+            <label>&#x65E5;&#x671F; * <small style="color:var(--text-muted);font-weight:400;">&#xFF08;&#x53EF;&#x624B;&#x52D5;&#x9078;&#x64C7;&#xFF0C;&#x6216;&#x9EDE;&#x64CA;&#x4E0A;&#x65B9;&#x884C;&#x4E8B;&#x66C6;&#x7DA0;&#x8272;&#x6642;&#x6BB5;&#x81EA;&#x52D5;&#x586B;&#x5165;&#xFF09;</small></label>
+            <input type="date" name="bookingDate" id="bkDate" required />
+            <label>&#x6642;&#x6BB5; *</label>
+            <select name="timeSlot" id="bkSlot" required>
+                <option value="">&#x8ACB;&#x9078;&#x64C7;&#x6642;&#x6BB5;</option>
+                <option value="08:00-08:50">08:00-08:50</option>
+                <option value="09:00-09:50">09:00-09:50</option>
+                <option value="10:00-10:50">10:00-10:50</option>
+                <option value="11:00-11:50">11:00-11:50</option>
+                <option value="12:00-12:50">12:00-12:50</option>
+                <option value="13:00-13:50">13:00-13:50</option>
+                <option value="14:00-14:50">14:00-14:50</option>
+                <option value="15:00-15:50">15:00-15:50</option>
+                <option value="16:00-16:50">16:00-16:50</option>
+                <option value="17:00-17:50">17:00-17:50</option>
+                <option value="18:00-18:50">18:00-18:50</option>
+                <option value="19:00-19:50">19:00-19:50</option>
+                <option value="20:00-20:50">20:00-20:50</option>
+                <option value="21:00-21:50">21:00-21:50</option>
+                <option value="22:00-22:50">22:00-22:50</option>
+            </select>
+            <label>&#x5099;&#x8A3B;</label>
+            <textarea name="studentNote" id="bkNote" placeholder="&#x60F3;&#x5B78;&#x4EC0;&#x9EBC;&#xFF1F;&#x76EE;&#x524D;&#x7684;&#x7A0B;&#x5EA6;&#xFF1F;"></textarea>
+            <div id="bkMsg" style="margin-top:12px;font-size:13px;display:none;"></div>
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeBooking()">&#x53D6;&#x6D88;</button>
+                <button type="button" class="confirm-btn" onclick="submitBooking()">&#x63D0;&#x4EA4;&#x9810;&#x7D04;</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function openBooking() {
+        document.getElementById('bookingModal').classList.add('active');
+    }
+    function closeBooking() {
+        document.getElementById('bookingModal').classList.remove('active');
+    }
+    async function submitBooking() {
+        var form = document.getElementById('bookingForm');
+        var data = {
+            teacherId: @teacher.Id,
+            studentName: form.querySelector('[name="studentName"]').value.trim(),
+            studentEmail: form.querySelector('[name="studentEmail"]').value.trim(),
+            studentPhone: form.querySelector('[name="studentPhone"]') ? form.querySelector('[name="studentPhone"]').value.trim() : '',
+            bookingDate: form.querySelector('[name="bookingDate"]').value,
+            timeSlot: form.querySelector('[name="timeSlot"]').value,
+            studentNote: form.querySelector('[name="studentNote"]') ? form.querySelector('[name="studentNote"]').value : ''
+        };
+        if (!data.studentName || !data.studentEmail || !data.bookingDate || !data.timeSlot) {
+            showMsg('請填寫必填欄位（姓名、Email、日期、時段）', 'red'); return;
+        }
+        try {
+            var res = await fetch('/Teacher/Book', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            var result = await res.json();
+            if (result.requireRegister) {
+                alert(result.message);
+                location.href = '/Account/Register';
+                return;
+            }
+            if (result.success) {
+                showMsg('預約成功！等待老師確認', '#4CAF50');
+                setTimeout(function() { closeBooking(); location.reload(); }, 2000);
+            } else {
+                showMsg('預約失敗：' + (result.message || '請稍後再試'), 'red');
+            }
+        } catch(e) {
+            showMsg('網路錯誤：' + e.message, 'red');
+        }
+    }
+    function showMsg(msg, color) {
+        var el = document.getElementById('bkMsg');
+        el.style.display = 'block';
+        el.style.color = color;
+        el.innerHTML = msg;
+    }
+
+    // Auto-fill user info for registered users
+    (function() {
+        fetch('/Account/Me')
+            .then(function(r) { if (r.ok) return r.json(); throw new Error('not logged in'); })
+            .then(function(user) {
+                var nickname = user.Nickname || user.nickname || '';
+                var email = user.Email || user.email || '';
+                var phone = user.Phone || user.phone || '';
+                if (nickname && !document.getElementById('bkName').value) {
+                    document.getElementById('bkName').value = nickname;
+                }
+                if (email && !document.getElementById('bkEmail').value) {
+                    document.getElementById('bkEmail').value = email;
+                }
+                if (phone && !document.getElementById('bkPhone').value) {
+                    document.getElementById('bkPhone').value = phone;
+                }
+            })
+            .catch(function() { /* not logged in, ignore */ });
+    })();
+
+    // === Detail Calendar Grid (Real-Date) ===
+    var detailGridVisible = true;
+    var detailWeekOffset = 0;
+    var teacherId = @teacher.Id;
+
+    function toggleDetailGrid() {
+        detailGridVisible = !detailGridVisible;
+        document.getElementById('detailGridContainer').style.display = detailGridVisible ? 'block' : 'none';
+        document.getElementById('detailGridToggle').innerHTML = detailGridVisible ? '\u25BC \u6536\u8D77' : '\u25B6 \u5C55\u958B';
+    }
+
+    function getDetailWeekDates(offset) {
+        var today = new Date();
+        var monday = new Date(today);
+        var dayOfWeek = today.getDay();
+        var diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        monday.setDate(today.getDate() + diff + (offset * 7));
+        monday.setHours(0,0,0,0);
+        var dates = [];
+        var dayNames = ['\u4E00','\u4E8C','\u4E09','\u56DB','\u4E94','\u516D','\u65E5'];
+        for (var i = 0; i < 7; i++) {
+            var d = new Date(monday);
+            d.setDate(monday.getDate() + i);
+            dates.push({
+                date: d,
+                dateStr: (d.getMonth()+1) + '/' + d.getDate(),
+                dayName: dayNames[i],
+                dayOfWeek: i === 6 ? 0 : i + 1,
+                isoDate: d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2)
+            });
+        }
+        return dates;
+    }
+
+    function changeDetailWeek(dir) {
+        detailWeekOffset += dir;
+        renderDetailCalendar();
+    }
+
+    function renderDetailCalendar() {
+        var dates = getDetailWeekDates(detailWeekOffset);
+        document.getElementById('detailWeekLabel').textContent = dates[0].dateStr + ' ~ ' + dates[6].dateStr;
+        for (var i = 0; i < 7; i++) {
+            var th = document.getElementById('dth' + i);
+            if (th) th.textContent = dates[i].dateStr + '(' + dates[i].dayName + ')';
+        }
+        loadDetailAvailableSlots(dates);
+    }
+
+    function loadDetailAvailableSlots(dates) {
+        fetch('/Teacher/AvailableSlots?teacherId=' + teacherId)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var body = document.getElementById('detailGridBody');
+                var html = '';
+                var hours = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00'];
+                hours.forEach(function(hour) {
+                    html += '<tr>';
+                    html += '<td class="time-label">' + hour + '</td>';
+                    dates.forEach(function(dateInfo) {
+                        var isAvailable = data.slots && data.slots.some(function(s) {
+                            return s.dayOfWeek === dateInfo.dayOfWeek && s.startTime === hour;
+                        });
+                        var isBooked = data.bookedSlots && data.bookedSlots.some(function(s) {
+                            var bDate = new Date(s.bookingDate);
+                            var bIso = bDate.getFullYear() + '-' + ('0'+(bDate.getMonth()+1)).slice(-2) + '-' + ('0'+bDate.getDate()).slice(-2);
+                            return bIso === dateInfo.isoDate && s.timeSlot.startsWith(hour);
+                        });
+                        if (isBooked) {
+                            html += '<td class="booked">\u5DF2\u9810\u7D04</td>';
+                        } else if (isAvailable) {
+                            html += '<td class="available" onclick="quickDetailBook(\'' + dateInfo.isoDate + '\',\'' + dateInfo.dateStr + '(' + dateInfo.dayName + ')\',\'' + hour + '\')">\u53EF\u9810\u7D04</td>';
+                        } else {
+                            html += '<td></td>';
+                        }
+                    });
+                    html += '</tr>';
+                });
+                body.innerHTML = html;
+            });
+    }
+
+    function quickDetailBook(isoDate, dateLabel, hour) {
+        var timeSlot = hour + '-' + hour.split(':')[0] + ':50';
+        if (!confirm('\u78BA\u8A8D\u9810\u7D04 ' + dateLabel + ' ' + timeSlot + '\uFF1F')) return;
+        fetch('/Account/Me')
+            .then(function(r) { if (r.ok) return r.json(); throw new Error('not logged in'); })
+            .then(function(me) {
+                var isRegistered = me.IsRegistered || me.isRegistered || false;
+                var nickname = me.Nickname || me.nickname || '';
+                var email = me.Email || me.email || '';
+
+                if (!me.exists || !isRegistered) {
+                    alert('\u8ACB\u5148\u8A3B\u518A\u624D\u80FD\u9810\u7D04');
+                    location.href = '/Account/Register';
+                    return;
+                }
+                return fetch('/Teacher/Book', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        teacherId: teacherId,
+                        studentName: nickname,
+                        studentEmail: email,
+                        studentPhone: '',
+                        bookingDate: isoDate,
+                        timeSlot: timeSlot,
+                        studentNote: ''
+                    })
+                }).then(function(r) { return r.json(); }).then(function(result) {
+                    if (result.requireRegister) {
+                        alert(result.message);
+                        location.href = '/Account/Register';
+                    } else if (result.success) {
+                        alert('\u2705 \u9810\u7D04\u6210\u529F\uFF01\u7B49\u5F85\u8001\u5E2B\u78BA\u8A8D');
+                        renderDetailCalendar();
+                    } else {
+                        alert('\u274C ' + (result.message || '\u9810\u7D04\u5931\u6557'));
+                    }
+                });
+            })
+            .catch(function() {
+                // Not logged in, fall back to booking modal
+                document.getElementById('bkDate').value = isoDate;
+                var slotStr = hour + '-' + hour.split(':')[0] + ':50';
+                var slotSelect = document.getElementById('bkSlot');
+                for (var i = 0; i < slotSelect.options.length; i++) {
+                    if (slotSelect.options[i].value === slotStr) { slotSelect.selectedIndex = i; break; }
+                }
+                openBooking();
+            });
+    }
+
+    renderDetailCalendar();
+
+    // === Teacher Posts ===
+    function loadPosts() {
+        fetch('/Teacher/Posts?teacherId=' + teacherId)
+            .then(r => r.json())
+            .then(posts => {
+                var container = document.getElementById('teacherPosts');
+                if (!posts || posts.length === 0) {
+                    container.innerHTML = '<div style="color:var(--text-muted);font-size:13px;">這位老師還沒有發布內容</div>';
+                    return;
+                }
+                var html = '';
+                posts.forEach(function(p) {
+                    var typeName = p.type === 'video' ? '影片' : p.type === 'resource' ? '資源' : '文章';
+                    var preview = p.content.length > 100 ? p.content.substring(0, 100) + '...' : p.content;
+                    html += '<div class="post-card" id="post-' + p.id + '">';
+                    html += '  <div class="post-header" onclick="togglePost(' + p.id + ')">';
+                    html += '    <span class="post-title">' + escapeHtml(p.title) + '</span>';
+                    html += '    <span class="post-badge ' + p.type + '">' + typeName + '</span>';
+                    html += '  </div>';
+                    html += '  <div class="post-preview" onclick="togglePost(' + p.id + ')">' + escapeHtml(preview) + '</div>';
+                    html += '  <div class="post-meta">';
+                    html += '    <span>&#x2764;&#xFE0F; <span id="likes-' + p.id + '">' + p.likes + '</span> 讚</span>';
+                    html += '    <span>&#x1F4AC; <span id="comments-count-' + p.id + '">0</span> 留言</span>';
+                    html += '    <span>' + (p.createdAt ? new Date(p.createdAt).toLocaleDateString() : '') + '</span>';
+                    html += '  </div>';
+                    html += '  <div class="post-expanded" id="expanded-' + p.id + '">';
+                    html += '    <div class="post-content-full">' + escapeHtml(p.content) + '</div>';
+                    if (p.type === 'video' && p.videoUrl) {
+                        html += '    <div class="post-video-embed"><iframe src="' + escapeHtml(p.videoUrl) + '" allowfullscreen></iframe></div>';
+                    }
+                    if (p.type === 'resource' && p.resourceUrl) {
+                        html += '    <a class="post-resource-link" href="' + escapeHtml(p.resourceUrl) + '" target="_blank">&#x1F4E5; 下載資源</a>';
+                    }
+                    html += '    <div class="post-actions">';
+                    html += '      <button onclick="likePost(' + p.id + ')">&#x2764;&#xFE0F; 按讚</button>';
+                    html += '    </div>';
+                    html += '    <div class="comment-section">';
+                    html += '      <div class="comment-form">';
+                    html += '        <input type="text" id="cmNick-' + p.id + '" placeholder="暱稱" />';
+                    html += '        <textarea id="cmContent-' + p.id + '" placeholder="寫下你的留言..."></textarea>';
+                    html += '        <button onclick="submitComment(' + p.id + ')">送出</button>';
+                    html += '      </div>';
+                    html += '      <div id="comments-' + p.id + '"></div>';
+                    html += '    </div>';
+                    html += '  </div>';
+                    html += '</div>';
+                });
+                container.innerHTML = html;
+                // Load comment counts
+                posts.forEach(function(p) { loadComments(p.id); });
+            });
+    }
+
+    function togglePost(postId) {
+        var el = document.getElementById('expanded-' + postId);
+        el.classList.toggle('active');
+    }
+
+    function likePost(postId) {
+        fetch('/Teacher/LikePost', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ postId: postId })
+        }).then(r => r.json()).then(d => {
+            if (d.likes !== undefined) {
+                document.getElementById('likes-' + postId).textContent = d.likes;
+            }
+        });
+    }
+
+    function submitComment(postId) {
+        var nick = document.getElementById('cmNick-' + postId).value.trim();
+        var content = document.getElementById('cmContent-' + postId).value.trim();
+        if (!content) { alert('請輸入留言內容'); return; }
+        fetch('/Teacher/CommentPost', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ postId: postId, nickname: nick || null, content: content })
+        }).then(r => r.json()).then(d => {
+            if (d.success) {
+                document.getElementById('cmContent-' + postId).value = '';
+                loadComments(postId);
+            }
+        });
+    }
+
+    function loadComments(postId) {
+        fetch('/Teacher/PostComments?postId=' + postId)
+            .then(r => r.json())
+            .then(comments => {
+                var countEl = document.getElementById('comments-count-' + postId);
+                if (countEl) countEl.textContent = comments.length;
+                var container = document.getElementById('comments-' + postId);
+                if (!container) return;
+                var html = '';
+                comments.forEach(function(c) {
+                    html += '<div class="comment-item">';
+                    html += '  <div class="cm-head"><strong>' + escapeHtml(c.nickname) + '</strong><span>' + (c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '') + '</span></div>';
+                    html += '  <div class="cm-body">' + escapeHtml(c.content) + '</div>';
+                    html += '</div>';
+                });
+                container.innerHTML = html;
+            });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    loadPosts();
+
+    // === Favorite Teacher ===
+    var isFavorited = false;
+    var currentFavId = null;
+
+    function checkFavoriteStatus() {
+        fetch('/Account/MyFavoriteTeachers')
+            .then(r => r.json())
+            .then(favs => {
+                var fav = favs.find(f => f.id === teacherId);
+                if (fav) {
+                    isFavorited = true;
+                    currentFavId = fav.favId;
+                    updateFavButton();
+                }
+            }).catch(() => {});
+    }
+
+    function updateFavButton() {
+        var icon = document.getElementById('favIcon');
+        var text = document.getElementById('favText');
+        var btn = document.getElementById('favBtn');
+        if (isFavorited) {
+            icon.innerHTML = '\uD83D\uDC94';
+            text.textContent = '取消收藏';
+            btn.style.borderColor = '#e94560';
+            btn.style.color = '#e94560';
+        } else {
+            icon.innerHTML = '\u2764\uFE0F';
+            text.textContent = '收藏老師';
+            btn.style.borderColor = 'var(--border)';
+            btn.style.color = 'var(--text)';
+        }
+    }
+
+    function toggleFavorite() {
+        if (isFavorited) {
+            fetch('/Account/UnfavoriteTeacher', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ favId: currentFavId })
+            }).then(r => r.json()).then(d => {
+                if (d.success) {
+                    isFavorited = false;
+                    currentFavId = null;
+                    updateFavButton();
+                }
+            });
+        } else {
+            fetch('/Account/FavoriteTeacher', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ teacherId: teacherId })
+            }).then(r => r.json()).then(d => {
+                if (d.success) {
+                    isFavorited = true;
+                    // Refetch to get the favId
+                    checkFavoriteStatus();
+                } else if (d.message) {
+                    isFavorited = true;
+                    checkFavoriteStatus();
+                }
+            });
+        }
+    }
+
+    checkFavoriteStatus();
+
+    // === DM Chat with Teacher ===
+    var teacherAnonId = '@teacherAnonymousId';
+
+    function openDmChat() {
+        document.getElementById('dmChatModal').classList.add('active');
+        loadDmMessages();
+        document.getElementById('dmInput').focus();
+    }
+    function closeDmChat() {
+        document.getElementById('dmChatModal').classList.remove('active');
+    }
+
+    function loadDmMessages() {
+        if (!teacherAnonId) return;
+        fetch('/Message/GetMessages?otherId=' + encodeURIComponent(teacherAnonId))
+            .then(function(r) { return r.json(); })
+            .then(function(msgs) {
+                var container = document.getElementById('dmMessages');
+                if (!msgs || msgs.length === 0) {
+                    container.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px;margin-top:40px;">&#x5C1A;&#x7121;&#x8A0A;&#x606F;&#xFF0C;&#x958B;&#x59CB;&#x548C;&#x8001;&#x5E2B;&#x804A;&#x5929;&#x5427;&#xFF01;</div>';
+                    return;
+                }
+                var html = '';
+                msgs.forEach(function(m) {
+                    var align = m.isMine ? 'flex-end' : 'flex-start';
+                    var bg = m.isMine ? 'rgba(99,102,241,.15)' : 'var(--bg3)';
+                    var border = m.isMine ? '1px solid rgba(99,102,241,.25)' : '1px solid var(--border)';
+                    var time = m.sentAt ? new Date(m.sentAt).toLocaleString() : '';
+                    html += '<div style="align-self:' + align + ';max-width:80%;">';
+                    html += '  <div style="background:' + bg + ';border:' + border + ';border-radius:12px;padding:8px 12px;">';
+                    html += '    <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px;">' + escapeHtml(m.senderName) + ' &middot; ' + escapeHtml(time) + '</div>';
+                    html += '    <div style="font-size:14px;color:var(--text);line-height:1.5;">' + escapeHtml(m.message) + '</div>';
+                    html += '  </div>';
+                    html += '</div>';
+                });
+                container.innerHTML = html;
+                container.scrollTop = container.scrollHeight;
+            });
+    }
+
+    function sendDm() {
+        var input = document.getElementById('dmInput');
+        var msg = input.value.trim();
+        if (!msg || !teacherAnonId) return;
+        fetch('/Message/Send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ receiverId: teacherAnonId, teacherId: teacherId, message: msg })
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.success) {
+                input.value = '';
+                loadDmMessages();
+            } else if (d.message) {
+                alert(d.message);
+            }
+        }).catch(function() { alert('&#x7DB2;&#x8DEF;&#x932F;&#x8AA4;'); });
+    }
+
+    document.getElementById('dmInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendDm(); }
+    });
+</script>
+}

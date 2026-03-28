@@ -1,0 +1,429 @@
+@{
+    ViewData["Title"] = "問題詳情";
+    var q = ViewBag.Question as DotNetLearning.Models.QnA;
+}
+
+<style>
+    .qna-detail-page {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 4rem;
+    }
+
+    .qna-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--accent);
+        text-decoration: none;
+        font-size: .9rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .qna-back:hover { text-decoration: underline; }
+
+    /* Question section */
+    .qna-q-box {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .qna-q-header {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .qna-q-status {
+        font-size: .8rem;
+        padding: 3px 10px;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    .qna-q-status.solved { background: #2e7d32; color: #fff; }
+    .qna-q-status.unsolved { background: var(--accent3); color: #fff; }
+
+    .qna-q-chapter {
+        background: var(--bg3);
+        color: var(--accent);
+        font-size: .8rem;
+        padding: 3px 10px;
+        border-radius: 4px;
+    }
+
+    .qna-q-text {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: var(--text);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        white-space: pre-wrap;
+    }
+
+    .qna-q-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: .85rem;
+        color: var(--text-muted);
+    }
+
+    .btn-upvote {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 12px;
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: .85rem;
+        transition: all .2s;
+    }
+
+    .btn-upvote:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .btn-upvote.voted {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(34, 153, 221, .1);
+    }
+
+    /* Answers */
+    .qna-answers-title {
+        font-size: 1.1rem;
+        color: var(--text);
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .qna-answer-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 12px;
+        position: relative;
+    }
+
+    .qna-answer-card.accepted {
+        border-color: #2e7d32;
+        border-width: 2px;
+    }
+
+    .qna-accepted-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #2e7d32;
+        color: #fff;
+        font-size: .75rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+        margin-bottom: .5rem;
+    }
+
+    .qna-answer-content {
+        color: var(--text);
+        line-height: 1.6;
+        margin-bottom: .75rem;
+        white-space: pre-wrap;
+    }
+
+    .qna-answer-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: .82rem;
+        color: var(--text-muted);
+        flex-wrap: wrap;
+    }
+
+    .btn-accept {
+        padding: 4px 12px;
+        background: transparent;
+        border: 1px solid #2e7d32;
+        color: #4caf50;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: .8rem;
+        transition: all .2s;
+    }
+
+    .btn-accept:hover {
+        background: #2e7d32;
+        color: #fff;
+    }
+
+    /* Answer form */
+    .qna-answer-form {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .qna-answer-form h3 {
+        color: var(--text);
+        margin-bottom: 1rem;
+        font-size: 1.05rem;
+    }
+
+    .form-field {
+        margin-bottom: 1rem;
+    }
+
+    .form-field label {
+        display: block;
+        font-size: .85rem;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+    }
+
+    .form-field input,
+    .form-field textarea {
+        width: 100%;
+        padding: 10px 12px;
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 8px;
+        font-size: .95rem;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+
+    .form-field textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .btn-answer-submit {
+        padding: 10px 28px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: .95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity .2s;
+    }
+
+    .btn-answer-submit:hover { opacity: .85; }
+    .btn-answer-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+    .qna-no-answers {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-muted);
+        font-size: .95rem;
+    }
+</style>
+
+<div class="qna-detail-page">
+    <a href="/QnA" class="qna-back">← 返回問答列表</a>
+
+    @if (q != null)
+    {
+        <div class="qna-q-box">
+            <div class="qna-q-header">
+                <span class="qna-q-status @(q.IsSolved ? "solved" : "unsolved")">
+                    @(q.IsSolved ? "✅ 已解決" : "待解決")
+                </span>
+                @if (!string.IsNullOrEmpty(q.ChapterTitle))
+                {
+                    <span class="qna-q-chapter">@q.ChapterTitle</span>
+                }
+            </div>
+            <div class="qna-q-text">@q.Question</div>
+            <div class="qna-q-meta">
+                <span>👤 @q.Nickname</span>
+                <span>🕐 @FormatTimeAgo(q.CreatedAt)</span>
+                <button class="btn-upvote" id="btnUpvoteQ" onclick="upvoteQuestion()">
+                    👍 <span id="qUpvotes">@q.Upvotes</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="qna-answers-title" id="answersTitle">💬 回答 (載入中...)</div>
+        <div id="answersList"></div>
+
+        <div class="qna-answer-form">
+            <h3>✍️ 回答這個問題</h3>
+            <div class="form-field">
+                <label>暱稱（選填）</label>
+                <input type="text" id="answerNickname" placeholder="匿名" maxlength="20" />
+            </div>
+            <div class="form-field">
+                <label>回答內容 *</label>
+                <textarea id="answerContent" placeholder="寫下你的回答..." maxlength="5000"></textarea>
+            </div>
+            <button class="btn-answer-submit" id="btnSubmitAnswer" onclick="submitAnswer()">送出回答</button>
+        </div>
+    }
+</div>
+
+<script>
+    const QNA_ID = @(q?.Id ?? 0);
+    const Q_SESSION = '@(q?.SessionId ?? "")';
+    let mySession = '';
+
+    // Try to get session from a lightweight endpoint or cookie
+    // For simplicity, we compare via hidden field
+    async function initSession() {
+        try {
+            // Trigger session creation by a lightweight call
+            const r = await fetch('/QnA/List?page=1');
+            await r.json();
+        } catch {}
+    }
+
+    async function loadAnswers() {
+        const res = await fetch('/QnA/Answers?qnaId=' + QNA_ID);
+        const answers = await res.json();
+
+        document.getElementById('answersTitle').textContent = `💬 回答 (${answers.length})`;
+
+        if (answers.length === 0) {
+            document.getElementById('answersList').innerHTML =
+                '<div class="qna-no-answers">還沒有回答，成為第一個回答的人吧！</div>';
+            return;
+        }
+
+        document.getElementById('answersList').innerHTML = answers.map(a => `
+            <div class="qna-answer-card ${a.isAccepted ? 'accepted' : ''}">
+                ${a.isAccepted ? '<div class="qna-accepted-tag">✅ 最佳答案</div>' : ''}
+                <div class="qna-answer-content">${escHtml(a.content)}</div>
+                <div class="qna-answer-meta">
+                    <span>👤 ${escHtml(a.nickname)}</span>
+                    <span>🕐 ${a.timeAgo}</span>
+                    <button class="btn-upvote" onclick="upvoteAnswer(${a.id}, this)">
+                        👍 <span>${a.upvotes}</span>
+                    </button>
+                    ${!a.isAccepted ? `<button class="btn-accept btn-accept-answer" data-aid="${a.id}" onclick="markAccepted(${a.id})" style="display:none;">採納為最佳答案</button>` : ''}
+                </div>
+            </div>
+        `).join('');
+
+        // Show accept buttons if current user is question author
+        showAcceptButtons();
+    }
+
+    function showAcceptButtons() {
+        // The accept buttons are shown only if the question is not solved yet
+        // and the user is the question author (same session)
+        // We check via a cookie/session - simplified: we show them and let server validate
+        @if (q != null && !q.IsSolved)
+        {
+            <text>
+            document.querySelectorAll('.btn-accept-answer').forEach(btn => {
+                btn.style.display = 'inline-block';
+            });
+            </text>
+        }
+    }
+
+    async function upvoteQuestion() {
+        const btn = document.getElementById('btnUpvoteQ');
+        if (btn.classList.contains('voted')) return;
+        const res = await fetch('/QnA/Upvote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'question', id: QNA_ID })
+        });
+        const data = await res.json();
+        document.getElementById('qUpvotes').textContent = data.upvotes;
+        btn.classList.add('voted');
+    }
+
+    async function upvoteAnswer(answerId, btn) {
+        if (btn.classList.contains('voted')) return;
+        const res = await fetch('/QnA/Upvote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'answer', id: answerId })
+        });
+        const data = await res.json();
+        btn.querySelector('span').textContent = data.upvotes;
+        btn.classList.add('voted');
+    }
+
+    async function markAccepted(answerId) {
+        if (!confirm('確定要採納這個回答為最佳答案嗎？')) return;
+        const res = await fetch('/QnA/MarkSolved', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ qnAId: QNA_ID, answerId: answerId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || '操作失敗，只有發問者可以採納答案');
+        }
+    }
+
+    async function submitAnswer() {
+        const btn = document.getElementById('btnSubmitAnswer');
+        const content = document.getElementById('answerContent').value.trim();
+        if (!content) { alert('請輸入回答內容'); return; }
+
+        btn.disabled = true;
+        try {
+            const res = await fetch('/QnA/Answer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    qnAId: QNA_ID,
+                    nickname: document.getElementById('answerNickname').value.trim() || null,
+                    content
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('answerContent').value = '';
+                loadAnswers();
+            } else {
+                alert(data.error || '發生錯誤');
+            }
+        } catch {
+            alert('網路錯誤');
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    function escHtml(s) {
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    @functions {
+        string FormatTimeAgo(DateTime dt)
+        {
+            var diff = DateTime.Now - dt;
+            if (diff.TotalMinutes < 1) return "剛剛";
+            if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} 分鐘前";
+            if (diff.TotalHours < 24) return $"{(int)diff.TotalHours} 小時前";
+            if (diff.TotalDays < 30) return $"{(int)diff.TotalDays} 天前";
+            return dt.ToString("yyyy/MM/dd");
+        }
+    }
+
+    // Init
+    loadAnswers();
+</script>

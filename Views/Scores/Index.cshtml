@@ -1,0 +1,101 @@
+@using DotNetLearning.Models
+@model List<QuizAttempt>
+@{
+    ViewData["Title"] = "我的成績";
+    // chapters: Dictionary<int, {Title, Slug}>
+    var chapters = ViewBag.Chapters as object;
+    // We'll cast via dynamic for simplicity
+}
+
+<div class="scores-page">
+    <div class="scores-hero">
+        <div class="scores-hero-inner">
+            <h1>📊 我的學習成績</h1>
+            <p>追蹤你的測驗紀錄與學習進度</p>
+        </div>
+        <a href="/Scores/ExportExcel" class="btn-excel">📥 匯出 Excel 紀錄</a>
+    </div>
+
+    <!-- 統計卡片 -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📖</div>
+            <div class="stat-val">@ViewBag.CompletedChapters <span class="stat-sub">/ @ViewBag.TotalChapters</span></div>
+            <div class="stat-label">章節完成</div>
+            @{
+                int pct = ViewBag.TotalChapters > 0 ? (int)(ViewBag.CompletedChapters * 100.0 / ViewBag.TotalChapters) : 0;
+            }
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:@(pct)%"></div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-val">@ViewBag.TotalAttempts</div>
+            <div class="stat-label">測驗次數</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-val">@ViewBag.AvgScore<span class="stat-sub">%</span></div>
+            <div class="stat-label">平均分數</div>
+        </div>
+    </div>
+
+    <!-- 測驗紀錄 -->
+    <div class="scores-section">
+        <h2>📋 測驗紀錄</h2>
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon">🎯</div>
+                <p>還沒有測驗紀錄，去做個測驗吧！</p>
+                <a href="/" class="btn-primary">開始學習</a>
+            </div>
+        }
+        else
+        {
+            <div class="attempts-table-wrap">
+                <table class="attempts-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>章節</th>
+                            <th>得分</th>
+                            <th>答對</th>
+                            <th>時間</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var chapDict = ViewBag.ChapterDict as Dictionary<int, (string Title, string Slug)> ?? new();
+                        }
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            var a = Model[i];
+                            var score = a.Total > 0 ? (int)(a.Score * 100.0 / a.Total) : 0;
+                            var scoreClass = score >= 80 ? "score-pass" : score >= 60 ? "score-ok" : "score-fail";
+                            var chapterTitle = ViewBag.ChapterTitles != null
+                                ? (ViewBag.ChapterTitles as Dictionary<int, string>)?.GetValueOrDefault(a.ChapterId, $"章節 {a.ChapterId}") ?? $"章節 {a.ChapterId}"
+                                : $"章節 {a.ChapterId}";
+                            var chapterSlug = ViewBag.ChapterSlugs != null
+                                ? (ViewBag.ChapterSlugs as Dictionary<int, string>)?.GetValueOrDefault(a.ChapterId, "") ?? ""
+                                : "";
+                            <tr>
+                                <td class="row-num">@(i + 1)</td>
+                                <td class="chapter-name">@chapterTitle</td>
+                                <td><span class="score-pill @scoreClass">@score%</span></td>
+                                <td class="score-frac">@a.Score / @a.Total 題</td>
+                                <td class="time-col">@a.TakenAt.ToString("MM/dd HH:mm")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(chapterSlug))
+                                    {
+                                        <a href="/Home/Chapter/@chapterSlug" class="btn-sm">複習</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

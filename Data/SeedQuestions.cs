@@ -1,0 +1,124 @@
+using DotNetLearning.Models;
+
+namespace DotNetLearning.Data;
+
+public static class SeedQuestions
+{
+    public static List<Question> GetQuestions()
+    {
+        return new List<Question>
+        {
+            // ── C# 基礎 (ChapterId 1-7) ──
+            new() { Id=1, ChapterId=1, Type="multiple", Difficulty=1, QuestionText="C# 是由哪家公司開發的？", OptionsJson=@"[""A. Google"",""B. Microsoft"",""C. Apple"",""D. Oracle""]", CorrectAnswer="B", Explanation="C# 是由 Microsoft 於 2000 年發布的程式語言。" },
+            new() { Id=2, ChapterId=1, Type="truefalse", Difficulty=1, QuestionText="C# 只能在 Windows 上執行。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="錯誤", Explanation=".NET 8 支援 Windows、Linux、macOS 跨平台執行。" },
+            new() { Id=3, ChapterId=2, Type="fillin", Difficulty=1, QuestionText="宣告一個整數變數：___ myNumber = 42;", OptionsJson="[]", CorrectAnswer="int", Explanation="int 是 C# 中 32 位元整數的關鍵字。" },
+            new() { Id=4, ChapterId=2, Type="multiple", Difficulty=1, QuestionText="以下哪個是參考型別？", OptionsJson=@"[""A. int"",""B. bool"",""C. string"",""D. double""]", CorrectAnswer="C", Explanation="string 是參考型別，int/bool/double 都是值型別。" },
+            new() { Id=5, ChapterId=3, Type="fillin", Difficulty=1, QuestionText="迴圈中跳過本次迭代的關鍵字是 ___", OptionsJson="[]", CorrectAnswer="continue", Explanation="continue 跳過本次迴圈剩餘部分，進入下一次迭代。" },
+            new() { Id=6, ChapterId=3, Type="order", Difficulty=2, QuestionText="排出 for 迴圈的正確語法順序", OptionsJson=@"[""{ 迴圈主體 }"",""for"",""(int i = 0;"",""i < 10;"",""i++)""]", CorrectAnswer="2,3,4,5,1", Explanation="for (初始化; 條件; 遞增) { 主體 }" },
+            new() { Id=7, ChapterId=4, Type="multiple", Difficulty=2, QuestionText="哪個關鍵字讓參數可以在方法內被修改並回傳？", OptionsJson=@"[""A. in"",""B. ref"",""C. params"",""D. static""]", CorrectAnswer="B", Explanation="ref 傳參考，方法內的修改會影響呼叫端的變數。" },
+            new() { Id=8, ChapterId=4, Type="fillin", Difficulty=1, QuestionText="方法不回傳任何值時，回傳型別寫 ___", OptionsJson="[]", CorrectAnswer="void", Explanation="void 表示方法不回傳任何值。" },
+            new() { Id=9, ChapterId=5, Type="multiple", Difficulty=2, QuestionText="OOP 中「隱藏內部實作細節」是哪個特性？", OptionsJson=@"[""A. 繼承"",""B. 多型"",""C. 封裝"",""D. 抽象""]", CorrectAnswer="C", Explanation="封裝透過 access modifiers 隱藏內部細節。" },
+            new() { Id=10, ChapterId=5, Type="truefalse", Difficulty=2, QuestionText="C# 支援多重繼承（一個 class 繼承多個 class）。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="錯誤", Explanation="C# 不支援多重繼承，但可以實作多個 interface。" },
+            new() { Id=11, ChapterId=6, Type="fillin", Difficulty=2, QuestionText="LINQ 中篩選資料用 .___() 方法", OptionsJson="[]", CorrectAnswer="Where", Explanation="Where() 根據條件篩選集合中的元素。" },
+            new() { Id=12, ChapterId=6, Type="multiple", Difficulty=2, QuestionText="numbers.FirstOrDefault() 在 int 集合為空時回傳？", OptionsJson=@"[""A. null"",""B. 0"",""C. 拋出例外"",""D. -1""]", CorrectAnswer="B", Explanation="int 的預設值是 0。" },
+            new() { Id=13, ChapterId=7, Type="truefalse", Difficulty=2, QuestionText="async void 方法可以被 try-catch 捕捉例外。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="錯誤", Explanation="async void 的例外無法被呼叫端捕捉，應該用 async Task。" },
+            new() { Id=14, ChapterId=7, Type="fillin", Difficulty=2, QuestionText="非同步方法的回傳型別通常是 ___<T>", OptionsJson="[]", CorrectAnswer="Task", Explanation="async 方法回傳 Task<T> 或 Task。" },
+            // ── C# 進階 (ChapterId 8-9, 100-104) ──
+            new() { Id=15, ChapterId=8, Type="multiple", Difficulty=2, QuestionText="List<T> 和 Array 最大的差別是？", OptionsJson=@"[""A. List 是固定大小"",""B. Array 可動態調整"",""C. List 可動態調整大小"",""D. 兩者相同""]", CorrectAnswer="C", Explanation="List<T> 可用 Add/Remove 動態調整。" },
+            new() { Id=16, ChapterId=8, Type="truefalse", Difficulty=2, QuestionText="foreach 中可以直接修改正在迭代的集合。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="錯誤", Explanation="foreach 中修改集合會拋出 InvalidOperationException。" },
+            new() { Id=17, ChapterId=9, Type="fillin", Difficulty=1, QuestionText="保留堆疊追蹤的重新拋出語法是 ___; （不是 throw ex;）", OptionsJson="[]", CorrectAnswer="throw", Explanation="throw; 保留堆疊追蹤，throw ex; 會重設。" },
+            new() { Id=18, ChapterId=9, Type="multiple", Difficulty=2, QuestionText="finally 區塊何時執行？", OptionsJson=@"[""A. 只在例外時"",""B. 只在沒例外時"",""C. 無論如何都執行"",""D. 只在 catch 後""]", CorrectAnswer="C", Explanation="finally 無論是否發生例外都會執行。" },
+            new() { Id=19, ChapterId=100, Type="multiple", Difficulty=3, QuestionText="Func<T> 和 Action<T> 的差別是？", OptionsJson=@"[""A. Action 有回傳值"",""B. Func 沒有回傳值"",""C. Func 有回傳值，Action 沒有"",""D. 兩者相同""]", CorrectAnswer="C", Explanation="Func 最後一個泛型參數是回傳型別，Action 回傳 void。" },
+            new() { Id=20, ChapterId=100, Type="fillin", Difficulty=3, QuestionText="C# 中宣告事件的關鍵字是 ___", OptionsJson="[]", CorrectAnswer="event", Explanation="event 限制委派只能在類別內部觸發。" },
+            new() { Id=21, ChapterId=101, Type="fillin", Difficulty=3, QuestionText="取得物件的型別資訊用 obj.___() 方法", OptionsJson="[]", CorrectAnswer="GetType", Explanation="GetType() 回傳 Type 物件，可用於反射。" },
+            new() { Id=22, ChapterId=102, Type="multiple", Difficulty=3, QuestionText="避免競爭條件應該用？", OptionsJson=@"[""A. async/await"",""B. lock"",""C. try/catch"",""D. using""]", CorrectAnswer="B", Explanation="lock 確保同一時間只有一個執行緒存取共享資源。" },
+            new() { Id=23, ChapterId=102, Type="truefalse", Difficulty=3, QuestionText="async/await 和多執行緒是同一件事。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="錯誤", Explanation="async/await 是非同步不阻塞，不一定開新執行緒。" },
+            new() { Id=24, ChapterId=103, Type="fillin", Difficulty=1, QuestionText="大量字串串接應該用 ___ 類別", OptionsJson="[]", CorrectAnswer="StringBuilder", Explanation="StringBuilder 避免每次串接都建立新字串物件。" },
+            new() { Id=25, ChapterId=104, Type="multiple", Difficulty=2, QuestionText="讀取整個文字檔最簡單的方法是？", OptionsJson=@"[""A. File.ReadAllText()"",""B. Console.ReadLine()"",""C. Stream.Read()"",""D. File.Open()""]", CorrectAnswer="A", Explanation="File.ReadAllText() 一行讀取整個檔案。" },
+            // ── ASP.NET Core (ChapterId 10-19, 120-124) ──
+            new() { Id=26, ChapterId=10, Type="multiple", Difficulty=1, QuestionText="MVC 中的 M 代表？", OptionsJson=@"[""A. Module"",""B. Model"",""C. Method"",""D. Manager""]", CorrectAnswer="B", Explanation="MVC = Model、View、Controller。" },
+            new() { Id=27, ChapterId=11, Type="fillin", Difficulty=1, QuestionText="Controller 回傳 View 用 return ___();", OptionsJson="[]", CorrectAnswer="View", Explanation="return View() 回傳對應的 Razor View。" },
+            new() { Id=28, ChapterId=12, Type="multiple", Difficulty=2, QuestionText="[Route(\"api/[controller]\")] 屬於哪種路由？", OptionsJson=@"[""A. Conventional"",""B. Attribute"",""C. Area"",""D. Default""]", CorrectAnswer="B", Explanation="用 [Route] 特性標記的是 Attribute Routing。" },
+            new() { Id=29, ChapterId=13, Type="fillin", Difficulty=1, QuestionText="Razor 中顯示 C# 變數用 ___ 符號開頭", OptionsJson="[]", CorrectAnswer="@", Explanation="@ 符號切換到 C# 程式碼。" },
+            new() { Id=30, ChapterId=14, Type="order", Difficulty=3, QuestionText="排出 Middleware 管線的正確順序", OptionsJson=@"[""UseAuthorization"",""UseRouting"",""UseAuthentication"",""UseHttpsRedirection""]", CorrectAnswer="4,2,3,1", Explanation="HttpsRedirection → Routing → Authentication → Authorization" },
+            new() { Id=31, ChapterId=15, Type="multiple", Difficulty=2, QuestionText="AddScoped 的生命週期是？", OptionsJson=@"[""A. 每次注入建一個"",""B. 每個 Request 一個"",""C. 整個 App 一個"",""D. 每個 Controller 一個""]", CorrectAnswer="B", Explanation="Scoped 每個 HTTP Request 共享同一個實例。" },
+            new() { Id=32, ChapterId=15, Type="truefalse", Difficulty=3, QuestionText="Singleton 中注入 Scoped 服務是安全的。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="錯誤", Explanation="Captive Dependency 問題，Scoped 生命週期被拉長。" },
+            new() { Id=33, ChapterId=16, Type="truefalse", Difficulty=2, QuestionText="JWT 存在 localStorage 比 HttpOnly Cookie 安全。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="錯誤", Explanation="localStorage 容易被 XSS 攻擊讀取。" },
+            new() { Id=34, ChapterId=17, Type="fillin", Difficulty=2, QuestionText="接收 JSON Body 參數用 [___] 特性", OptionsJson="[]", CorrectAnswer="FromBody", Explanation="[FromBody] 從 Request Body 反序列化參數。" },
+            new() { Id=35, ChapterId=17, Type="multiple", Difficulty=2, QuestionText="更新資源用哪個 HTTP Method？", OptionsJson=@"[""A. GET"",""B. POST"",""C. PUT"",""D. DELETE""]", CorrectAnswer="C", Explanation="PUT 更新完整資源，PATCH 部分更新。" },
+            new() { Id=36, ChapterId=18, Type="multiple", Difficulty=2, QuestionText="SignalR 的核心類別叫？", OptionsJson=@"[""A. Controller"",""B. Hub"",""C. Middleware"",""D. Handler""]", CorrectAnswer="B", Explanation="Hub 處理即時連線和訊息。" },
+            new() { Id=37, ChapterId=19, Type="fillin", Difficulty=2, QuestionText="xUnit 中標記測試方法的特性是 [___]", OptionsJson="[]", CorrectAnswer="Fact", Explanation="[Fact] 標記無參數測試方法。" },
+            new() { Id=38, ChapterId=120, Type="multiple", Difficulty=2, QuestionText="Minimal API 定義 GET 端點用？", OptionsJson=@"[""A. app.UseGet()"",""B. app.MapGet()"",""C. app.AddGet()"",""D. app.RouteGet()""]", CorrectAnswer="B", Explanation="app.MapGet() 是 Minimal API 定義端點的方式。" },
+            new() { Id=39, ChapterId=121, Type="truefalse", Difficulty=1, QuestionText="Razor Pages 的 .cshtml 必須以 @page 開頭。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="正確", Explanation="沒有 @page 就不會被當作頁面處理。" },
+            new() { Id=40, ChapterId=122, Type="multiple", Difficulty=3, QuestionText="Filter 的執行順序是？", OptionsJson=@"[""A. Action → Authorization"",""B. Authorization → Resource → Action"",""C. Resource → Authorization"",""D. Action → Resource""]", CorrectAnswer="B", Explanation="Authorization → Resource → Action → Exception → Result" },
+            new() { Id=41, ChapterId=123, Type="multiple", Difficulty=2, QuestionText="Blazor Server 的特色是？", OptionsJson=@"[""A. 在瀏覽器執行 C#"",""B. 在伺服器執行，透過 SignalR 更新 UI"",""C. 完全靜態頁面"",""D. 只支援 JavaScript""]", CorrectAnswer="B", Explanation="Blazor Server 在伺服器執行，透過 SignalR 推送 UI 差異。" },
+            new() { Id=42, ChapterId=124, Type="fillin", Difficulty=2, QuestionText="RESTful URL 應該用名詞：/api/___ 而非 /api/getUsers", OptionsJson="[]", CorrectAnswer="users", Explanation="REST 慣例用名詞複數，HTTP Method 表達動作。" },
+            // ── 資料庫 (ChapterId 20-28) ──
+            new() { Id=43, ChapterId=20, Type="fillin", Difficulty=1, QuestionText="SQL 查詢所有欄位：SELECT ___ FROM Table", OptionsJson="[]", CorrectAnswer="*", Explanation="* 代表所有欄位。" },
+            new() { Id=44, ChapterId=20, Type="multiple", Difficulty=1, QuestionText="刪除資料用哪個關鍵字？", OptionsJson=@"[""A. REMOVE"",""B. DELETE"",""C. DROP"",""D. ERASE""]", CorrectAnswer="B", Explanation="DELETE 刪除資料列，DROP 刪除整個表。" },
+            new() { Id=45, ChapterId=21, Type="multiple", Difficulty=2, QuestionText="SaveChanges() 的作用是？", OptionsJson=@"[""A. 讀取資料"",""B. 建立資料表"",""C. 將變更寫入資料庫"",""D. 關閉連線""]", CorrectAnswer="C", Explanation="SaveChanges() 將所有變更一次寫入資料庫。" },
+            new() { Id=46, ChapterId=21, Type="fillin", Difficulty=2, QuestionText="EF Core 急載入關聯資料用 .___() 方法", OptionsJson="[]", CorrectAnswer="Include", Explanation="Include() 是 Eager Loading。" },
+            new() { Id=47, ChapterId=22, Type="fillin", Difficulty=2, QuestionText="SQL 中合併兩個資料表用 ___ 關鍵字", OptionsJson="[]", CorrectAnswer="JOIN", Explanation="JOIN 根據關聯欄位合併多個資料表。" },
+            new() { Id=48, ChapterId=23, Type="truefalse", Difficulty=3, QuestionText="EF Core 預設啟用 Lazy Loading。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="錯誤", Explanation="需要安裝額外套件並設定才能啟用。" },
+            new() { Id=49, ChapterId=24, Type="multiple", Difficulty=2, QuestionText="Dapper 相比 EF Core 的優勢是？", OptionsJson=@"[""A. 自動追蹤"",""B. 效能更好"",""C. 不需寫 SQL"",""D. 自動建表""]", CorrectAnswer="B", Explanation="Dapper 幾乎零開銷，接近原生 ADO.NET。" },
+            new() { Id=50, ChapterId=25, Type="fillin", Difficulty=2, QuestionText="EF Core 建立遷移：dotnet ef migrations ___", OptionsJson="[]", CorrectAnswer="add", Explanation="dotnet ef migrations add [Name] 建立遷移。" },
+            new() { Id=51, ChapterId=26, Type="multiple", Difficulty=3, QuestionText="N+1 問題是什麼？", OptionsJson=@"[""A. 查詢 N+1 個資料表"",""B. 主查詢 1 次 + 每筆額外查 N 次"",""C. N+1 個連線"",""D. 索引有 N+1 層""]", CorrectAnswer="B", Explanation="1 次主查詢 + N 次子查詢，用 Include() 解決。" },
+            new() { Id=52, ChapterId=26, Type="truefalse", Difficulty=3, QuestionText="每個欄位都建索引可以提升效能。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="錯誤", Explanation="過多索引拖慢寫入效能。" },
+            new() { Id=53, ChapterId=27, Type="multiple", Difficulty=3, QuestionText="ACID 中的 I 代表？", OptionsJson=@"[""A. Identity"",""B. Integrity"",""C. Isolation"",""D. Integration""]", CorrectAnswer="C", Explanation="Isolation（隔離性）：交易之間互不干擾。" },
+            new() { Id=54, ChapterId=28, Type="truefalse", Difficulty=2, QuestionText="Stored Procedure 比直接 SQL 更安全。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="正確", Explanation="SP 自動參數化，降低 SQL Injection 風險。" },
+            // ── 網路 (ChapterId 30-33) ──
+            new() { Id=55, ChapterId=30, Type="multiple", Difficulty=1, QuestionText="OSI 模型共有幾層？", OptionsJson=@"[""A. 4"",""B. 5"",""C. 7"",""D. 8""]", CorrectAnswer="C", Explanation="OSI 七層模型。" },
+            new() { Id=56, ChapterId=30, Type="fillin", Difficulty=1, QuestionText="HTTP 預設使用 TCP 的 ___ 埠", OptionsJson="[]", CorrectAnswer="80", Explanation="HTTP 用 80，HTTPS 用 443。" },
+            new() { Id=57, ChapterId=31, Type="multiple", Difficulty=2, QuestionText="HTTP 404 代表？", OptionsJson=@"[""A. 伺服器錯誤"",""B. 找不到資源"",""C. 未授權"",""D. 重新導向""]", CorrectAnswer="B", Explanation="404 Not Found。" },
+            new() { Id=58, ChapterId=31, Type="multiple", Difficulty=1, QuestionText="HTTPS 預設埠號是？", OptionsJson=@"[""A. 80"",""B. 443"",""C. 8080"",""D. 3000""]", CorrectAnswer="B", Explanation="HTTPS 預設 443 埠。" },
+            new() { Id=59, ChapterId=32, Type="fillin", Difficulty=2, QuestionText="DNS 全名是 Domain ___ System", OptionsJson="[]", CorrectAnswer="Name", Explanation="DNS = Domain Name System。" },
+            new() { Id=60, ChapterId=33, Type="truefalse", Difficulty=2, QuestionText="WebSocket 是全雙工通訊。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="正確", Explanation="WebSocket 建立連線後雙方可同時發送資料。" },
+            // ── 資安 (ChapterId 40-43) ──
+            new() { Id=61, ChapterId=40, Type="multiple", Difficulty=2, QuestionText="OWASP Top 10 第一名的風險是？", OptionsJson=@"[""A. XSS"",""B. SQL Injection"",""C. Broken Access Control"",""D. CSRF""]", CorrectAnswer="C", Explanation="2021 年第一名是 Broken Access Control。" },
+            new() { Id=62, ChapterId=40, Type="fillin", Difficulty=2, QuestionText="防止 SQL Injection 最有效的方法是___查詢", OptionsJson="[]", CorrectAnswer="參數化", Explanation="參數化查詢讓 SQL 引擎區分資料和指令。" },
+            new() { Id=63, ChapterId=41, Type="multiple", Difficulty=2, QuestionText="JWT 的三個部分是？", OptionsJson=@"[""A. User.Pass.Token"",""B. Header.Payload.Signature"",""C. Key.Value.Hash"",""D. Auth.Data.Sign""]", CorrectAnswer="B", Explanation="JWT = Header.Payload.Signature。" },
+            new() { Id=64, ChapterId=41, Type="truefalse", Difficulty=3, QuestionText="OAuth 2.0 是認證協議。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="錯誤", Explanation="OAuth 2.0 是授權協議，OpenID Connect 才是認證。" },
+            new() { Id=65, ChapterId=42, Type="truefalse", Difficulty=3, QuestionText="MD5 適合儲存使用者密碼。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="錯誤", Explanation="MD5 太快已被破解，應用 bcrypt 或 Argon2。" },
+            new() { Id=66, ChapterId=42, Type="multiple", Difficulty=3, QuestionText="bcrypt 比 MD5 更適合儲存密碼因為？", OptionsJson=@"[""A. bcrypt 更快"",""B. bcrypt 有 Salt 且刻意設計得慢"",""C. MD5 輸出更長"",""D. bcrypt 是加密非雜湊""]", CorrectAnswer="B", Explanation="bcrypt 內建 Salt + Cost Factor。" },
+            new() { Id=67, ChapterId=43, Type="fillin", Difficulty=2, QuestionText="ASP.NET Core 防 CSRF 的 Token 叫 ___ForgeryToken", OptionsJson="[]", CorrectAnswer="Anti", Explanation="@Html.AntiForgeryToken() 防止 CSRF。" },
+            // ── Docker (ChapterId 50-53) ──
+            new() { Id=68, ChapterId=50, Type="multiple", Difficulty=1, QuestionText="Docker 容器和 VM 的差別是？", OptionsJson=@"[""A. 容器有獨立 OS"",""B. 容器共享主機 OS 核心"",""C. VM 更輕量"",""D. 兩者相同""]", CorrectAnswer="B", Explanation="容器共享主機 OS 核心，比 VM 輕量。" },
+            new() { Id=69, ChapterId=50, Type="fillin", Difficulty=1, QuestionText="建立 Docker 映像的指令是 docker ___", OptionsJson="[]", CorrectAnswer="build", Explanation="docker build -t myapp . 建立映像。" },
+            new() { Id=70, ChapterId=51, Type="multiple", Difficulty=2, QuestionText="Docker Compose 設定檔名稱是？", OptionsJson=@"[""A. Dockerfile"",""B. docker-compose.yml"",""C. compose.json"",""D. docker.config""]", CorrectAnswer="B", Explanation="docker-compose.yml 定義多容器編排。" },
+            new() { Id=71, ChapterId=52, Type="order", Difficulty=2, QuestionText="排出 CI/CD Pipeline 正確順序", OptionsJson=@"[""部署"",""推送 Git"",""自動化測試"",""建置""]", CorrectAnswer="2,4,3,1", Explanation="推送 → Build → Test → Deploy" },
+            new() { Id=72, ChapterId=52, Type="fillin", Difficulty=2, QuestionText="GitHub Actions 工作流程放在 .github/___ 資料夾", OptionsJson="[]", CorrectAnswer="workflows", Explanation=".github/workflows/ 存放 YAML 工作流程。" },
+            new() { Id=73, ChapterId=53, Type="truefalse", Difficulty=2, QuestionText="連線字串寫死在程式碼中是安全的。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="錯誤", Explanation="應該用環境變數或 Secret Manager。" },
+            // ── 設計模式 (ChapterId 200-203) ──
+            new() { Id=74, ChapterId=200, Type="multiple", Difficulty=2, QuestionText="SOLID 中的 S 代表？", OptionsJson=@"[""A. Singleton"",""B. Single Responsibility"",""C. Static"",""D. Sealed""]", CorrectAnswer="B", Explanation="Single Responsibility：一個類別只負責一件事。" },
+            new() { Id=75, ChapterId=200, Type="fillin", Difficulty=2, QuestionText="SOLID 中的 D 代表 Dependency ___", OptionsJson="[]", CorrectAnswer="Inversion", Explanation="依賴抽象，不依賴具體實作。" },
+            new() { Id=76, ChapterId=200, Type="order", Difficulty=3, QuestionText="排出 SOLID 的正確順序（S-O-L-I-D）", OptionsJson=@"[""Interface Segregation"",""Liskov Substitution"",""Single Responsibility"",""Dependency Inversion"",""Open-Closed""]", CorrectAnswer="3,5,2,1,4", Explanation="S=Single, O=Open-Closed, L=Liskov, I=Interface, D=Dependency" },
+            new() { Id=77, ChapterId=201, Type="multiple", Difficulty=3, QuestionText="Singleton Pattern 確保？", OptionsJson=@"[""A. 每次都建新物件"",""B. 全程式只有一個實例"",""C. 物件不能修改"",""D. 不能被繼承""]", CorrectAnswer="B", Explanation="Singleton 保證只有一個實例。" },
+            new() { Id=78, ChapterId=201, Type="fillin", Difficulty=3, QuestionText="執行緒安全 Singleton 可用 ___<T> 類別", OptionsJson="[]", CorrectAnswer="Lazy", Explanation="Lazy<T> 延遲初始化且執行緒安全。" },
+            new() { Id=79, ChapterId=202, Type="multiple", Difficulty=3, QuestionText="Observer Pattern 最像？", OptionsJson=@"[""A. 工廠生產"",""B. YouTube 訂閱通知"",""C. 排隊買票"",""D. 開車導航""]", CorrectAnswer="B", Explanation="Observer = 訂閱者模式，有更新就通知。" },
+            new() { Id=80, ChapterId=203, Type="truefalse", Difficulty=3, QuestionText="Clean Architecture 中 Domain 層可以依賴 Infrastructure 層。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="錯誤", Explanation="內層不能依賴外層，Domain 是最內層。" },
+            // ── 基礎設施 (ChapterId 300-303) ──
+            new() { Id=81, ChapterId=300, Type="multiple", Difficulty=2, QuestionText="SlidingExpiration 是什麼意思？", OptionsJson=@"[""A. 固定時間後過期"",""B. 每次存取延長過期"",""C. 永不過期"",""D. 隨機過期""]", CorrectAnswer="B", Explanation="Sliding 每次存取重新計算過期時間。" },
+            new() { Id=82, ChapterId=300, Type="truefalse", Difficulty=2, QuestionText="Redis 是記憶體內資料庫，適合分散式快取。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="正確", Explanation="Redis 讀取速度極快。" },
+            new() { Id=83, ChapterId=301, Type="order", Difficulty=2, QuestionText="排出 Log Level 從低到高", OptionsJson=@"[""Error"",""Information"",""Trace"",""Warning""]", CorrectAnswer="3,2,4,1", Explanation="Trace → Debug → Information → Warning → Error → Critical" },
+            new() { Id=84, ChapterId=301, Type="fillin", Difficulty=2, QuestionText="ASP.NET Core 內建日誌介面是 ___<T>", OptionsJson="[]", CorrectAnswer="ILogger", Explanation="ILogger<T> 透過 DI 注入。" },
+            new() { Id=85, ChapterId=302, Type="fillin", Difficulty=3, QuestionText="高效能記憶體片段存取用 ___<T> 結構", OptionsJson="[]", CorrectAnswer="Span", Explanation="Span<T> 避免不必要的記憶體配置。" },
+            new() { Id=86, ChapterId=303, Type="multiple", Difficulty=1, QuestionText=".NET 8 屬於哪個版本系列？", OptionsJson=@"[""A. .NET Framework"",""B. .NET Core"",""C. .NET（統一版本）"",""D. Mono""]", CorrectAnswer="C", Explanation="從 .NET 5 開始統一為 .NET。" },
+            new() { Id=87, ChapterId=303, Type="fillin", Difficulty=1, QuestionText="建立新 MVC 專案：dotnet ___ mvc", OptionsJson="[]", CorrectAnswer="new", Explanation="dotnet new mvc 建立 MVC 專案。" },
+            // ── AI 應用 (ChapterId 400-405) ──
+            new() { Id=88, ChapterId=400, Type="multiple", Difficulty=1, QuestionText="Claude Code 是什麼？", OptionsJson=@"[""A. 圖片編輯器"",""B. AI 輔助開發 CLI"",""C. 資料庫工具"",""D. 瀏覽器""]", CorrectAnswer="B", Explanation="Claude Code 是 Anthropic 的 AI 輔助開發工具。" },
+            new() { Id=89, ChapterId=401, Type="multiple", Difficulty=2, QuestionText="好的 Prompt 應該包含？", OptionsJson=@"[""A. 越短越好"",""B. 角色+背景+任務+格式"",""C. 只寫一個字"",""D. 全用英文""]", CorrectAnswer="B", Explanation="Prompt 公式：角色+背景+任務+格式+限制。" },
+            new() { Id=90, ChapterId=402, Type="fillin", Difficulty=2, QuestionText="Claude Code 的專案記憶檔案叫 ___.md", OptionsJson="[]", CorrectAnswer="CLAUDE", Explanation="CLAUDE.md 每次對話自動載入。" },
+            new() { Id=91, ChapterId=403, Type="multiple", Difficulty=2, QuestionText="MCP 的全名是？", OptionsJson=@"[""A. Model Control Panel"",""B. Model Context Protocol"",""C. Microsoft Cloud"",""D. Multi Core Processing""]", CorrectAnswer="B", Explanation="MCP = Model Context Protocol。" },
+            new() { Id=92, ChapterId=403, Type="truefalse", Difficulty=2, QuestionText=".mcp.json 放在專案根目錄就會自動載入。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="正確", Explanation="Claude Code 啟動時自動讀取並啟動 MCP Server。" },
+            new() { Id=93, ChapterId=404, Type="truefalse", Difficulty=2, QuestionText="CLAUDE.md 使用快取，幾乎不花額外 Token。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="正確", Explanation="CLAUDE.md 有快取機制。" },
+            new() { Id=94, ChapterId=404, Type="multiple", Difficulty=2, QuestionText="最省 Token 的方式是？", OptionsJson=@"[""A. 每次重新解釋背景"",""B. 用 CLAUDE.md 自動載入"",""C. 不用記憶"",""D. 每次貼完整程式碼""]", CorrectAnswer="B", Explanation="CLAUDE.md 有快取，自動載入幾乎 0 Token。" },
+            new() { Id=95, ChapterId=405, Type="order", Difficulty=2, QuestionText="排出 AI 協作開發流程", OptionsJson=@"[""自動化部署"",""寫 Prompt"",""測試驗證"",""AI 執行開發""]", CorrectAnswer="2,4,3,1", Explanation="Prompt → AI 開發 → 測試 → 部署" },
+            // ── 補滿到 100 ──
+            new() { Id=96, ChapterId=2, Type="order", Difficulty=1, QuestionText="排出變數宣告的正確順序", OptionsJson=@"[""= 42;"",""int"",""myVar""]", CorrectAnswer="2,3,1", Explanation="int myVar = 42;" },
+            new() { Id=97, ChapterId=5, Type="order", Difficulty=2, QuestionText="排出建立物件的正確順序", OptionsJson=@"[""();"",""new"",""Dog"",""Dog myDog =""]", CorrectAnswer="4,2,3,1", Explanation="Dog myDog = new Dog();" },
+            new() { Id=98, ChapterId=7, Type="order", Difficulty=2, QuestionText="排出非同步方法宣告順序", OptionsJson=@"[""{...}"",""async"",""Task<string>"",""GetDataAsync()""]", CorrectAnswer="2,3,4,1", Explanation="async Task<string> GetDataAsync() {...}" },
+            new() { Id=99, ChapterId=14, Type="truefalse", Difficulty=2, QuestionText="Middleware 順序很重要，錯誤順序可能導致功能異常。", OptionsJson=@"[""正確"",""錯誤""]", CorrectAnswer="正確", Explanation="UseAuthentication 必須在 UseAuthorization 之前。" },
+            new() { Id=100, ChapterId=24, Type="fillin", Difficulty=2, QuestionText="Dapper 查詢單筆用 connection.___<T>(sql)", OptionsJson="[]", CorrectAnswer="QueryFirstOrDefault", Explanation="QueryFirstOrDefault 回傳第一筆或預設值。" },
+        };
+    }
+}

@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — .NET 學習平台</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-one-dark.min.css" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+</head>
+<body>
+    <!-- Top Navbar -->
+    <nav class="topnav">
+        <button class="hamburger" onclick="toggleMobileNav()" aria-label="選單">
+            <span></span><span></span><span></span>
+        </button>
+        <a href="/" class="logo">
+            <span style="font-weight:800;font-size:1.1rem;color:#fff;">⚡ DevLearn</span>
+        </a>
+        <div class="nav-search">
+            <input type="text" id="globalSearch" placeholder="搜尋章節..." autocomplete="off" />
+            <div id="searchResults" class="search-dropdown"></div>
+        </div>
+        <div class="nav-right" id="navRight">
+            <a href="/CheckIn" class="nav-scores-link">📅 簽到</a>
+            <a href="/Daily" class="nav-scores-link">🔥 每日</a>
+            <div class="nav-dropdown">
+                <button class="nav-scores-link nav-dropdown-btn">🎮 遊戲 ▾</button>
+                <div class="nav-dropdown-menu">
+                    <a href="/Detective">🔍 程式碼偵探</a>
+                    <a href="/Speed">⏱️ 速度挑戰</a>
+                    <a href="/Puzzle">🧩 填字遊戲</a>
+                    <a href="/Arena">⚔️ 程式碼擂台</a>
+                </div>
+            </div>
+            <div class="nav-dropdown">
+                <button class="nav-scores-link nav-dropdown-btn">📚 工具 ▾</button>
+                <div class="nav-dropdown-menu">
+                    <a href="/Analytics">📊 學習分析</a>
+                    <a href="/Flashcard">🃏 暗記卡片</a>
+                    <a href="/Snippet">📌 程式碼收藏</a>
+                    <a href="/QnA">❓ 問答區</a>
+                    <a href="/Buddy">👥 學習夥伴</a>
+                    <a href="/Leaderboard">🏆 排行榜</a>
+                </div>
+            </div>
+            <a href="/Teacher" class="nav-scores-link">&#x1F468;&#x200D;&#x1F3EB; &#x627E;&#x8001;&#x5E2B;</a>
+            <a href="/Account/Profile" class="nav-scores-link" id="navUserLink">&#x1F464; &#x6211;&#x7684;</a>
+            <span id="totalProgress" class="progress-badge">⏳ 載入中</span>
+        </div>
+    </nav>
+
+    @RenderBody()
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/ideas.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Chat Sidebar Widget -->
+    <style>
+        #chatToggleBtn{position:fixed;bottom:24px;right:24px;z-index:10000;background:var(--accent);color:#fff;border:none;border-radius:50px;padding:10px 20px;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(99,102,241,.3);transition:all .3s ease;font-family:'Noto Sans TC',sans-serif}
+        #chatToggleBtn:hover{transform:scale(1.05);box-shadow:0 6px 28px rgba(99,102,241,.4)}
+        #chatToggleBtn .chat-unread{display:none;background:var(--accent3);color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;position:absolute;top:-4px;right:-4px}
+
+        #chatPanel{position:fixed;top:0;right:-360px;width:340px;height:100dvh;height:100vh;z-index:9999;display:flex;flex-direction:column;background:rgba(13,17,23,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-left:1px solid var(--border);transition:right .35s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 30px rgba(0,0,0,.4)}
+        #chatPanel.open{right:0}
+
+        .chat-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);background:rgba(19,34,56,.8);min-height:54px}
+        .chat-header-title{font-size:15px;font-weight:700;color:var(--text)}
+        .chat-online{font-size:12px;color:#4caf50;margin-left:8px;white-space:nowrap}
+        .chat-close-btn{background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .2s}
+        .chat-close-btn:hover{background:var(--bg4);color:var(--text)}
+
+        .chat-nickname-setup{padding:20px 16px;text-align:center;border-bottom:1px solid var(--border)}
+        .chat-nickname-setup label{display:block;font-size:13px;color:var(--text-muted);margin-bottom:8px}
+        .chat-nickname-setup input{width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;margin-bottom:12px;outline:none;font-family:'Noto Sans TC',sans-serif}
+        .chat-nickname-setup input:focus{border-color:var(--accent)}
+        .emoji-selector{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+        .emoji-selector span{font-size:22px;cursor:pointer;padding:4px 6px;border-radius:8px;border:2px solid transparent;transition:all .2s}
+        .emoji-selector span:hover,.emoji-selector span.selected{border-color:var(--accent);background:var(--bg4);transform:scale(1.15)}
+        .chat-join-btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 24px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Noto Sans TC',sans-serif}
+        .chat-join-btn:hover{background:var(--accent2)}
+
+        .chat-messages{flex:1;overflow-y:auto;padding:12px;padding-bottom:60px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+        .chat-messages::-webkit-scrollbar{width:5px}
+        .chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+
+        .chat-msg{display:flex;gap:8px;max-width:90%;animation:chatFadeIn .3s ease}
+        .chat-msg.mine{align-self:flex-end;flex-direction:row-reverse}
+        .chat-msg-avatar{font-size:20px;flex-shrink:0;margin-top:2px}
+        .chat-msg-body{background:var(--bg3);border-radius:12px;padding:8px 12px;min-width:0}
+        .chat-msg.mine .chat-msg-body{background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.25)}
+        .chat-msg-meta{display:flex;align-items:center;gap:6px;margin-bottom:2px}
+        .chat-msg-nick{font-size:12px;font-weight:600;color:var(--accent)}
+        .chat-msg-time{font-size:10px;color:var(--text-dim)}
+        .chat-msg-text{font-size:13px;color:var(--text);line-height:1.5;word-break:break-word}
+
+        .chat-input-area{position:absolute;bottom:0;left:0;right:0;display:flex;gap:8px;padding:8px;border-top:1px solid rgba(255,255,255,0.1);background:rgba(15,17,23,0.98);flex-shrink:0;z-index:10}
+        .chat-input-area input{flex:1;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;outline:none;font-family:'Noto Sans TC',sans-serif}
+        .chat-input-area input:focus{border-color:var(--accent)}
+        .chat-input-area button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Noto Sans TC',sans-serif;white-space:nowrap}
+        .chat-input-area button:hover{background:var(--accent2)}
+        .chat-input-area button:disabled{opacity:.5;cursor:not-allowed}
+
+        @@keyframes chatFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+        @@media(max-width:600px){
+            #chatPanel{width:100vw;right:-100vw;height:100dvh;height:-webkit-fill-available}
+            #chatToggleBtn{bottom:16px;right:16px;padding:12px 20px;font-size:16px}
+            .chat-input-area{position:fixed !important;bottom:0 !important;left:0 !important;right:0 !important;padding:10px 12px !important;padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px)) !important;background:rgba(15,17,23,0.99) !important;z-index:10001 !important;border-top:1px solid rgba(255,255,255,0.15) !important}
+            .chat-input-area input{font-size:16px !important;padding:12px !important;border-radius:10px !important}
+            .chat-input-area button{padding:12px 18px !important;font-size:15px !important;min-width:60px;border-radius:10px !important}
+            .chat-messages{flex:1;overflow-y:auto;padding-bottom:80px !important;-webkit-overflow-scrolling:touch}
+            .pm-chat-input{position:fixed !important;bottom:0 !important;left:0 !important;right:0 !important;padding:10px 12px !important;padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px)) !important;background:rgba(15,17,23,0.99) !important;z-index:10001 !important}
+            .pm-chat-input input{font-size:16px !important;padding:12px !important}
+            .pm-chat-msgs{flex:1;overflow-y:auto;padding-bottom:80px !important;-webkit-overflow-scrolling:touch}
+            .chat-tab{padding:10px 4px !important;font-size:12px !important}
+            .chat-nickname-setup{padding:15px !important}
+            .chat-join-btn{padding:12px !important;font-size:15px !important}
+            .pm-tab-content.active{display:flex;flex-direction:column;overflow:hidden;position:relative}
+        }
+        @@media(max-width:900px){
+            #chatToggleBtn{z-index:10001;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+            .chat-tab{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+            #chatSendBtn{min-width:50px;-webkit-tap-highlight-color:transparent}
+        }
+    </style>
+
+    <style>
+        .chat-tabs{display:flex;border-bottom:1px solid var(--border);background:rgba(19,34,56,.6)}
+        .chat-tab{flex:1;padding:10px 8px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--text-muted);font-family:'Noto Sans TC',sans-serif;transition:all .2s;position:relative}
+        .chat-tab.active{color:var(--accent);border-bottom:2px solid var(--accent)}
+        .chat-tab:hover{color:var(--text)}
+        .chat-tab .tab-badge{display:inline-block;background:var(--accent3,#e94560);color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;line-height:18px;text-align:center;margin-left:4px;vertical-align:middle}
+        .pm-tab-content{display:none;flex-direction:column;flex:1;overflow:hidden;position:relative}
+        .pm-tab-content.active{display:flex}
+        .pm-conv-list{flex:1;overflow-y:auto;padding:8px}
+        .pm-conv-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .2s;margin-bottom:4px}
+        .pm-conv-item:hover{background:var(--bg4)}
+        .pm-conv-name{font-size:13px;font-weight:600;color:var(--text)}
+        .pm-conv-preview{font-size:12px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+        .pm-conv-time{font-size:11px;color:var(--text-dim);white-space:nowrap}
+        .pm-conv-unread{background:var(--accent3,#e94560);color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;flex-shrink:0}
+        .pm-chat-header{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border);font-size:14px;font-weight:600}
+        .pm-chat-header button{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;padding:2px 6px}
+        .pm-chat-msgs{flex:1;overflow-y:auto;padding:10px;padding-bottom:60px;display:flex;flex-direction:column;gap:6px}
+        .pm-chat-input{display:flex;gap:8px;padding:10px 12px;border-top:1px solid rgba(255,255,255,0.1);position:absolute;bottom:0;left:0;right:0;background:rgba(15,17,23,0.98);z-index:10}
+        .pm-chat-input input{flex:1;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;outline:none;font-family:'Noto Sans TC',sans-serif}
+        .pm-chat-input input:focus{border-color:var(--accent)}
+        .pm-chat-input button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap}
+        .pm-refresh-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;padding:4px 10px;font-size:12px;margin:6px 8px}
+        .pm-refresh-btn:hover{border-color:var(--accent);color:var(--accent)}
+    </style>
+
+    <button id="chatToggleBtn" onclick="toggleChat()">
+        <span class="chat-unread" id="chatUnread">0</span>
+        💬 聊天室
+    </button>
+
+    <div id="chatPanel">
+        <div class="chat-header">
+            <span class="chat-header-title">&#x1F4AC; &#x5373;&#x6642;&#x804A;&#x5929;&#x5BA4; <span class="chat-online" id="chatOnline">&#x1F7E2; 0 &#x4EBA;&#x5728;&#x7DDA;</span></span>
+            <button class="chat-close-btn" onclick="toggleChat()" title="&#x6700;&#x5C0F;&#x5316;">&#x2715;</button>
+        </div>
+        <div class="chat-tabs">
+            <button class="chat-tab active" id="tabPublic" onclick="switchChatTab('public')">&#x1F4AC; &#x516C;&#x958B;&#x804A;&#x5929;</button>
+            <button class="chat-tab" id="tabPm" onclick="switchChatTab('pm')">&#x1F4E9; &#x79C1;&#x8A0A; <span class="tab-badge" id="pmBadge" style="display:none">0</span></button>
+            <button class="chat-tab" id="tabSupport" onclick="switchChatTab('support')">&#x1F4DE; &#x5BA2;&#x670D; <span class="tab-badge" id="supportBadge" style="display:none">0</span></button>
+        </div>
+        <!-- Public Chat Tab -->
+        <div class="pm-tab-content active" id="publicTabContent">
+            <div class="chat-nickname-setup" id="chatSetup">
+                <label>&#x8A2D;&#x5B9A;&#x4F60;&#x7684;&#x66B1;&#x7A31;</label>
+                <input type="text" id="chatNickInput" placeholder="&#x8F38;&#x5165;&#x66B1;&#x7A31;..." maxlength="20" />
+                <label style="margin-top:8px">&#x9078;&#x64C7;&#x982D;&#x50CF;</label>
+                <div class="emoji-selector" id="emojiSelector">
+                    <span class="selected" data-emoji="&#x1F600;">&#x1F600;</span>
+                    <span data-emoji="&#x1F60E;">&#x1F60E;</span>
+                    <span data-emoji="&#x1F913;">&#x1F913;</span>
+                    <span data-emoji="&#x1F4BB;">&#x1F4BB;</span>
+                    <span data-emoji="&#x1F3AE;">&#x1F3AE;</span>
+                    <span data-emoji="&#x1F3B8;">&#x1F3B8;</span>
+                    <span data-emoji="&#x1F525;">&#x1F525;</span>
+                    <span data-emoji="&#x2B50;">&#x2B50;</span>
+                </div>
+                <button class="chat-join-btn" onclick="joinChat()">&#x52A0;&#x5165;&#x804A;&#x5929;</button>
+            </div>
+            <div class="chat-messages" id="chatMessages" style="display:none"></div>
+            <div class="chat-input-area" id="chatInputArea" style="display:none">
+                <input type="text" id="chatMsgInput" placeholder="&#x8F38;&#x5165;&#x8A0A;&#x606F;..." maxlength="500" />
+                <button id="chatSendBtn" onclick="sendChatMsg()">&#x50B3;&#x9001;</button>
+            </div>
+        </div>
+        <!-- Support Tab -->
+        <div class="pm-tab-content" id="supportTabContent">
+            <div style="padding:10px 12px;overflow-y:auto;flex:1;">
+                <div id="supportNewForm">
+                    <div onclick="toggleSupportForm()" style="cursor:pointer;padding:8px 12px;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);border-radius:8px;font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px;text-align:center;">&#x2795; &#x65B0;&#x554F;&#x984C;</div>
+                    <div id="supportFormBody" style="display:none;margin-bottom:12px;">
+                        <select id="supportCategory" style="width:100%;padding:7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;margin-bottom:8px;font-family:'Noto Sans TC',sans-serif;">
+                            <option value="網站問題回報">🐛 網站問題回報</option>
+                            <option value="技術問題">💻 技術問題</option>
+                            <option value="付款問題">💳 付款問題</option>
+                            <option value="老師相關">👨‍🏫 老師相關</option>
+                            <option value="預約問題">📅 預約問題</option>
+                            <option value="功能建議">💡 功能建議</option>
+                            <option value="其他">&#x2753; &#x5176;&#x4ED6;</option>
+                        </select>
+                        <textarea id="supportContent" placeholder="&#x8ACB;&#x63CF;&#x8FF0;&#x60A8;&#x7684;&#x554F;&#x984C;..." style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;min-height:70px;resize:vertical;font-family:'Noto Sans TC',sans-serif;margin-bottom:8px;"></textarea>
+                        <button onclick="submitSupportTicket()" style="width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans TC',sans-serif;">&#x50B3;&#x9001;</button>
+                    </div>
+                </div>
+                <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">&#x1F4CB; &#x6211;&#x7684;&#x5DE5;&#x55AE;</div>
+                <div id="supportTicketList" style="display:flex;flex-direction:column;gap:6px;"></div>
+            </div>
+        </div>
+        <!-- Private Messages Tab -->
+        <div class="pm-tab-content" id="pmTabContent">
+            <div id="pmConvList" class="pm-conv-list">
+                <button class="pm-refresh-btn" onclick="loadPmConversations()">&#x1F504; &#x91CD;&#x65B0;&#x6574;&#x7406;</button>
+                <div id="pmConvItems" style="margin-top:4px;"></div>
+            </div>
+            <div id="pmChatView" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+                <div class="pm-chat-header">
+                    <button onclick="backToConvList()">&#x2190;</button>
+                    <span id="pmChatName">&#x5C0D;&#x8A71;</span>
+                    <button onclick="refreshPmChat()" style="margin-left:auto;">&#x1F504;</button>
+                </div>
+                <div class="pm-chat-msgs" id="pmChatMsgs"></div>
+                <div class="pm-chat-input">
+                    <input type="text" id="pmChatInput" placeholder="&#x8F38;&#x5165;&#x79C1;&#x8A0A;..." maxlength="500" />
+                    <button onclick="sendPmMsg()">&#x50B3;&#x9001;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script>
+    (function(){
+        let chatNick = localStorage.getItem('chatNick') || '';
+        let chatEmoji = localStorage.getItem('chatEmoji') || '\u{1F600}';
+        let chatOpen = false;
+        let chatJoined = !!chatNick;
+        let unreadCount = 0;
+        let connection = null;
+
+        const panel = document.getElementById('chatPanel');
+        const toggleBtn = document.getElementById('chatToggleBtn');
+        const unreadBadge = document.getElementById('chatUnread');
+        const setupDiv = document.getElementById('chatSetup');
+        const msgsDiv = document.getElementById('chatMessages');
+        const inputArea = document.getElementById('chatInputArea');
+        const msgInput = document.getElementById('chatMsgInput');
+        const nickInput = document.getElementById('chatNickInput');
+        const onlineSpan = document.getElementById('chatOnline');
+
+        // Emoji selector
+        document.querySelectorAll('#emojiSelector span').forEach(s => {
+            s.addEventListener('click', function(){
+                document.querySelectorAll('#emojiSelector span').forEach(x => x.classList.remove('selected'));
+                this.classList.add('selected');
+                chatEmoji = this.dataset.emoji;
+            });
+        });
+
+        // Restore saved state
+        if(chatNick){
+            nickInput.value = chatNick;
+            setupDiv.style.display = 'none';
+            msgsDiv.style.display = 'flex';
+            inputArea.style.display = 'flex';
+        }
+        // Restore selected emoji
+        if(chatEmoji){
+            document.querySelectorAll('#emojiSelector span').forEach(s => {
+                s.classList.toggle('selected', s.dataset.emoji === chatEmoji);
+            });
+        }
+
+        window.toggleChat = function(){
+            chatOpen = !chatOpen;
+            panel.classList.toggle('open', chatOpen);
+            if(chatOpen){
+                unreadCount = 0;
+                unreadBadge.style.display = 'none';
+                if(!connection) initSignalR();
+                if(chatJoined) msgInput.focus();
+            }
+        };
+
+        window.joinChat = function(){
+            const nick = nickInput.value.trim();
+            if(!nick){ nickInput.focus(); return; }
+            chatNick = nick;
+            chatEmoji = chatEmoji || '\u{1F600}';
+            localStorage.setItem('chatNick', chatNick);
+            localStorage.setItem('chatEmoji', chatEmoji);
+            chatJoined = true;
+            setupDiv.style.display = 'none';
+            msgsDiv.style.display = 'flex';
+            inputArea.style.display = 'flex';
+            if(!connection) initSignalR();
+            msgInput.focus();
+        };
+
+        window.sendChatMsg = function(){
+            const msg = msgInput.value.trim();
+            if(!msg || !connection) return;
+            connection.invoke('SendMessage', chatNick, msg, chatEmoji).catch(function(err){ console.error(err); });
+            msgInput.value = '';
+            msgInput.focus();
+        };
+
+        // Enter to send
+        document.getElementById('chatMsgInput').addEventListener('keydown', function(e){
+            if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChatMsg(); }
+        });
+
+        // Also allow Enter on nickname input to join
+        nickInput.addEventListener('keydown', function(e){
+            if(e.key === 'Enter'){ e.preventDefault(); joinChat(); }
+        });
+
+        function initSignalR(){
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl('/chathub', { transport: signalR.HttpTransportType.LongPolling })
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on('ReceiveMessage', function(nick, msg, emoji, time){
+                appendMsg(nick, msg, emoji, time);
+                if(!chatOpen){
+                    unreadCount++;
+                    unreadBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    unreadBadge.style.display = 'block';
+                }
+            });
+
+            connection.on('LoadHistory', function(messages){
+                msgsDiv.innerHTML = '';
+                messages.forEach(function(m){ appendMsg(m.nickname, m.message, m.avatarEmoji, m.time, true); });
+                scrollToBottom();
+            });
+
+            connection.on('UserCount', function(count){
+                onlineSpan.innerHTML = '\u{1F7E2} ' + count + ' \u4EBA\u5728\u7DDA';
+            });
+
+            connection.start().then(function(){
+                connection.invoke('GetRecentMessages').catch(function(err){ console.error(err); });
+            }).catch(function(err){ console.error('SignalR connection error:', err); });
+        }
+
+        function appendMsg(nick, msg, emoji, time, isHistory){
+            var isMine = nick === chatNick;
+            var div = document.createElement('div');
+            div.className = 'chat-msg' + (isMine ? ' mine' : '');
+            div.innerHTML =
+                '<span class="chat-msg-avatar">' + escHtml(emoji) + '</span>' +
+                '<div class="chat-msg-body">' +
+                    '<div class="chat-msg-meta">' +
+                        '<span class="chat-msg-nick">' + escHtml(nick) + '</span>' +
+                        '<span class="chat-msg-time">' + escHtml(time) + '</span>' +
+                    '</div>' +
+                    '<div class="chat-msg-text">' + escHtml(msg) + '</div>' +
+                '</div>';
+            msgsDiv.appendChild(div);
+            if(!isHistory) scrollToBottom();
+        }
+
+        function scrollToBottom(){
+            setTimeout(function(){ msgsDiv.scrollTop = msgsDiv.scrollHeight; }, 50);
+        }
+
+        function escHtml(s){
+            var d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+    })();
+    </script>
+
+    <!-- Private Messages Tab Script -->
+    <script>
+    (function(){
+        var currentPmOtherId = null;
+        var currentPmTeacherId = null;
+        var currentPmOtherName = '';
+
+        window.switchChatTab = function(tab) {
+            document.getElementById('tabPublic').classList.toggle('active', tab === 'public');
+            document.getElementById('tabPm').classList.toggle('active', tab === 'pm');
+            document.getElementById('tabSupport').classList.toggle('active', tab === 'support');
+            document.getElementById('publicTabContent').classList.toggle('active', tab === 'public');
+            document.getElementById('pmTabContent').classList.toggle('active', tab === 'pm');
+            document.getElementById('supportTabContent').classList.toggle('active', tab === 'support');
+            if (tab === 'pm') {
+                loadPmConversations();
+            }
+            if (tab === 'support') {
+                loadSupportTickets();
+            }
+        };
+
+        window.loadPmConversations = function() {
+            fetch('/Message/Conversations').then(function(r){ return r.json(); }).then(function(convs) {
+                var container = document.getElementById('pmConvItems');
+                if (!convs || convs.length === 0) {
+                    container.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:30px 0;">\u5C1A\u7121\u79C1\u4EBA\u8A0A\u606F</div>';
+                    return;
+                }
+                var html = '';
+                convs.forEach(function(c) {
+                    var time = c.lastTime ? new Date(c.lastTime).toLocaleString() : '';
+                    var preview = c.lastMessage ? (c.lastMessage.length > 25 ? c.lastMessage.substring(0,25) + '...' : c.lastMessage) : '';
+                    html += '<div class="pm-conv-item" onclick="openPmChat(\'' + escPmHtml(c.otherId) + '\',' + (c.teacherId||'null') + ',\'' + escPmHtml(c.otherName) + '\')">';
+                    html += '  <div style="flex:1;min-width:0;">';
+                    html += '    <div class="pm-conv-name">' + escPmHtml(c.otherName) + '</div>';
+                    html += '    <div class="pm-conv-preview">' + escPmHtml(preview) + '</div>';
+                    html += '  </div>';
+                    html += '  <div style="text-align:right;flex-shrink:0;">';
+                    html += '    <div class="pm-conv-time">' + escPmHtml(time) + '</div>';
+                    if (c.unreadCount > 0) {
+                        html += '    <div class="pm-conv-unread">' + c.unreadCount + '</div>';
+                    }
+                    html += '  </div>';
+                    html += '</div>';
+                });
+                container.innerHTML = html;
+            }).catch(function(){});
+        };
+
+        window.openPmChat = function(otherId, teacherId, otherName) {
+            currentPmOtherId = otherId;
+            currentPmTeacherId = teacherId;
+            currentPmOtherName = otherName;
+            document.getElementById('pmConvList').style.display = 'none';
+            var chatView = document.getElementById('pmChatView');
+            chatView.style.display = 'flex';
+            document.getElementById('pmChatName').textContent = otherName;
+            loadPmChatMessages();
+            document.getElementById('pmChatInput').focus();
+        };
+
+        window.backToConvList = function() {
+            document.getElementById('pmChatView').style.display = 'none';
+            document.getElementById('pmConvList').style.display = 'block';
+            currentPmOtherId = null;
+            loadPmConversations();
+        };
+
+        window.refreshPmChat = function() {
+            if (currentPmOtherId) loadPmChatMessages();
+        };
+
+        function loadPmChatMessages() {
+            if (!currentPmOtherId) return;
+            fetch('/Message/GetMessages?otherId=' + encodeURIComponent(currentPmOtherId))
+                .then(function(r){ return r.json(); })
+                .then(function(msgs) {
+                    var container = document.getElementById('pmChatMsgs');
+                    if (!msgs || msgs.length === 0) {
+                        container.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px;margin-top:30px;">\u5C1A\u7121\u8A0A\u606F</div>';
+                        return;
+                    }
+                    var html = '';
+                    msgs.forEach(function(m) {
+                        var align = m.isMine ? 'flex-end' : 'flex-start';
+                        var bg = m.isMine ? 'rgba(99,102,241,.15)' : 'var(--bg3)';
+                        var bd = m.isMine ? '1px solid rgba(99,102,241,.25)' : '1px solid var(--border)';
+                        var time = m.sentAt ? new Date(m.sentAt).toLocaleTimeString() : '';
+                        html += '<div style="align-self:' + align + ';max-width:80%;">';
+                        html += '  <div style="background:' + bg + ';border:' + bd + ';border-radius:12px;padding:8px 12px;">';
+                        html += '    <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px;">' + escPmHtml(m.senderName) + ' \u00B7 ' + escPmHtml(time) + '</div>';
+                        html += '    <div style="font-size:13px;color:var(--text);line-height:1.5;">' + escPmHtml(m.message) + '</div>';
+                        html += '  </div>';
+                        html += '</div>';
+                    });
+                    container.innerHTML = html;
+                    container.scrollTop = container.scrollHeight;
+                    // Update unread badge
+                    checkPmUnread();
+                }).catch(function(){});
+        }
+
+        window.sendPmMsg = function() {
+            var input = document.getElementById('pmChatInput');
+            var msg = input.value.trim();
+            if (!msg || !currentPmOtherId) return;
+            fetch('/Message/Send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ receiverId: currentPmOtherId, teacherId: currentPmTeacherId, message: msg })
+            }).then(function(r){ return r.json(); }).then(function(d) {
+                if (d.success) {
+                    input.value = '';
+                    loadPmChatMessages();
+                } else if (d.message) {
+                    alert(d.message);
+                }
+            }).catch(function(){});
+        };
+
+        document.getElementById('pmChatInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendPmMsg(); }
+        });
+
+        function checkPmUnread() {
+            fetch('/Message/UnreadCount').then(function(r){ return r.json(); }).then(function(d) {
+                var badge = document.getElementById('pmBadge');
+                if (d.count > 0) {
+                    badge.textContent = d.count > 99 ? '99+' : d.count;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }).catch(function(){});
+        }
+
+        // Check unread on load
+        checkPmUnread();
+        // Periodically check every 30 seconds
+        setInterval(checkPmUnread, 30000);
+
+        function escPmHtml(s) {
+            if (!s) return '';
+            var d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+    })();
+    </script>
+
+    <!-- Support Tab Script -->
+    <script>
+    (function(){
+        window.toggleSupportForm = function() {
+            var body = document.getElementById('supportFormBody');
+            body.style.display = body.style.display === 'none' ? 'block' : 'none';
+        };
+
+        window.submitSupportTicket = function() {
+            var category = document.getElementById('supportCategory').value;
+            var content = document.getElementById('supportContent').value.trim();
+            if (!content) { alert('\u8ACB\u8F38\u5165\u554F\u984C\u5167\u5BB9'); return; }
+            fetch('/Support/Submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ category: category, content: content })
+            }).then(function(r){ return r.json(); }).then(function(d) {
+                if (d.success) {
+                    document.getElementById('supportContent').value = '';
+                    document.getElementById('supportFormBody').style.display = 'none';
+                    loadSupportTickets();
+                } else {
+                    alert('\u63D0\u4EA4\u5931\u6557');
+                }
+            }).catch(function(){ alert('\u63D0\u4EA4\u5931\u6557'); });
+        };
+
+        window.loadSupportTickets = function() {
+            fetch('/Support/MyTickets').then(function(r){ return r.json(); }).then(function(tickets) {
+                var container = document.getElementById('supportTicketList');
+                if (!tickets || tickets.length === 0) {
+                    container.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:20px 0;">\u5C1A\u7121\u5DE5\u55AE</div>';
+                    return;
+                }
+                var html = '';
+                tickets.forEach(function(t) {
+                    var catColors = {'\u6280\u8853\u554F\u984C':'#6366f1','\u4ED8\u6B3E\u554F\u984C':'#e94560','\u8001\u5E2B\u76F8\u95DC':'#2299dd','\u9810\u7D04\u554F\u984C':'#F9A825','\u529F\u80FD\u5EFA\u8B70':'#00c853'};
+                    var catColor = catColors[t.category] || '#999';
+                    var statusMap = {'pending':'\u5F85\u8655\u7406','processing':'\u8655\u7406\u4E2D','resolved':'\u5DF2\u56DE\u8986','closed':'\u5DF2\u95DC\u9589'};
+                    var statusColors = {'pending':'#F9A825','processing':'#2299dd','resolved':'#00c853','closed':'#999'};
+                    var statusText = statusMap[t.status] || t.status;
+                    var statusColor = statusColors[t.status] || '#999';
+                    var time = t.createdAt ? new Date(t.createdAt).toLocaleString() : '';
+                    var preview = t.content && t.content.length > 50 ? t.content.substring(0,50) + '...' : (t.content || '');
+                    html += '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 12px;">';
+                    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+                    html += '<span style="display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;background:rgba(' + hexToRgb(catColor) + ',0.15);color:' + catColor + ';">' + escSupportHtml(t.category) + '</span>';
+                    html += '<span style="display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;background:rgba(' + hexToRgb(statusColor) + ',0.15);color:' + statusColor + ';">' + statusText + '</span>';
+                    html += '</div>';
+                    html += '<div style="font-size:13px;color:var(--text);line-height:1.4;margin-bottom:4px;">' + escSupportHtml(preview) + '</div>';
+                    if (t.adminReply) {
+                        html += '<div style="background:rgba(0,200,83,0.08);border-left:3px solid #00c853;padding:6px 8px;border-radius:0 6px 6px 0;margin-top:6px;">';
+                        html += '<div style="font-size:11px;color:#00c853;font-weight:600;margin-bottom:2px;">\u5BA2\u670D\u56DE\u8986</div>';
+                        html += '<div style="font-size:12px;color:#ccc;line-height:1.4;">' + escSupportHtml(t.adminReply) + '</div>';
+                        html += '</div>';
+                    }
+                    html += '<div style="font-size:11px;color:var(--text-dim);margin-top:4px;">' + escSupportHtml(time) + '</div>';
+                    html += '</div>';
+                });
+                container.innerHTML = html;
+            }).catch(function(){});
+        };
+
+        function checkSupportUnread() {
+            fetch('/Support/UnreadReplies').then(function(r){ return r.json(); }).then(function(d) {
+                var badge = document.getElementById('supportBadge');
+                if (d.count > 0) {
+                    badge.textContent = d.count > 99 ? '99+' : d.count;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }).catch(function(){});
+        }
+
+        function hexToRgb(hex) {
+            hex = hex.replace('#','');
+            var r = parseInt(hex.substring(0,2),16);
+            var g = parseInt(hex.substring(2,4),16);
+            var b = parseInt(hex.substring(4,6),16);
+            return r + ',' + g + ',' + b;
+        }
+
+        function escSupportHtml(s) {
+            if (!s) return '';
+            var d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+
+        checkSupportUnread();
+        setInterval(checkSupportUnread, 30000);
+    })();
+    </script>
+
+    <script>
+    (function(){
+        fetch('/Account/Status').then(r=>r.json()).then(function(d){
+            var el = document.getElementById('navUserLink');
+            if(!el) return;
+            if(d.isAdmin){
+                el.href = '/Admin/Dashboard';
+                el.innerHTML = '<span style="background:rgba(220,53,69,.2);color:#ff6b6b;border:1px solid rgba(220,53,69,.4);border-radius:10px;padding:1px 10px;font-size:.78rem;font-weight:600;">\u{1F6E1}\uFE0F \u7BA1\u7406\u54E1</span>' +
+                    ' <a href="/Admin/Logout" style="color:#ff6b6b;font-size:.72rem;text-decoration:none;opacity:.8;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.8">\u767B\u51FA</a>';
+            } else if(d.isTeacher){
+                el.href = '/Teacher/Dashboard';
+                el.innerHTML = '<span style="background:rgba(99,102,241,.1);color:#818cf8;border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:1px 10px;font-size:.78rem;font-weight:600;">\u{1F468}\u200D\u{1F3EB} ' + d.nickname + '</span>' +
+                    ' <a href="/Account/Logout" style="color:#8b949e;font-size:.72rem;text-decoration:none;opacity:.8;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.8">\u767B\u51FA</a>';
+            } else if(d.isRegistered){
+                el.href = '/Account/Profile';
+                el.innerHTML = '<span style="background:rgba(56,189,114,.15);color:#38bd72;border:1px solid rgba(56,189,114,.3);border-radius:10px;padding:1px 10px;font-size:.78rem;font-weight:600;">\u{1F464} ' + d.nickname + '</span>' +
+                    ' <a href="/Account/Logout" style="color:#8b949e;font-size:.72rem;text-decoration:none;opacity:.8;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.8" onclick="return confirm(\'\u78BA\u5B9A\u8981\u767B\u51FA\u55CE\uFF1F\u767B\u51FA\u5F8C\u5C07\u4F7F\u7528\u65B0\u7684\u533F\u540D\u8EAB\u4EFD\')">\u767B\u51FA</a>';
+            } else {
+                el.href = '/Account/Login';
+                el.innerHTML = '<span style="background:rgba(139,148,158,.12);color:#8b949e;border:1px solid rgba(139,148,158,.25);border-radius:10px;padding:1px 10px;font-size:.78rem;font-weight:600;">\u{1F511} \u767B\u5165</span>';
+            }
+        }).catch(function(){});
+    })();
+    </script>
+
+    <!-- 全方位錯誤自動偵測與回報 -->
+    <script>
+    (function(){
+        var reported = {};
+        function reportError(msg, stack, source) {
+            var key = msg + '|' + location.pathname;
+            if (reported[key]) return;
+            reported[key] = true;
+            fetch('/api/ErrorLog/report', {method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({pageUrl: location.href, errorMessage: msg, stackTrace: stack || '', source: source || 'frontend'})
+            }).catch(function(){});
+        }
+
+        // 1. JS 執行錯誤
+        window.onerror = function(msg, url, line, col, err) {
+            reportError(msg, (err&&err.stack||'') + ' at ' + url + ':' + line + ':' + col, 'frontend-js');
+        };
+
+        // 2. Promise 未處理的 rejection
+        window.addEventListener('unhandledrejection', function(e) {
+            reportError('Unhandled Promise: ' + (e.reason&&e.reason.message||e.reason||''), e.reason&&e.reason.stack||'', 'frontend-promise');
+        });
+
+        // 3. API 呼叫失敗偵測（攔截 fetch）
+        var origFetch = window.fetch;
+        window.fetch = function(url, opts) {
+            return origFetch.apply(this, arguments).then(function(res) {
+                if (!res.ok && res.status >= 500) {
+                    reportError('API 500: ' + (typeof url === 'string' ? url : url.url) + ' [' + res.status + ']', 'Status: ' + res.status + ' ' + res.statusText, 'frontend-api');
+                }
+                return res;
+            }).catch(function(err) {
+                reportError('API Network Error: ' + (typeof url === 'string' ? url : url.url), err&&err.message||'', 'frontend-network');
+                throw err;
+            });
+        };
+
+        // 4. 資源載入失敗（CSS/JS/圖片）
+        window.addEventListener('error', function(e) {
+            if (e.target && e.target !== window && e.target.tagName) {
+                var tag = e.target.tagName;
+                var src = e.target.src || e.target.href || '';
+                if (src && (tag === 'SCRIPT' || tag === 'LINK' || tag === 'IMG')) {
+                    reportError('Resource Load Failed: [' + tag + '] ' + src, '', 'frontend-resource');
+                }
+            }
+        }, true);
+
+        // 5. 頁面載入效能（超過 10 秒警告）
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                if (window.performance) {
+                    var timing = performance.timing;
+                    var loadTime = timing.loadEventEnd - timing.navigationStart;
+                    if (loadTime > 10000) {
+                        reportError('Slow Page Load: ' + (loadTime/1000).toFixed(1) + 's on ' + location.pathname, 'domContentLoaded: ' + (timing.domContentLoadedEventEnd - timing.navigationStart) + 'ms', 'frontend-performance');
+                    }
+                }
+            }, 100);
+        });
+
+        // 6. Console.error 攔截
+        var origError = console.error;
+        console.error = function() {
+            var args = Array.prototype.slice.call(arguments);
+            var msg = args.map(function(a){ return typeof a === 'string' ? a : JSON.stringify(a); }).join(' ');
+            if (msg.length > 10 && !msg.includes('ErrorLog')) {
+                reportError('Console.error: ' + msg.substring(0, 500), '', 'frontend-console');
+            }
+            origError.apply(console, arguments);
+        };
+
+        // 7. 手機端偵測
+        var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+            // 7a. 觸控無反應偵測（點按鈕 3 秒沒反應）
+            document.addEventListener('touchstart', function(e) {
+                var target = e.target.closest('button, a, [onclick]');
+                if (!target) return;
+                target._touchStart = Date.now();
+            }, {passive: true});
+            document.addEventListener('touchend', function(e) {
+                var target = e.target.closest('button, a, [onclick]');
+                if (!target || !target._touchStart) return;
+                var elapsed = Date.now() - target._touchStart;
+                if (elapsed > 3000) {
+                    reportError('Mobile UI Freeze: ' + (target.textContent||'').substring(0,50) + ' (' + elapsed + 'ms)', 'Element: ' + target.tagName + '.' + target.className, 'mobile-freeze');
+                }
+                delete target._touchStart;
+            }, {passive: true});
+
+            // 7b. viewport 異常偵測（手機 zoom 被鎖定）
+            if (window.visualViewport && window.visualViewport.scale > 1.5) {
+                reportError('Mobile Zoom Issue: scale=' + window.visualViewport.scale, 'viewport width: ' + window.innerWidth, 'mobile-viewport');
+            }
+
+            // 7c. 離線偵測
+            window.addEventListener('offline', function() {
+                reportError('Mobile Offline: 使用者網路斷線', 'page: ' + location.pathname, 'mobile-network');
+            });
+
+            // 7d. 記憶體不足偵測（如果支援）
+            if (navigator.deviceMemory && navigator.deviceMemory < 2) {
+                reportError('Low Memory Device: ' + navigator.deviceMemory + 'GB', 'UA: ' + navigator.userAgent.substring(0, 100), 'mobile-memory');
+            }
+        }
+
+        // 8. SignalR 斷線偵測
+        var signalRChecked = false;
+        setTimeout(function() {
+            if (typeof signalR !== 'undefined' && !signalRChecked) {
+                signalRChecked = true;
+                // 如果 10 秒後 connection 還沒建立
+                if (typeof connection !== 'undefined' && connection && connection.state !== 'Connected') {
+                    reportError('SignalR Not Connected: state=' + (connection.state||'unknown'), '', 'signalr');
+                }
+            }
+        }, 10000);
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,741 @@
+@{
+    ViewData["Title"] = "程式碼偵探";
+}
+
+<style>
+    :root {
+        --bg: #0D1117;
+        --bg2: #161B22;
+        --bg3: #21262D;
+        --accent: #F9A825;
+        --text: #E6EDF3;
+        --border: #30363D;
+        --green: #3FB950;
+        --red: #F85149;
+        --yellow: #D29922;
+    }
+
+    .detective-page {
+        min-height: 100vh;
+        background: var(--bg);
+        padding: 20px;
+        font-family: 'Noto Sans TC', sans-serif;
+        color: var(--text);
+    }
+
+    .detective-header {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+
+    .detective-header h1 {
+        font-size: 2rem;
+        color: var(--accent);
+        margin-bottom: 8px;
+    }
+
+    .detective-header p {
+        color: #8B949E;
+        font-size: 0.95rem;
+    }
+
+    /* Difficulty Selector */
+    .difficulty-bar {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .diff-btn {
+        padding: 10px 24px;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        background: var(--bg2);
+        color: var(--text);
+        cursor: pointer;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.3s;
+    }
+
+    .diff-btn:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .diff-btn.active {
+        border-color: var(--accent);
+        background: var(--bg3);
+        box-shadow: 0 0 12px rgba(249, 168, 37, 0.2);
+    }
+
+    .diff-btn.beginner { color: var(--green); }
+    .diff-btn.intermediate { color: var(--yellow); }
+    .diff-btn.advanced { color: var(--red); }
+
+    /* Stats Bar */
+    .stats-bar {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .stat-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px 20px;
+        text-align: center;
+        min-width: 120px;
+    }
+
+    .stat-card .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .stat-card .stat-label {
+        font-size: 0.8rem;
+        color: #8B949E;
+        margin-top: 4px;
+    }
+
+    /* Main Game Area */
+    .game-area {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .challenge-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+
+    .challenge-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .challenge-title h2 {
+        font-size: 1.3rem;
+        color: var(--text);
+        margin: 0;
+    }
+
+    .challenge-meta {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .badge-beginner { background: rgba(63,185,80,0.15); color: var(--green); }
+    .badge-intermediate { background: rgba(210,153,34,0.15); color: var(--yellow); }
+    .badge-advanced { background: rgba(248,81,73,0.15); color: var(--red); }
+    .badge-category { background: rgba(249,168,37,0.1); color: var(--accent); }
+
+    /* Timer */
+    .timer-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.1rem;
+        font-family: 'JetBrains Mono', monospace;
+        color: var(--accent);
+        background: var(--bg3);
+        padding: 6px 14px;
+        border-radius: 8px;
+    }
+
+    /* Code Display */
+    .code-section {
+        margin-bottom: 20px;
+    }
+
+    .code-section label {
+        display: block;
+        font-size: 0.9rem;
+        color: #8B949E;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .code-section pre {
+        border-radius: 12px !important;
+        border: 1px solid var(--border) !important;
+        margin: 0 !important;
+        background: var(--bg) !important;
+    }
+
+    .code-section pre code {
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 0.85rem !important;
+        line-height: 1.6 !important;
+    }
+
+    /* Answer Area */
+    .answer-area textarea {
+        width: 100%;
+        min-height: 250px;
+        background: var(--bg);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        resize: vertical;
+        box-sizing: border-box;
+    }
+
+    .answer-area textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(249, 168, 37, 0.15);
+    }
+
+    /* Buttons */
+    .btn-row {
+        display: flex;
+        gap: 12px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+    }
+
+    .btn-submit {
+        padding: 12px 32px;
+        background: var(--accent);
+        color: #000;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.3s;
+    }
+
+    .btn-submit:hover {
+        background: #FFB300;
+        transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .btn-next {
+        padding: 12px 32px;
+        background: var(--bg3);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.3s;
+    }
+
+    .btn-next:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .btn-skip {
+        padding: 12px 24px;
+        background: transparent;
+        color: #8B949E;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.3s;
+        margin-left: auto;
+    }
+
+    .btn-skip:hover { color: var(--text); border-color: var(--text); }
+
+    /* Result Panel */
+    .result-panel {
+        display: none;
+        border-radius: 16px;
+        padding: 24px;
+        margin-top: 20px;
+        animation: slideIn 0.4s ease;
+    }
+
+    .result-panel.correct {
+        background: rgba(63,185,80,0.08);
+        border: 1px solid var(--green);
+    }
+
+    .result-panel.wrong {
+        background: rgba(248,81,73,0.08);
+        border: 1px solid var(--red);
+    }
+
+    .result-icon {
+        font-size: 3rem;
+        text-align: center;
+        margin-bottom: 12px;
+    }
+
+    .result-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 16px;
+    }
+
+    .result-panel.correct .result-title { color: var(--green); }
+    .result-panel.wrong .result-title { color: var(--red); }
+
+    .result-explanation {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+        line-height: 1.7;
+        color: #C9D1D9;
+        margin-bottom: 16px;
+    }
+
+    .result-explanation h4 {
+        color: var(--accent);
+        margin: 0 0 8px 0;
+    }
+
+    .result-time {
+        text-align: center;
+        color: #8B949E;
+        font-size: 0.9rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #8B949E;
+    }
+
+    .empty-state .icon { font-size: 4rem; margin-bottom: 16px; }
+    .empty-state h3 { color: var(--text); margin-bottom: 8px; }
+
+    /* Loading */
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 40px;
+        color: #8B949E;
+    }
+
+    .loading-spinner .spin {
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        border: 3px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    /* Confetti */
+    .confetti-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 9999;
+        overflow: hidden;
+    }
+
+    .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        top: -10px;
+        opacity: 0;
+        animation: confettiFall 3s ease-out forwards;
+    }
+
+    @@keyframes confettiFall {
+        0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+        100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @@keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @@media (max-width: 768px) {
+        .detective-header h1 { font-size: 1.5rem; }
+        .stats-bar { gap: 8px; }
+        .stat-card { min-width: 80px; padding: 8px 12px; }
+        .stat-card .stat-value { font-size: 1.2rem; }
+        .challenge-title { flex-direction: column; align-items: flex-start; gap: 8px; }
+        .answer-area textarea { min-height: 180px; }
+    }
+</style>
+
+<div class="detective-page">
+    <div class="detective-header">
+        <h1>🔍 程式碼偵探</h1>
+        <p>找出程式碼中的 Bug 並修復它！看看你能多快解決問題</p>
+    </div>
+
+    <!-- Difficulty Selector -->
+    <div class="difficulty-bar">
+        <button class="diff-btn beginner active" data-diff="beginner" onclick="selectDifficulty('beginner', this)">
+            🟢 初級偵探
+        </button>
+        <button class="diff-btn intermediate" data-diff="intermediate" onclick="selectDifficulty('intermediate', this)">
+            🟡 中級偵探
+        </button>
+        <button class="diff-btn advanced" data-diff="advanced" onclick="selectDifficulty('advanced', this)">
+            🔴 高級偵探
+        </button>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="stat-value" id="statSolved">0</div>
+            <div class="stat-label">已解決</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statAttempted">0</div>
+            <div class="stat-label">已嘗試</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statAccuracy">0%</div>
+            <div class="stat-label">正確率</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statAvgTime">0s</div>
+            <div class="stat-label">平均用時</div>
+        </div>
+    </div>
+
+    <!-- Game Area -->
+    <div class="game-area">
+        <!-- Loading -->
+        <div class="loading-spinner" id="loadingSpinner">
+            <div class="spin"></div>
+            <p>正在載入題目...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display:none;">
+            <div class="icon">🕵️</div>
+            <h3>準備好了嗎？</h3>
+            <p>選擇難度開始你的偵探之旅</p>
+        </div>
+
+        <!-- Challenge Card -->
+        <div class="challenge-card" id="challengeCard" style="display:none;">
+            <div class="challenge-title">
+                <h2 id="challengeTitle"></h2>
+                <div class="challenge-meta">
+                    <span class="badge" id="badgeDifficulty"></span>
+                    <span class="badge badge-category" id="badgeCategory"></span>
+                    <div class="timer-box">
+                        ⏱️ <span id="timerDisplay">00:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buggy Code -->
+            <div class="code-section">
+                <label>🐛 有 Bug 的程式碼（找出並修復它）：</label>
+                <pre><code class="language-csharp" id="buggyCodeBlock"></code></pre>
+            </div>
+
+            <!-- Answer Area -->
+            <div class="answer-area">
+                <label style="display:block; font-size:0.9rem; color:#8B949E; margin-bottom:8px; font-weight:600;">
+                    ✏️ 你的修復版本：
+                </label>
+                <textarea id="userAnswer" placeholder="在這裡貼上你修復後的完整程式碼..."></textarea>
+            </div>
+
+            <!-- Buttons -->
+            <div class="btn-row">
+                <button class="btn-submit" id="btnSubmit" onclick="submitAnswer()">🔎 提交答案</button>
+                <button class="btn-next" id="btnNext" onclick="loadChallenge()" style="display:none;">
+                    下一題 ➜
+                </button>
+                <button class="btn-skip" onclick="loadChallenge()">跳過此題</button>
+            </div>
+        </div>
+
+        <!-- Result Panel -->
+        <div class="result-panel" id="resultPanel">
+            <div class="result-icon" id="resultIcon"></div>
+            <div class="result-title" id="resultTitle"></div>
+            <div class="result-explanation" id="resultExplanation"></div>
+            <div class="code-section" id="fixedCodeSection" style="display:none;">
+                <label>✅ 正確的程式碼：</label>
+                <pre><code class="language-csharp" id="fixedCodeBlock"></code></pre>
+            </div>
+            <div class="result-time" id="resultTime"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let currentDifficulty = 'beginner';
+    let currentChallenge = null;
+    let timerInterval = null;
+    let elapsedSeconds = 0;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+        loadStats();
+        loadChallenge();
+    });
+
+    function selectDifficulty(diff, btn) {
+        currentDifficulty = diff;
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadChallenge();
+    }
+
+    async function loadStats() {
+        try {
+            const res = await fetch('/Detective/MyStats');
+            const data = await res.json();
+            document.getElementById('statSolved').textContent = data.solved;
+            document.getElementById('statAttempted').textContent = data.attempted;
+            document.getElementById('statAccuracy').textContent = data.accuracy + '%';
+            document.getElementById('statAvgTime').textContent = data.avgTime + 's';
+        } catch (e) {
+            console.error('載入統計失敗', e);
+        }
+    }
+
+    async function loadChallenge() {
+        stopTimer();
+        resetUI();
+
+        const spinner = document.getElementById('loadingSpinner');
+        const card = document.getElementById('challengeCard');
+        const empty = document.getElementById('emptyState');
+        const result = document.getElementById('resultPanel');
+
+        spinner.style.display = 'block';
+        card.style.display = 'none';
+        empty.style.display = 'none';
+        result.style.display = 'none';
+
+        try {
+            const res = await fetch(`/Detective/GetChallenge?difficulty=${currentDifficulty}`);
+            const data = await res.json();
+
+            if (data.error) {
+                spinner.style.display = 'none';
+                empty.style.display = 'block';
+                return;
+            }
+
+            currentChallenge = data;
+
+            // Set title and badges
+            document.getElementById('challengeTitle').textContent = data.title;
+
+            const diffBadge = document.getElementById('badgeDifficulty');
+            const diffMap = {
+                beginner: { text: '🟢 初級', cls: 'badge-beginner' },
+                intermediate: { text: '🟡 中級', cls: 'badge-intermediate' },
+                advanced: { text: '🔴 高級', cls: 'badge-advanced' }
+            };
+            const dm = diffMap[data.difficulty] || diffMap.beginner;
+            diffBadge.textContent = dm.text;
+            diffBadge.className = 'badge ' + dm.cls;
+
+            document.getElementById('badgeCategory').textContent = data.category;
+
+            // Set buggy code with Prism highlighting
+            const codeBlock = document.getElementById('buggyCodeBlock');
+            codeBlock.textContent = data.buggyCode;
+            Prism.highlightElement(codeBlock);
+
+            // Clear answer
+            document.getElementById('userAnswer').value = '';
+
+            spinner.style.display = 'none';
+            card.style.display = 'block';
+
+            // Start timer
+            startTimer();
+
+        } catch (e) {
+            console.error('載入題目失敗', e);
+            spinner.style.display = 'none';
+            empty.style.display = 'block';
+        }
+    }
+
+    function startTimer() {
+        elapsedSeconds = 0;
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            elapsedSeconds++;
+            updateTimerDisplay();
+        }, 1000);
+    }
+
+    function stopTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    }
+
+    function updateTimerDisplay() {
+        const m = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+        const s = (elapsedSeconds % 60).toString().padStart(2, '0');
+        document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+    }
+
+    function resetUI() {
+        document.getElementById('btnSubmit').disabled = false;
+        document.getElementById('btnSubmit').style.display = '';
+        document.getElementById('btnNext').style.display = 'none';
+    }
+
+    async function submitAnswer() {
+        if (!currentChallenge) return;
+
+        const userAnswer = document.getElementById('userAnswer').value.trim();
+        if (!userAnswer) {
+            alert('請輸入你的修復版本！');
+            return;
+        }
+
+        stopTimer();
+
+        const btnSubmit = document.getElementById('btnSubmit');
+        btnSubmit.disabled = true;
+
+        try {
+            const res = await fetch('/Detective/Submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bugChallengeId: currentChallenge.id,
+                    userAnswer: userAnswer,
+                    timeTakenSeconds: elapsedSeconds
+                })
+            });
+
+            const data = await res.json();
+            showResult(data);
+            loadStats();
+
+        } catch (e) {
+            console.error('提交失敗', e);
+            btnSubmit.disabled = false;
+        }
+    }
+
+    function showResult(data) {
+        const panel = document.getElementById('resultPanel');
+        const icon = document.getElementById('resultIcon');
+        const title = document.getElementById('resultTitle');
+        const explanation = document.getElementById('resultExplanation');
+        const fixedSection = document.getElementById('fixedCodeSection');
+        const fixedBlock = document.getElementById('fixedCodeBlock');
+        const timeEl = document.getElementById('resultTime');
+
+        panel.className = 'result-panel ' + (data.correct ? 'correct' : 'wrong');
+
+        if (data.correct) {
+            icon.textContent = '🎉';
+            title.textContent = '答對了！你真是個優秀的偵探！';
+            showConfetti();
+        } else {
+            icon.textContent = '🤔';
+            title.textContent = '還差一點點，看看正確答案吧！';
+        }
+
+        explanation.innerHTML = `<h4>💡 解說</h4><p>${escapeHtml(data.explanation)}</p>`;
+
+        // Show fixed code
+        fixedBlock.textContent = data.fixedCode;
+        Prism.highlightElement(fixedBlock);
+        fixedSection.style.display = 'block';
+
+        // Time
+        const m = Math.floor(data.timeTaken / 60);
+        const s = data.timeTaken % 60;
+        timeEl.textContent = `⏱️ 用時 ${m > 0 ? m + '分' : ''}${s}秒`;
+
+        panel.style.display = 'block';
+
+        // Show next button
+        document.getElementById('btnSubmit').style.display = 'none';
+        document.getElementById('btnNext').style.display = '';
+
+        // Scroll to result
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function showConfetti() {
+        const container = document.createElement('div');
+        container.className = 'confetti-container';
+        document.body.appendChild(container);
+
+        const colors = ['#F9A825', '#3FB950', '#F85149', '#58A6FF', '#D2A8FF', '#FF7B72'];
+
+        for (let i = 0; i < 80; i++) {
+            const piece = document.createElement('div');
+            piece.className = 'confetti';
+            piece.style.left = Math.random() * 100 + '%';
+            piece.style.animationDelay = Math.random() * 2 + 's';
+            piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+            piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+            piece.style.width = (6 + Math.random() * 8) + 'px';
+            piece.style.height = (6 + Math.random() * 8) + 'px';
+            container.appendChild(piece);
+        }
+
+        setTimeout(() => container.remove(), 4000);
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+</script>
+}

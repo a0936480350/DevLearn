@@ -1,0 +1,590 @@
+@model List<DotNetLearning.Models.UserProfile>
+@{
+    ViewData["Title"] = "排行榜";
+}
+
+<style>
+    .lb-page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 4rem;
+    }
+
+    .lb-hero {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .lb-hero h1 {
+        font-size: 2rem;
+        color: var(--text);
+        margin-bottom: .5rem;
+    }
+
+    .lb-hero p {
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    /* My Profile Section */
+    .my-profile {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .my-profile.no-profile {
+        justify-content: center;
+        text-align: center;
+        flex-direction: column;
+        gap: .75rem;
+    }
+
+    .my-badge-icon {
+        font-size: 2.5rem;
+    }
+
+    .my-info {
+        flex: 1;
+        min-width: 180px;
+    }
+
+    .my-nickname {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .my-rank-text {
+        color: var(--text-muted);
+        font-size: .9rem;
+        margin-top: .2rem;
+    }
+
+    .my-stats {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .my-stat {
+        text-align: center;
+    }
+
+    .my-stat-val {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .my-stat-label {
+        font-size: .75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+    }
+
+    /* Nickname Button */
+    .btn-nickname {
+        background: var(--accent2);
+        color: #fff;
+        border: none;
+        padding: .5rem 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: .9rem;
+        font-weight: 600;
+        transition: opacity .2s;
+    }
+
+    .btn-nickname:hover {
+        opacity: .85;
+    }
+
+    /* Top 3 Podium */
+    .podium {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .podium-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.2rem 1.5rem;
+        text-align: center;
+        width: 200px;
+        transition: transform .2s;
+    }
+
+    .podium-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .podium-card.gold {
+        border-color: #FFD700;
+        box-shadow: 0 0 20px rgba(255, 215, 0, .15);
+        order: 2;
+        padding-bottom: 2rem;
+    }
+
+    .podium-card.silver {
+        border-color: #C0C0C0;
+        box-shadow: 0 0 15px rgba(192, 192, 192, .1);
+        order: 1;
+    }
+
+    .podium-card.bronze {
+        border-color: #CD7F32;
+        box-shadow: 0 0 15px rgba(205, 127, 50, .1);
+        order: 3;
+    }
+
+    .podium-rank {
+        font-size: 2rem;
+        margin-bottom: .3rem;
+    }
+
+    .podium-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: .3rem;
+        word-break: break-all;
+    }
+
+    .podium-score {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .podium-badge {
+        font-size: .85rem;
+        color: var(--text-muted);
+        margin-top: .3rem;
+    }
+
+    /* Table */
+    .lb-table-wrap {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .lb-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .lb-table th {
+        background: var(--bg3);
+        color: var(--text-muted);
+        font-size: .8rem;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        padding: .75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .lb-table td {
+        padding: .7rem 1rem;
+        color: var(--text);
+        border-bottom: 1px solid var(--border);
+        font-size: .95rem;
+    }
+
+    .lb-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .lb-table tr:hover td {
+        background: var(--bg3);
+    }
+
+    .lb-table tr.is-me td {
+        background: rgba(100, 255, 218, .06);
+    }
+
+    .rank-cell {
+        font-weight: 700;
+        color: var(--text-muted);
+        width: 50px;
+    }
+
+    .name-cell {
+        font-weight: 600;
+        word-break: break-all;
+    }
+
+    .score-cell {
+        font-weight: 700;
+        color: var(--accent);
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    .badge-cell {
+        white-space: nowrap;
+    }
+
+    .badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        background: var(--bg4);
+        padding: .2rem .6rem;
+        border-radius: 20px;
+        font-size: .8rem;
+        color: var(--text-muted);
+    }
+
+    /* Nickname Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.6);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-overlay.show {
+        display: flex;
+    }
+
+    .modal-box {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 2rem;
+        width: 380px;
+        max-width: 90vw;
+    }
+
+    .modal-box h2 {
+        color: var(--text);
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .modal-input {
+        width: 100%;
+        padding: .6rem .8rem;
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        outline: none;
+    }
+
+    .modal-input:focus {
+        border-color: var(--accent);
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: .75rem;
+        justify-content: flex-end;
+    }
+
+    .btn-cancel {
+        background: var(--bg4);
+        color: var(--text-muted);
+        border: none;
+        padding: .5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: .9rem;
+    }
+
+    .btn-save {
+        background: var(--accent);
+        color: var(--bg);
+        border: none;
+        padding: .5rem 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: .9rem;
+        font-weight: 600;
+    }
+
+    .btn-save:hover {
+        opacity: .9;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    @@media (max-width: 700px) {
+        .podium {
+            flex-direction: column;
+            align-items: center;
+        }
+        .podium-card {
+            width: 100%;
+            max-width: 280px;
+        }
+        .podium-card.gold {
+            order: 0;
+        }
+        .podium-card.silver {
+            order: 1;
+        }
+        .podium-card.bronze {
+            order: 2;
+        }
+        .my-profile {
+            flex-direction: column;
+            text-align: center;
+        }
+        .my-stats {
+            justify-content: center;
+        }
+        .lb-table th:nth-child(5),
+        .lb-table td:nth-child(5),
+        .lb-table th:nth-child(6),
+        .lb-table td:nth-child(6) {
+            display: none;
+        }
+    }
+</style>
+
+<div class="lb-page">
+    <div class="lb-hero">
+        <h1>🏆 學習排行榜</h1>
+        <p>與其他學習者一較高下，累積分數晉升等級</p>
+    </div>
+
+    <!-- My Profile -->
+    <div class="my-profile" id="myProfile">
+        <div class="no-profile" id="myProfileLoading">
+            <span style="color:var(--text-muted)">載入中...</span>
+        </div>
+    </div>
+
+    <!-- Top 3 Podium -->
+    @if (Model.Count >= 1)
+    {
+        <div class="podium">
+            @for (int i = 0; i < Math.Min(3, Model.Count); i++)
+            {
+                var user = Model[i];
+                var podClass = i == 0 ? "gold" : i == 1 ? "silver" : "bronze";
+                var medal = i == 0 ? "🥇" : i == 1 ? "🥈" : "🥉";
+                var badgeIcon = GetBadgeIcon(user.BadgeLevel);
+                var badgeLabel = GetBadgeLabel(user.BadgeLevel);
+                <div class="podium-card @podClass">
+                    <div class="podium-rank">@medal</div>
+                    <div class="podium-name">@(string.IsNullOrEmpty(user.Nickname) ? "匿名學習者" : user.Nickname)</div>
+                    <div class="podium-score">@user.TotalScore 分</div>
+                    <div class="podium-badge">@badgeIcon @badgeLabel</div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Full Table -->
+    @if (Model.Count > 0)
+    {
+        <div class="lb-table-wrap">
+            <table class="lb-table">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>暱稱</th>
+                        <th>分數</th>
+                        <th>等級</th>
+                        <th>測驗數</th>
+                        <th>章節完成</th>
+                    </tr>
+                </thead>
+                <tbody id="lbBody">
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        var user = Model[i];
+                        var badgeIcon = GetBadgeIcon(user.BadgeLevel);
+                        var badgeLabel = GetBadgeLabel(user.BadgeLevel);
+                        <tr data-session="@user.SessionId">
+                            <td class="rank-cell">@(i + 1)</td>
+                            <td class="name-cell">@(string.IsNullOrEmpty(user.Nickname) ? "匿名學習者" : user.Nickname)</td>
+                            <td class="score-cell">@user.TotalScore</td>
+                            <td class="badge-cell"><span class="badge-pill">@badgeIcon @badgeLabel</span></td>
+                            <td>@user.QuizzesTaken</td>
+                            <td>@user.ChaptersCompleted</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">🏆</div>
+            <p>目前還沒有排行資料，去做個測驗成為第一名吧！</p>
+            <a href="/" class="btn-nickname" style="display:inline-block;margin-top:1rem;text-decoration:none;">開始學習</a>
+        </div>
+    }
+</div>
+
+<!-- Nickname Modal -->
+<div class="modal-overlay" id="nicknameModal">
+    <div class="modal-box">
+        <h2>✏️ 設定暱稱</h2>
+        <input type="text" class="modal-input" id="nicknameInput" placeholder="輸入你的暱稱..." maxlength="20" />
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal()">取消</button>
+            <button class="btn-save" onclick="saveNickname()">儲存</button>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetBadgeIcon(string level) => level switch
+    {
+        "master" => "👑",
+        "expert" => "🔥",
+        "advanced" => "⚡",
+        "intermediate" => "💎",
+        "beginner" => "🌿",
+        _ => "🌱"
+    };
+
+    string GetBadgeLabel(string level) => level switch
+    {
+        "master" => "大師",
+        "expert" => "專家",
+        "advanced" => "進階",
+        "intermediate" => "中級",
+        "beginner" => "初學",
+        _ => "新手"
+    };
+}
+
+@section Scripts {
+<script>
+(function() {
+    const badgeIcons = { master:'👑', expert:'🔥', advanced:'⚡', intermediate:'💎', beginner:'🌿', newbie:'🌱' };
+    const badgeLabels = { master:'大師', expert:'專家', advanced:'進階', intermediate:'中級', beginner:'初學', newbie:'新手' };
+
+    async function loadMyProfile() {
+        try {
+            const res = await fetch('/Leaderboard/MyProfile');
+            const data = await res.json();
+            const el = document.getElementById('myProfile');
+
+            if (!data.exists) {
+                el.classList.add('no-profile');
+                el.innerHTML = `
+                    <span style="color:var(--text-muted)">你還沒有建立檔案</span>
+                    <button class="btn-nickname" onclick="openModal()">🎮 設定暱稱加入排行</button>
+                `;
+                return;
+            }
+
+            el.classList.remove('no-profile');
+            const icon = badgeIcons[data.badgeLevel] || '🌱';
+            const label = badgeLabels[data.badgeLevel] || '新手';
+            el.innerHTML = `
+                <div class="my-badge-icon">${icon}</div>
+                <div class="my-info">
+                    <div class="my-nickname">${data.nickname || '匿名學習者'}</div>
+                    <div class="my-rank-text">第 ${data.rank} 名 / 共 ${data.totalUsers} 人</div>
+                </div>
+                <div class="my-stats">
+                    <div class="my-stat">
+                        <div class="my-stat-val">${data.totalScore}</div>
+                        <div class="my-stat-label">總分</div>
+                    </div>
+                    <div class="my-stat">
+                        <div class="my-stat-val">${data.quizzesTaken}</div>
+                        <div class="my-stat-label">測驗數</div>
+                    </div>
+                    <div class="my-stat">
+                        <div class="my-stat-val">${data.chaptersCompleted}</div>
+                        <div class="my-stat-label">章節完成</div>
+                    </div>
+                    <div class="my-stat">
+                        <div class="my-stat-val">${icon} ${label}</div>
+                        <div class="my-stat-label">等級</div>
+                    </div>
+                </div>
+                <button class="btn-nickname" onclick="openModal()">✏️ 改暱稱</button>
+            `;
+
+            // Highlight current user in table
+            document.querySelectorAll('#lbBody tr').forEach(tr => {
+                // We use session matching via a hidden approach - highlight by rank
+            });
+
+        } catch (e) {
+            console.error('Failed to load profile:', e);
+            document.getElementById('myProfile').innerHTML = '<span style="color:var(--text-muted)">無法載入個人資料</span>';
+        }
+    }
+
+    window.openModal = function() {
+        document.getElementById('nicknameModal').classList.add('show');
+        document.getElementById('nicknameInput').focus();
+    };
+
+    window.closeModal = function() {
+        document.getElementById('nicknameModal').classList.remove('show');
+    };
+
+    window.saveNickname = async function() {
+        const nickname = document.getElementById('nicknameInput').value.trim();
+        if (!nickname) return;
+
+        try {
+            const res = await fetch('/Leaderboard/SetNickname', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nickname })
+            });
+            if (res.ok) {
+                closeModal();
+                loadMyProfile();
+                // Reload page to update table
+                setTimeout(() => location.reload(), 300);
+            }
+        } catch (e) {
+            console.error('Failed to set nickname:', e);
+        }
+    };
+
+    // Close modal on overlay click
+    document.getElementById('nicknameModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // Enter key in input
+    document.getElementById('nicknameInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') saveNickname();
+    });
+
+    loadMyProfile();
+})();
+</script>
+}

@@ -1,0 +1,198 @@
+@using DotNetLearning.Models
+@{
+    ViewData["Title"] = "找老師";
+    var teachers = (List<Teacher>)ViewBag.Teachers;
+    var search = ViewBag.Search as string;
+    var skill = ViewBag.Skill as string;
+}
+
+<style>
+    .teacher-page { max-width: 1000px; margin: 0 auto; padding: 32px 20px; }
+    .teacher-page h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; color: var(--text); }
+    .teacher-page .subtitle { color: var(--text-muted); margin-bottom: 24px; font-size: 15px; }
+
+    .filter-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; align-items: center; }
+    .filter-bar input, .filter-bar select {
+        padding: 10px 16px; background: var(--bg3); border: 1px solid var(--border);
+        border-radius: 24px; color: var(--text); font-size: 14px; font-family: inherit;
+    }
+    .filter-bar input:focus, .filter-bar select:focus { outline: none; border-color: var(--accent); }
+    .filter-bar input[type="text"] { flex: 1; min-width: 200px; }
+    .filter-bar button {
+        padding: 10px 24px; background: var(--accent); color: #fff; border: none;
+        border-radius: 24px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    .filter-bar button:hover { background: var(--accent3); }
+
+    .skill-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .skill-tag {
+        padding: 6px 16px; border-radius: 20px; font-size: 13px; cursor: pointer;
+        background: var(--bg3); color: var(--text-muted); border: 1px solid var(--border); transition: all 0.2s;
+        text-decoration: none;
+    }
+    .skill-tag:hover, .skill-tag.active { background: rgba(0,184,148,0.1); color: var(--accent); border-color: var(--accent); }
+
+    /* Horizontal teacher cards - AmazingTalker style */
+    .teacher-grid { display: flex; flex-direction: column; gap: 16px; }
+
+    .teacher-card {
+        background: var(--bg2); border: 1px solid var(--card-border); border-radius: 16px;
+        padding: 24px; transition: all 0.3s; cursor: pointer;
+        display: flex; gap: 20px; align-items: flex-start;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .teacher-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+
+    .tc-header { display: flex; gap: 0; align-items: center; margin-bottom: 0; flex-direction: column; flex-shrink: 0; }
+    .tc-avatar {
+        width: 80px; height: 80px; border-radius: 50%; background: var(--bg3);
+        display: flex; align-items: center; justify-content: center; font-size: 32px;
+        border: 3px solid var(--accent); flex-shrink: 0; overflow: hidden;
+    }
+    .tc-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .tc-avatar-initials {
+        width: 80px; height: 80px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 28px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .tc-body { flex: 1; min-width: 0; }
+    .tc-body-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+    .tc-info h3 { font-size: 18px; font-weight: 700; margin-bottom: 2px; color: var(--text); }
+    .tc-info .tc-title { font-size: 13px; color: var(--text-muted); }
+
+    .tc-pricing-right { text-align: right; flex-shrink: 0; }
+    .tc-pricing-right .trial-price { font-size: 12px; color: var(--text-muted); }
+    .tc-pricing-right .trial-price strong { color: var(--accent); font-size: 16px; }
+    .tc-pricing-right .regular-price { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .tc-pricing-right .regular-price strong { color: var(--text); font-size: 14px; }
+
+    .tc-rating { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 14px; }
+    .tc-rating .stars { color: #F9A825; }
+    .tc-rating .count { color: var(--text-muted); font-size: 12px; }
+
+    .tc-skills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .tc-skill { padding: 3px 10px; background: var(--bg3); border-radius: 12px; font-size: 12px; color: var(--text-muted); }
+
+    .tc-bio-preview { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+    .tc-footer { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+    .tc-price { font-size: 18px; font-weight: 700; color: var(--accent); }
+    .tc-price small { font-size: 12px; color: var(--text-muted); font-weight: 400; }
+    .tc-btn {
+        padding: 8px 20px; background: var(--accent); color: #fff; border: none;
+        border-radius: 24px; font-size: 13px; font-weight: 600; cursor: pointer;
+        text-decoration: none; transition: all 0.2s; font-family: inherit;
+    }
+    .tc-btn:hover { background: var(--accent3); }
+    .tc-btn-outline {
+        padding: 8px 20px; background: transparent; color: var(--accent); border: 1.5px solid var(--accent);
+        border-radius: 24px; font-size: 13px; font-weight: 600; cursor: pointer;
+        text-decoration: none; transition: all 0.2s; font-family: inherit;
+    }
+    .tc-btn-outline:hover { background: rgba(0,184,148,0.08); }
+
+    .no-result { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    .no-result .icon { font-size: 48px; margin-bottom: 12px; }
+
+    @@media (max-width: 640px) {
+        .teacher-card { flex-direction: column; align-items: center; text-align: center; }
+        .tc-body-top { flex-direction: column; align-items: center; }
+        .tc-pricing-right { text-align: center; margin-top: 8px; }
+        .tc-footer { justify-content: center; }
+        .tc-skills { justify-content: center; }
+    }
+</style>
+
+<div style="position:relative;height:200px;background:linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.8)), url('/images/teacher-class.jpg') center/cover;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+    <h1 style="color:#fff;font-size:2rem;font-weight:800;">找老師</h1>
+    <p style="color:rgba(255,255,255,0.8);">尋找最適合你的 .NET 專業老師</p>
+</div>
+
+<div class="teacher-page">
+
+    <form method="get" class="filter-bar">
+        <input type="text" name="search" placeholder="&#x641C;&#x5C0B;&#x8001;&#x5E2B;&#x540D;&#x7A31;&#x3001;&#x5C08;&#x9577;..." value="@search" />
+        <input type="number" name="minPrice" placeholder="&#x6700;&#x4F4E;&#x50F9;&#x683C;" value="@ViewBag.MinPrice" style="width:120px;" />
+        <input type="number" name="maxPrice" placeholder="&#x6700;&#x9AD8;&#x50F9;&#x683C;" value="@ViewBag.MaxPrice" style="width:120px;" />
+        <button type="submit">&#x1F50D; &#x641C;&#x5C0B;</button>
+    </form>
+
+    <div class="skill-tags">
+        <a href="/Teacher" class="skill-tag @(string.IsNullOrEmpty(skill) ? "active" : "")">&#x5168;&#x90E8;</a>
+        <a href="/Teacher?skill=C%23" class="skill-tag @(skill == "C#" ? "active" : "")">C#</a>
+        <a href="/Teacher?skill=ASP.NET" class="skill-tag @(skill == "ASP.NET" ? "active" : "")">ASP.NET</a>
+        <a href="/Teacher?skill=Entity+Framework" class="skill-tag @(skill == "Entity Framework" ? "active" : "")">Entity Framework</a>
+        <a href="/Teacher?skill=SQL" class="skill-tag @(skill == "SQL" ? "active" : "")">SQL</a>
+        <a href="/Teacher?skill=Azure" class="skill-tag @(skill == "Azure" ? "active" : "")">Azure</a>
+        <a href="/Teacher?skill=Blazor" class="skill-tag @(skill == "Blazor" ? "active" : "")">Blazor</a>
+        <a href="/Teacher?skill=MAUI" class="skill-tag @(skill == "MAUI" ? "active" : "")">MAUI</a>
+    </div>
+
+    @if (teachers.Count == 0)
+    {
+        <div class="no-result">
+            <div class="icon">&#x1F50D;</div>
+            <div>&#x76EE;&#x524D;&#x6C92;&#x6709;&#x7B26;&#x5408;&#x689D;&#x4EF6;&#x7684;&#x8001;&#x5E2B;</div>
+            <div style="margin-top:16px;"><a href="/Teacher/Apply" class="tc-btn">&#x2728; &#x7533;&#x8ACB;&#x6210;&#x70BA;&#x8001;&#x5E2B;</a></div>
+        </div>
+    }
+    else
+    {
+        <div class="teacher-grid">
+            @foreach (var t in teachers)
+            {
+                var skills = System.Text.Json.JsonSerializer.Deserialize<List<string>>(t.SkillsJson) ?? new List<string>();
+                var starFull = (int)Math.Floor(t.AverageRating);
+                var starHalf = t.AverageRating - starFull >= 0.5 ? 1 : 0;
+                var colors = new[] { "#00b894", "#0984e3", "#6c5ce7", "#e17055", "#00cec9", "#fdcb6e" };
+                var initial = !string.IsNullOrEmpty(t.Name) ? t.Name.Substring(0, 1) : "T";
+                var bgColor = colors[t.Id % colors.Length];
+                <div class="teacher-card" onclick="location.href='/Teacher/Detail/@t.Id'">
+                    <div class="tc-header">
+                        @if (!string.IsNullOrEmpty(t.PhotoUrl))
+                        {
+                            <div class="tc-avatar">
+                                <img src="@t.PhotoUrl" alt="@t.Name" />
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="tc-avatar-initials" style="background:@bgColor;">@initial</div>
+                        }
+                    </div>
+                    <div class="tc-body">
+                        <div class="tc-body-top">
+                            <div class="tc-info">
+                                <h3>@t.Name</h3>
+                                <div class="tc-title">@t.Title</div>
+                            </div>
+                            <div class="tc-pricing-right">
+                                <div class="trial-price">&#x9AD4;&#x9A57;&#x8AB2; <strong>NT$@t.TrialPrice</strong></div>
+                                <div class="regular-price"><strong>NT$@t.HourlyRate</strong> /50&#x5206;&#x9418;</div>
+                            </div>
+                        </div>
+                        <div class="tc-rating">
+                            <span class="stars">@(new string('\u2605', starFull))@(starHalf == 1 ? "\u2BEA" : "")@(new string('\u2606', 5 - starFull - starHalf))</span>
+                            <span>@t.AverageRating.ToString("F1")</span>
+                            <span class="count">&middot; @t.TotalStudents &#x4F4D;&#x5B78;&#x751F; &middot; @t.TotalLessons &#x5802;&#x8AB2;</span>
+                        </div>
+                        <div class="tc-skills">
+                            @foreach (var s in skills.Take(5))
+                            {
+                                <span class="tc-skill">@s</span>
+                            }
+                        </div>
+                        <div class="tc-footer">
+                            <a href="/Teacher/Detail/@t.Id" class="tc-btn-outline" onclick="event.stopPropagation();">&#x806F;&#x7D61;&#x8001;&#x5E2B;</a>
+                            <a href="/Teacher/Detail/@t.Id" class="tc-btn" onclick="event.stopPropagation();">&#x9810;&#x7D04;&#x9AD4;&#x9A57;</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <div style="text-align:center;margin-top:40px;padding:20px;">
+        <a href="/Teacher/Apply" class="tc-btn" style="padding:12px 32px;font-size:15px;">&#x2728; &#x6211;&#x4E5F;&#x60F3;&#x7576;&#x8001;&#x5E2B;</a>
+    </div>
+</div>

@@ -1,0 +1,638 @@
+@{
+    ViewData["Title"] = "每日一題";
+}
+
+<style>
+    .daily-container {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Noto Sans TC', sans-serif;
+    }
+
+    .daily-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .daily-date {
+        font-size: 1.1rem;
+        color: #aaa;
+        margin-bottom: 4px;
+    }
+
+    .daily-title {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #ff6b35, #f7c948);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .streak-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #ff6b35 0%, #ff9a56 100%);
+        color: #fff;
+        font-size: 1.3rem;
+        font-weight: 700;
+        padding: 10px 24px;
+        border-radius: 50px;
+        margin: 16px auto;
+        box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+        animation: streakPulse 2s ease-in-out infinite;
+    }
+
+    .streak-badge.zero {
+        background: linear-gradient(135deg, #555, #777);
+        box-shadow: 0 4px 15px rgba(85, 85, 85, 0.3);
+        animation: none;
+    }
+
+    @@keyframes streakPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .question-card {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 24px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+
+    .question-category {
+        display: inline-block;
+        background: #2d2d44;
+        color: #a78bfa;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 20px;
+        margin-bottom: 12px;
+    }
+
+    .question-text {
+        font-size: 1.15rem;
+        line-height: 1.7;
+        color: #e0e0e0;
+        margin-bottom: 20px;
+        white-space: pre-wrap;
+    }
+
+    .options-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .options-list li {
+        margin-bottom: 10px;
+    }
+
+    .option-label {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        background: #252540;
+        border: 2px solid #333;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #e0e0e0;
+        font-size: 1rem;
+    }
+
+    .option-label:hover {
+        border-color: #a78bfa;
+        background: #2a2a4a;
+    }
+
+    .option-label input[type="radio"] {
+        accent-color: #a78bfa;
+        width: 18px;
+        height: 18px;
+    }
+
+    .option-label.selected {
+        border-color: #a78bfa;
+        background: #2d2055;
+    }
+
+    .option-label.correct {
+        border-color: #22c55e;
+        background: #0f3d1e;
+    }
+
+    .option-label.wrong {
+        border-color: #ef4444;
+        background: #3d1515;
+    }
+
+    .fillin-input {
+        width: 100%;
+        padding: 14px 18px;
+        background: #252540;
+        border: 2px solid #333;
+        border-radius: 12px;
+        color: #e0e0e0;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+
+    .fillin-input:focus {
+        border-color: #a78bfa;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #a78bfa, #7c3aed);
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: 700;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-top: 16px;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .result-panel {
+        text-align: center;
+        padding: 24px;
+        border-radius: 16px;
+        margin-top: 20px;
+        animation: fadeSlideIn 0.4s ease;
+    }
+
+    .result-panel.correct {
+        background: linear-gradient(135deg, #0f3d1e, #1a4a2e);
+        border: 2px solid #22c55e;
+    }
+
+    .result-panel.wrong {
+        background: linear-gradient(135deg, #3d1515, #4a1a1a);
+        border: 2px solid #ef4444;
+    }
+
+    .result-icon {
+        font-size: 3rem;
+        margin-bottom: 8px;
+    }
+
+    .result-text {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .result-panel.correct .result-text { color: #22c55e; }
+    .result-panel.wrong .result-text { color: #ef4444; }
+
+    .explanation-box {
+        background: #1a1a2e;
+        border-left: 4px solid #f7c948;
+        border-radius: 8px;
+        padding: 16px;
+        margin-top: 16px;
+        text-align: left;
+        color: #ccc;
+        line-height: 1.6;
+    }
+
+    .explanation-box strong {
+        color: #f7c948;
+    }
+
+    .already-done {
+        text-align: center;
+        padding: 30px;
+        color: #aaa;
+        font-size: 1.2rem;
+    }
+
+    .already-done .big-emoji {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .tomorrow-msg {
+        color: #a78bfa;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-top: 12px;
+    }
+
+    /* Calendar Heatmap */
+    .calendar-section {
+        margin-top: 30px;
+    }
+
+    .calendar-section h3 {
+        color: #e0e0e0;
+        font-size: 1.1rem;
+        margin-bottom: 14px;
+        text-align: center;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+        max-width: 350px;
+        margin: 0 auto;
+    }
+
+    .cal-day-label {
+        text-align: center;
+        color: #888;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding-bottom: 4px;
+    }
+
+    .cal-cell {
+        aspect-ratio: 1;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        color: #aaa;
+        font-weight: 600;
+        position: relative;
+    }
+
+    .cal-cell.correct { background: #166534; color: #86efac; }
+    .cal-cell.wrong { background: #7f1d1d; color: #fca5a5; }
+    .cal-cell.empty { background: #252540; color: #555; }
+    .cal-cell.future { background: #1a1a2e; color: #333; }
+    .cal-cell.today { box-shadow: 0 0 0 2px #a78bfa; }
+
+    /* Stats Panel */
+    .stats-panel {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .stat-card {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #a78bfa;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: #888;
+        margin-top: 4px;
+    }
+
+    .new-record {
+        animation: recordBounce 0.6s ease;
+        color: #f7c948 !important;
+    }
+
+    @@keyframes fadeSlideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @@keyframes recordBounce {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+    }
+
+    .loading-spinner {
+        text-align: center;
+        padding: 40px;
+        color: #888;
+        font-size: 1.1rem;
+    }
+
+    .streak-record-banner {
+        background: linear-gradient(135deg, #f7c948, #ff6b35);
+        color: #1a1a2e;
+        text-align: center;
+        padding: 12px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-top: 12px;
+        animation: recordBounce 0.6s ease;
+    }
+</style>
+
+<div class="daily-container">
+    <div class="daily-header">
+        <div class="daily-date" id="todayDate"></div>
+        <div class="daily-title">每日一題</div>
+        <div id="streakBadge" class="streak-badge zero" style="display:none;"></div>
+    </div>
+
+    <div id="loadingArea" class="loading-spinner">載入中...</div>
+    <div id="questionArea" style="display:none;"></div>
+    <div id="resultArea" style="display:none;"></div>
+    <div id="calendarSection" class="calendar-section" style="display:none;">
+        <h3>過去 30 天紀錄</h3>
+        <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+    <div id="statsPanel" class="stats-panel" style="display:none;"></div>
+</div>
+
+<script>
+(function() {
+    const todayStr = new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('todayDate').textContent = todayStr;
+
+    let challengeData = null;
+
+    async function loadToday() {
+        try {
+            const res = await fetch('/Daily/Today');
+            const data = await res.json();
+            if (data.error) {
+                document.getElementById('loadingArea').textContent = data.error;
+                return;
+            }
+            challengeData = data;
+            document.getElementById('loadingArea').style.display = 'none';
+            showStreak(data.streakDays);
+
+            if (data.alreadyAnswered) {
+                showAlreadyAnswered(data);
+            } else {
+                showQuestion(data);
+            }
+
+            loadHistory();
+            loadStats();
+        } catch (e) {
+            document.getElementById('loadingArea').textContent = '載入失敗，請重新整理';
+        }
+    }
+
+    function showStreak(days) {
+        const badge = document.getElementById('streakBadge');
+        badge.style.display = 'inline-flex';
+        if (days > 0) {
+            badge.className = 'streak-badge';
+            badge.innerHTML = '\uD83D\uDD25 連續 ' + days + ' 天';
+        } else {
+            badge.className = 'streak-badge zero';
+            badge.innerHTML = '\uD83D\uDD25 連續 0 天';
+        }
+    }
+
+    function showQuestion(data) {
+        const area = document.getElementById('questionArea');
+        area.style.display = 'block';
+
+        let options = [];
+        try { options = JSON.parse(data.optionsJson || '[]'); } catch(e) {}
+
+        let optionsHtml = '';
+        if (data.type === 'fillin') {
+            optionsHtml = '<input type="text" class="fillin-input" id="fillinAnswer" placeholder="輸入你的答案..." autocomplete="off" />';
+        } else {
+            optionsHtml = '<ul class="options-list">';
+            options.forEach((opt, i) => {
+                optionsHtml += '<li>' +
+                    '<label class="option-label" id="optLabel_' + i + '" onclick="selectOption(this, \'' + escapeHtml(opt) + '\')">' +
+                    '<input type="radio" name="answer" value="' + escapeHtml(opt) + '" />' +
+                    '<span>' + escapeHtml(opt) + '</span>' +
+                    '</label></li>';
+            });
+            optionsHtml += '</ul>';
+        }
+
+        area.innerHTML =
+            '<div class="question-card">' +
+                (data.category ? '<span class="question-category">' + escapeHtml(data.category) + '</span>' : '') +
+                '<div class="question-text">' + escapeHtml(data.questionText) + '</div>' +
+                optionsHtml +
+                '<button class="submit-btn" id="submitBtn" onclick="submitAnswer()">提交答案</button>' +
+            '</div>';
+    }
+
+    function showAlreadyAnswered(data) {
+        const area = document.getElementById('questionArea');
+        area.style.display = 'block';
+
+        let options = [];
+        try { options = JSON.parse(data.optionsJson || '[]'); } catch(e) {}
+
+        let optionsHtml = '';
+        if (data.type === 'fillin') {
+            optionsHtml = '<input type="text" class="fillin-input" value="' + escapeHtml(data.userAnswer) + '" disabled />';
+        } else {
+            optionsHtml = '<ul class="options-list">';
+            options.forEach((opt, i) => {
+                let cls = 'option-label';
+                if (opt === data.correctAnswer) cls += ' correct';
+                else if (opt === data.userAnswer && !data.wasCorrect) cls += ' wrong';
+                optionsHtml += '<li><label class="' + cls + '">' +
+                    '<input type="radio" name="answer" ' + (opt === data.userAnswer ? 'checked' : '') + ' disabled />' +
+                    '<span>' + escapeHtml(opt) + '</span>' +
+                    '</label></li>';
+            });
+            optionsHtml += '</ul>';
+        }
+
+        area.innerHTML =
+            '<div class="question-card">' +
+                (data.category ? '<span class="question-category">' + escapeHtml(data.category) + '</span>' : '') +
+                '<div class="question-text">' + escapeHtml(data.questionText) + '</div>' +
+                optionsHtml +
+            '</div>' +
+            '<div class="result-panel ' + (data.wasCorrect ? 'correct' : 'wrong') + '">' +
+                '<div class="result-icon">' + (data.wasCorrect ? '\u2705' : '\u274C') + '</div>' +
+                '<div class="result-text">' + (data.wasCorrect ? '答對了！' : '答錯了') + '</div>' +
+                '<div style="color:#aaa;">正確答案：' + escapeHtml(data.correctAnswer || '') + '</div>' +
+                (data.explanation ? '<div class="explanation-box"><strong>解析：</strong>' + escapeHtml(data.explanation) + '</div>' : '') +
+            '</div>' +
+            '<div class="already-done">' +
+                '<span class="big-emoji">\uD83C\uDF1F</span>' +
+                '<div class="tomorrow-msg">明天再來！</div>' +
+            '</div>';
+    }
+
+    window.selectOption = function(label, value) {
+        document.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+        label.classList.add('selected');
+        label.querySelector('input').checked = true;
+    };
+
+    window.submitAnswer = async function() {
+        if (!challengeData) return;
+
+        let answer = '';
+        if (challengeData.type === 'fillin') {
+            answer = document.getElementById('fillinAnswer')?.value || '';
+        } else {
+            const checked = document.querySelector('input[name="answer"]:checked');
+            if (!checked) { alert('請選擇一個答案'); return; }
+            answer = checked.value;
+        }
+
+        if (!answer.trim()) { alert('請輸入答案'); return; }
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = '提交中...';
+
+        try {
+            const res = await fetch('/Daily/Submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dailyChallengeId: challengeData.challengeId, answer })
+            });
+            const result = await res.json();
+            if (result.error) { alert(result.error); btn.disabled = false; btn.textContent = '提交答案'; return; }
+
+            // Highlight options
+            if (challengeData.type !== 'fillin') {
+                document.querySelectorAll('.option-label').forEach(label => {
+                    const val = label.querySelector('input').value;
+                    label.style.pointerEvents = 'none';
+                    if (val === result.correctAnswer) label.classList.add('correct');
+                    else if (val === answer && !result.correct) label.classList.add('wrong');
+                });
+            }
+
+            btn.style.display = 'none';
+
+            // Show result
+            const resultArea = document.getElementById('resultArea');
+            resultArea.style.display = 'block';
+            resultArea.innerHTML =
+                '<div class="result-panel ' + (result.correct ? 'correct' : 'wrong') + '">' +
+                    '<div class="result-icon">' + (result.correct ? '\u2705' : '\u274C') + '</div>' +
+                    '<div class="result-text">' + (result.correct ? '答對了！太棒了！' : '答錯了，沒關係！') + '</div>' +
+                    '<div style="color:#aaa;">正確答案：' + escapeHtml(result.correctAnswer) + '</div>' +
+                    (result.explanation ? '<div class="explanation-box"><strong>解析：</strong>' + escapeHtml(result.explanation) + '</div>' : '') +
+                '</div>' +
+                (result.isNewRecord ? '<div class="streak-record-banner">\uD83C\uDFC6 新紀錄！連續 ' + result.streak + ' 天答對！</div>' : '') +
+                '<div class="already-done"><span class="big-emoji">\uD83C\uDF1F</span><div class="tomorrow-msg">明天再來！</div></div>';
+
+            showStreak(result.streak);
+            loadHistory();
+            loadStats();
+        } catch (e) {
+            btn.disabled = false;
+            btn.textContent = '提交答案';
+            alert('提交失敗，請再試一次');
+        }
+    };
+
+    async function loadHistory() {
+        try {
+            const res = await fetch('/Daily/History?days=30');
+            const data = await res.json();
+            renderCalendar(data);
+        } catch(e) {}
+    }
+
+    function renderCalendar(history) {
+        const section = document.getElementById('calendarSection');
+        section.style.display = 'block';
+        const grid = document.getElementById('calendarGrid');
+
+        const historyMap = {};
+        history.forEach(h => { historyMap[h.date] = h.isCorrect; });
+
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const days = [];
+
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - i);
+            days.push(d);
+        }
+
+        // Day labels
+        const labels = ['日','一','二','三','四','五','六'];
+        // Find the starting day of week for the first day
+        const firstDow = days[0].getDay();
+
+        let html = '';
+        // Day of week headers
+        labels.forEach(l => { html += '<div class="cal-day-label">' + l + '</div>'; });
+
+        // Empty cells before first day
+        for (let i = 0; i < firstDow; i++) {
+            html += '<div class="cal-cell future"></div>';
+        }
+
+        days.forEach(d => {
+            const ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+            const isToday = d.getTime() === today.getTime();
+            let cls = 'cal-cell';
+
+            if (ds in historyMap) {
+                cls += historyMap[ds] ? ' correct' : ' wrong';
+            } else {
+                cls += ' empty';
+            }
+            if (isToday) cls += ' today';
+
+            html += '<div class="' + cls + '">' + d.getDate() + '</div>';
+        });
+
+        grid.innerHTML = html;
+    }
+
+    async function loadStats() {
+        try {
+            const res = await fetch('/Daily/Stats');
+            const data = await res.json();
+            const panel = document.getElementById('statsPanel');
+            panel.style.display = 'grid';
+            panel.innerHTML =
+                '<div class="stat-card"><div class="stat-value">' + data.currentStreak + '</div><div class="stat-label">目前連續</div></div>' +
+                '<div class="stat-card"><div class="stat-value">' + data.bestStreak + '</div><div class="stat-label">最佳連續</div></div>' +
+                '<div class="stat-card"><div class="stat-value">' + data.accuracy + '%</div><div class="stat-label">正確率 (' + data.totalCorrect + '/' + data.totalAttempted + ')</div></div>';
+        } catch(e) {}
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    loadToday();
+})();
+</script>

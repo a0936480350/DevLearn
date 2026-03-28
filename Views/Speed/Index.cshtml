@@ -1,0 +1,702 @@
+@{
+    ViewData["Title"] = "速度挑戰";
+}
+
+<style>
+    /* === 速度挑戰 Dark Theme === */
+    .speed-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', sans-serif;
+        color: #e0e0e0;
+    }
+
+    /* --- 開始畫面 --- */
+    .speed-lobby {
+        text-align: center;
+        padding: 40px 0;
+    }
+    .speed-lobby h1 {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, #ff6b35, #f7c948);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+    }
+    .speed-lobby .subtitle {
+        color: #999;
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+    .category-selector {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    .cat-btn {
+        padding: 10px 20px;
+        border: 2px solid #444;
+        border-radius: 12px;
+        background: #1e1e2e;
+        color: #ccc;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+    }
+    .cat-btn:hover {
+        border-color: #ff6b35;
+        color: #ff6b35;
+    }
+    .cat-btn.active {
+        border-color: #ff6b35;
+        background: rgba(255, 107, 53, 0.15);
+        color: #ff6b35;
+        font-weight: bold;
+    }
+    .start-btn {
+        display: inline-block;
+        padding: 18px 60px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        border: none;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #ff6b35, #e8530e);
+        color: #fff;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.15s;
+        box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
+        animation: pulse-btn 2s infinite;
+    }
+    .start-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 30px rgba(255, 107, 53, 0.6);
+    }
+    @@keyframes pulse-btn {
+        0%, 100% { box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4); }
+        50% { box-shadow: 0 4px 30px rgba(255, 107, 53, 0.7); }
+    }
+
+    /* --- 遊戲畫面 --- */
+    .speed-game {
+        display: none;
+    }
+    .timer-bar {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .timer-display {
+        font-size: 4rem;
+        font-weight: 900;
+        font-variant-numeric: tabular-nums;
+        color: #4ade80;
+        text-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
+        transition: color 0.3s;
+    }
+    .timer-display.warning {
+        color: #fbbf24;
+        text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+        animation: pulse-timer 0.5s infinite;
+    }
+    .timer-display.danger {
+        color: #ef4444;
+        text-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+        animation: pulse-timer 0.3s infinite;
+    }
+    @@keyframes pulse-timer {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+    }
+    .progress-track {
+        width: 100%;
+        height: 6px;
+        background: #333;
+        border-radius: 3px;
+        margin-top: 8px;
+        overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4ade80, #22c55e);
+        border-radius: 3px;
+        transition: width 1s linear, background 0.3s;
+    }
+    .score-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+        color: #aaa;
+    }
+    .score-bar .current-score {
+        font-size: 1.3rem;
+        color: #f7c948;
+        font-weight: bold;
+    }
+    .question-card {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 15px;
+        transition: border-color 0.3s;
+    }
+    .question-card.flash-correct {
+        border-color: #4ade80;
+        box-shadow: 0 0 30px rgba(74, 222, 128, 0.3);
+    }
+    .question-card.flash-wrong {
+        border-color: #ef4444;
+        box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+    }
+    .question-number {
+        color: #888;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+    .question-text {
+        font-size: 1.2rem;
+        line-height: 1.6;
+        color: #f0f0f0;
+        margin-bottom: 20px;
+    }
+    .options-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    .option-btn {
+        padding: 15px 20px;
+        border: 2px solid #444;
+        border-radius: 12px;
+        background: #252535;
+        color: #ddd;
+        cursor: pointer;
+        font-size: 1rem;
+        text-align: left;
+        transition: all 0.15s;
+        position: relative;
+    }
+    .option-btn:hover {
+        border-color: #ff6b35;
+        background: rgba(255, 107, 53, 0.1);
+        transform: translateY(-2px);
+    }
+    .option-btn .shortcut {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        font-size: 0.7rem;
+        color: #666;
+        background: #1a1a2a;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    .option-btn.correct-answer {
+        border-color: #4ade80;
+        background: rgba(74, 222, 128, 0.15);
+        color: #4ade80;
+    }
+    .option-btn.wrong-answer {
+        border-color: #ef4444;
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+    }
+    .option-btn.disabled {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    /* --- 結果畫面 --- */
+    .speed-result {
+        display: none;
+        text-align: center;
+        padding: 30px 0;
+    }
+    .result-score {
+        font-size: 5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #f7c948, #ff6b35);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 5px;
+    }
+    .result-label {
+        color: #888;
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+    }
+    .result-stats {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-bottom: 20px;
+    }
+    .stat-box {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 15px 25px;
+        text-align: center;
+    }
+    .stat-box .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #4ade80;
+    }
+    .stat-box .stat-label {
+        color: #888;
+        font-size: 0.85rem;
+        margin-top: 4px;
+    }
+    .percentile-msg {
+        font-size: 1.3rem;
+        color: #f7c948;
+        margin: 20px 0;
+        padding: 15px;
+        background: rgba(247, 201, 72, 0.1);
+        border-radius: 12px;
+        border: 1px solid rgba(247, 201, 72, 0.3);
+    }
+    .retry-btn {
+        padding: 14px 40px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #ff6b35, #e8530e);
+        color: #fff;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: transform 0.15s;
+    }
+    .retry-btn:hover {
+        transform: scale(1.05);
+    }
+
+    /* --- 排行榜 --- */
+    .leaderboard-section {
+        margin-top: 40px;
+    }
+    .leaderboard-section h2 {
+        text-align: center;
+        color: #f7c948;
+        margin-bottom: 15px;
+    }
+    .lb-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #1e1e2e;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .lb-table th {
+        background: #252535;
+        color: #aaa;
+        padding: 12px 15px;
+        text-align: left;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .lb-table td {
+        padding: 10px 15px;
+        border-bottom: 1px solid #2a2a3a;
+        color: #ccc;
+    }
+    .lb-table tr:last-child td {
+        border-bottom: none;
+    }
+    .lb-table .rank-1 td { color: #f7c948; }
+    .lb-table .rank-2 td { color: #c0c0c0; }
+    .lb-table .rank-3 td { color: #cd7f32; }
+    .lb-empty {
+        text-align: center;
+        color: #666;
+        padding: 30px;
+    }
+
+    /* --- 結果詳情 --- */
+    .result-details {
+        margin-top: 25px;
+        text-align: left;
+    }
+    .result-details h3 {
+        color: #aaa;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+    .detail-item {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .detail-icon {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+    .detail-text {
+        flex: 1;
+        font-size: 0.9rem;
+        color: #bbb;
+    }
+    .detail-text .explanation {
+        color: #888;
+        font-size: 0.8rem;
+        margin-top: 4px;
+    }
+</style>
+
+<div class="speed-container">
+    <!-- 開始畫面 -->
+    <div class="speed-lobby" id="lobby">
+        <h1>速度挑戰</h1>
+        <p class="subtitle">60 秒內答對越多題，分數越高！</p>
+
+        <div class="category-selector" id="categorySelector">
+            <button class="cat-btn active" data-cat="all">全部</button>
+            <button class="cat-btn" data-cat="csharp">C#</button>
+            <button class="cat-btn" data-cat="aspnet">ASP.NET</button>
+            <button class="cat-btn" data-cat="database">資料庫</button>
+            <button class="cat-btn" data-cat="network">網路</button>
+            <button class="cat-btn" data-cat="security">資安</button>
+            <button class="cat-btn" data-cat="docker">Docker</button>
+        </div>
+
+        <button class="start-btn" id="startBtn" onclick="startGame()">開始挑戰！</button>
+
+        <!-- 排行榜（大廳顯示） -->
+        <div class="leaderboard-section" id="lobbyLeaderboard">
+            <h2>排行榜</h2>
+            <div id="lobbyLbContent"></div>
+        </div>
+    </div>
+
+    <!-- 遊戲畫面 -->
+    <div class="speed-game" id="gameScreen">
+        <div class="timer-bar">
+            <div class="timer-display" id="timerDisplay">60</div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width:100%"></div>
+            </div>
+        </div>
+
+        <div class="score-bar">
+            <span>題目 <span id="qNum">1</span> / <span id="qTotal">30</span></span>
+            <span class="current-score">分數: <span id="liveScore">0</span></span>
+        </div>
+
+        <div class="question-card" id="questionCard">
+            <div class="question-number" id="questionNumber"></div>
+            <div class="question-text" id="questionText"></div>
+            <div class="options-grid" id="optionsGrid"></div>
+        </div>
+    </div>
+
+    <!-- 結果畫面 -->
+    <div class="speed-result" id="resultScreen">
+        <div class="result-score" id="resultScore">0</div>
+        <div class="result-label">分</div>
+
+        <div class="result-stats">
+            <div class="stat-box">
+                <div class="stat-value" id="resultCorrect">0</div>
+                <div class="stat-label">答對</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="resultTotal">0</div>
+                <div class="stat-label">作答</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="resultAccuracy">0%</div>
+                <div class="stat-label">正確率</div>
+            </div>
+        </div>
+
+        <div class="percentile-msg" id="percentileMsg"></div>
+
+        <button class="retry-btn" onclick="backToLobby()">再挑戰一次</button>
+
+        <div class="result-details" id="resultDetails">
+            <h3>答題詳情</h3>
+            <div id="detailsList"></div>
+        </div>
+
+        <div class="leaderboard-section">
+            <h2>排行榜</h2>
+            <div id="resultLbContent"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    let questions = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+    let answers = [];
+    let timer = null;
+    let timeLeft = 60;
+    let selectedCategory = 'all';
+    let gameActive = false;
+    let liveScore = 0;
+
+    // 分類按鈕
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            selectedCategory = this.dataset.cat;
+            loadLeaderboard('lobbyLbContent');
+        });
+    });
+
+    // 載入排行榜
+    async function loadLeaderboard(containerId) {
+        try {
+            const res = await fetch(`/Speed/Leaderboard?category=${selectedCategory}`);
+            const data = await res.json();
+            const container = document.getElementById(containerId);
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div class="lb-empty">還沒有挑戰紀錄，成為第一個！</div>';
+                return;
+            }
+            let html = '<table class="lb-table"><thead><tr><th>#</th><th>挑戰者</th><th>分數</th><th>答對</th><th>時間</th></tr></thead><tbody>';
+            data.forEach((r, i) => {
+                const rankClass = i < 3 ? `rank-${i+1}` : '';
+                const medal = i === 0 ? '\u{1F947}' : i === 1 ? '\u{1F948}' : i === 2 ? '\u{1F949}' : (i+1);
+                html += `<tr class="${rankClass}"><td>${medal}</td><td>${escHtml(r.nickname)}</td><td>${r.score}</td><td>${r.correct}/${r.total}</td><td>${r.playedAt}</td></tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        } catch(e) {
+            console.error('載入排行榜失敗', e);
+        }
+    }
+
+    // 開始遊戲
+    window.startGame = async function() {
+        const btn = document.getElementById('startBtn');
+        btn.textContent = '載入中...';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(`/Speed/Start?category=${selectedCategory}&timeLimit=60`);
+            const data = await res.json();
+            questions = data.questions;
+
+            if (!questions || questions.length === 0) {
+                alert('此分類沒有可用的題目！');
+                btn.textContent = '開始挑戰！';
+                btn.disabled = false;
+                return;
+            }
+
+            currentIndex = 0;
+            correctCount = 0;
+            liveScore = 0;
+            answers = [];
+            timeLeft = 60;
+            gameActive = true;
+
+            document.getElementById('qTotal').textContent = questions.length;
+            document.getElementById('liveScore').textContent = '0';
+
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+
+            showQuestion();
+            startTimer();
+        } catch(e) {
+            alert('載入題目失敗');
+            console.error(e);
+        } finally {
+            btn.textContent = '開始挑戰！';
+            btn.disabled = false;
+        }
+    };
+
+    function startTimer() {
+        updateTimerDisplay();
+        timer = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                endGame();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const el = document.getElementById('timerDisplay');
+        el.textContent = timeLeft;
+        el.className = 'timer-display';
+        if (timeLeft <= 10) el.classList.add('danger');
+        else if (timeLeft <= 20) el.classList.add('warning');
+
+        const pct = (timeLeft / 60) * 100;
+        const fill = document.getElementById('progressFill');
+        fill.style.width = pct + '%';
+        if (timeLeft <= 10) fill.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+        else if (timeLeft <= 20) fill.style.background = 'linear-gradient(90deg, #fbbf24, #f59e0b)';
+        else fill.style.background = 'linear-gradient(90deg, #4ade80, #22c55e)';
+    }
+
+    function showQuestion() {
+        if (currentIndex >= questions.length || !gameActive) {
+            endGame();
+            return;
+        }
+
+        const q = questions[currentIndex];
+        document.getElementById('qNum').textContent = currentIndex + 1;
+        document.getElementById('questionNumber').textContent = `第 ${currentIndex + 1} 題`;
+        document.getElementById('questionText').textContent = q.questionText;
+
+        let options = [];
+        try { options = JSON.parse(q.optionsJson); } catch(e) {}
+
+        const grid = document.getElementById('optionsGrid');
+        grid.innerHTML = '';
+
+        const shortcuts = ['1', '2', '3', '4'];
+        options.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = `${escHtml(opt)} <span class="shortcut">${shortcuts[i] || ''}</span>`;
+            btn.addEventListener('click', () => selectAnswer(opt, btn));
+            grid.appendChild(btn);
+        });
+
+        const card = document.getElementById('questionCard');
+        card.classList.remove('flash-correct', 'flash-wrong');
+    }
+
+    function selectAnswer(answer, btnEl) {
+        if (!gameActive) return;
+
+        // 禁用所有按鈕
+        document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+
+        // 取得答案字母（A/B/C/D 或 正確/錯誤）
+        const q = questions[currentIndex];
+        let selectedLetter = answer;
+        // 從選項文字中提取字母前綴（例如 "A. xxx" -> "A"）
+        const match = answer.match(/^([A-D])\./);
+        if (match) selectedLetter = match[1];
+        // 對於 truefalse 類型，直接使用完整文字
+        if (q.type === 'truefalse') selectedLetter = answer;
+
+        answers.push({ questionId: q.id, answer: selectedLetter });
+
+        // 不知道正確答案，先視覺反饋，結算時再判對錯
+        // 暫時顯示已選擇
+        btnEl.style.borderColor = '#ff6b35';
+        btnEl.style.background = 'rgba(255, 107, 53, 0.2)';
+
+        currentIndex++;
+        document.getElementById('qNum').textContent = Math.min(currentIndex + 1, questions.length);
+
+        setTimeout(() => {
+            showQuestion();
+        }, 300);
+    }
+
+    // 鍵盤快捷鍵
+    document.addEventListener('keydown', function(e) {
+        if (!gameActive) return;
+        const key = e.key;
+        const map = { '1': 0, '2': 1, '3': 2, '4': 3 };
+        if (map[key] !== undefined) {
+            const btns = document.querySelectorAll('.option-btn:not(.disabled)');
+            if (btns[map[key]]) {
+                btns[map[key]].click();
+            }
+        }
+    });
+
+    async function endGame() {
+        gameActive = false;
+        if (timer) clearInterval(timer);
+
+        document.getElementById('gameScreen').style.display = 'none';
+
+        const timeTaken = 60 - timeLeft;
+
+        try {
+            const res = await fetch('/Speed/Finish', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    answers: answers,
+                    timeTaken: timeTaken,
+                    category: selectedCategory
+                })
+            });
+            const data = await res.json();
+
+            document.getElementById('resultScore').textContent = data.score;
+            document.getElementById('resultCorrect').textContent = data.correct;
+            document.getElementById('resultTotal').textContent = data.total;
+            const acc = data.total > 0 ? Math.round(data.correct * 100 / data.total) : 0;
+            document.getElementById('resultAccuracy').textContent = acc + '%';
+            document.getElementById('percentileMsg').textContent = `你打敗了 ${data.percentile}% 的挑戰者！`;
+
+            // 答題詳情
+            const detailsList = document.getElementById('detailsList');
+            detailsList.innerHTML = '';
+            if (data.details) {
+                data.details.forEach((d, i) => {
+                    const q = questions[i];
+                    const icon = d.correct ? '\u2705' : '\u274C';
+                    const div = document.createElement('div');
+                    div.className = 'detail-item';
+                    div.innerHTML = `
+                        <span class="detail-icon">${icon}</span>
+                        <div class="detail-text">
+                            ${escHtml(q ? q.questionText : '')}
+                            <br><strong>正確答案: ${escHtml(d.correctAnswer)}</strong>
+                            <div class="explanation">${escHtml(d.explanation || '')}</div>
+                        </div>
+                    `;
+                    detailsList.appendChild(div);
+                });
+            }
+
+            loadLeaderboard('resultLbContent');
+        } catch(e) {
+            console.error('提交結果失敗', e);
+        }
+
+        document.getElementById('resultScreen').style.display = 'block';
+    }
+
+    window.backToLobby = function() {
+        document.getElementById('resultScreen').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'none';
+        document.getElementById('lobby').style.display = 'block';
+        loadLeaderboard('lobbyLbContent');
+    };
+
+    function escHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // 初始載入排行榜
+    loadLeaderboard('lobbyLbContent');
+})();
+</script>

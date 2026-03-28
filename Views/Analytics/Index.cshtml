@@ -1,0 +1,556 @@
+@{
+    ViewData["Title"] = "學習分析";
+}
+
+<div class="analytics-page">
+    <!-- Hero -->
+    <div class="analytics-hero">
+        <h1>📊 學習分析</h1>
+        <p>追蹤你的學習歷程，找出弱點，持續進步</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="analytics-stats-grid">
+        <div class="analytics-stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-val" id="stat-days">--</div>
+            <div class="stat-label">學習天數</div>
+        </div>
+        <div class="analytics-stat-card">
+            <div class="stat-icon">📖</div>
+            <div class="stat-val" id="stat-chapters">--</div>
+            <div class="stat-label">完成章節</div>
+        </div>
+        <div class="analytics-stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-val" id="stat-quizzes">--</div>
+            <div class="stat-label">測驗次數</div>
+        </div>
+        <div class="analytics-stat-card">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-val" id="stat-avg"><span>--</span><span class="stat-sub">%</span></div>
+            <div class="stat-label">平均分數</div>
+        </div>
+    </div>
+
+    <!-- Streak + This Week -->
+    <div class="analytics-week-row">
+        <div class="analytics-section analytics-streak-card">
+            <div class="streak-flame">🔥</div>
+            <div class="streak-num" id="stat-streak">0</div>
+            <div class="streak-label">天連續學習</div>
+        </div>
+        <div class="analytics-section analytics-week-card">
+            <h3>📆 本週活動</h3>
+            <div class="week-items">
+                <div class="week-item">
+                    <span class="week-icon">⏱️</span>
+                    <span id="week-minutes">0</span> 分鐘
+                </div>
+                <div class="week-item">
+                    <span class="week-icon">📖</span>
+                    <span id="week-chapters">0</span> 章節
+                </div>
+                <div class="week-item">
+                    <span class="week-icon">🎯</span>
+                    <span id="week-quizzes">0</span> 測驗
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Heatmap -->
+    <div class="analytics-section">
+        <div class="heatmap-header">
+            <h3>🗓️ 學習熱力圖</h3>
+            <div class="heatmap-year-nav">
+                <button id="heatmap-prev" class="heatmap-nav-btn">&lt;</button>
+                <span id="heatmap-year">@DateTime.Now.Year</span>
+                <button id="heatmap-next" class="heatmap-nav-btn">&gt;</button>
+            </div>
+        </div>
+        <div class="heatmap-months" id="heatmap-months"></div>
+        <div class="heatmap-container">
+            <div class="heatmap-days-label">
+                <span></span><span>一</span><span></span><span>三</span><span></span><span>五</span><span></span>
+            </div>
+            <div class="heatmap-grid" id="heatmap-grid"></div>
+        </div>
+        <div class="heatmap-legend">
+            <span>少</span>
+            <span class="heatmap-cell" data-level="0"></span>
+            <span class="heatmap-cell" data-level="1"></span>
+            <span class="heatmap-cell" data-level="2"></span>
+            <span class="heatmap-cell" data-level="3"></span>
+            <span class="heatmap-cell" data-level="4"></span>
+            <span>多</span>
+        </div>
+    </div>
+
+    <!-- Weak Points -->
+    <div class="analytics-section">
+        <h3>🎯 弱點分析</h3>
+        <div id="weakpoints-container">
+            <div class="loading-text">載入中...</div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .analytics-page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 24px 16px 60px;
+    }
+    .analytics-hero {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+    .analytics-hero h1 {
+        font-size: 2rem;
+        color: #e0e0e0;
+        margin-bottom: 8px;
+    }
+    .analytics-hero p {
+        color: #888;
+        font-size: 1rem;
+    }
+
+    /* Stats Cards */
+    .analytics-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .analytics-stat-card {
+        background: #1a1a2e;
+        border: 1px solid #2a2a4a;
+        border-radius: 12px;
+        padding: 20px 16px;
+        text-align: center;
+        transition: transform 0.2s;
+    }
+    .analytics-stat-card:hover {
+        transform: translateY(-2px);
+        border-color: #6366f1;
+    }
+    .analytics-stat-card .stat-icon {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+    }
+    .analytics-stat-card .stat-val {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #6366f1;
+    }
+    .analytics-stat-card .stat-sub {
+        font-size: 1rem;
+        color: #888;
+    }
+    .analytics-stat-card .stat-label {
+        font-size: 0.85rem;
+        color: #888;
+        margin-top: 4px;
+    }
+
+    /* Streak + Week Row */
+    .analytics-week-row {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .analytics-streak-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+    .streak-flame { font-size: 2rem; }
+    .streak-num { font-size: 2.4rem; font-weight: 700; color: #F9A825; }
+    .streak-label { color: #888; font-size: 0.9rem; }
+    .analytics-week-card h3 {
+        margin: 0 0 12px;
+        color: #e0e0e0;
+        font-size: 1rem;
+    }
+    .week-items {
+        display: flex;
+        gap: 24px;
+    }
+    .week-item {
+        color: #ccc;
+        font-size: 1rem;
+    }
+    .week-item span:first-child {
+        margin-right: 4px;
+    }
+    .week-item span:nth-child(2) {
+        font-weight: 700;
+        color: #6366f1;
+    }
+
+    /* Section */
+    .analytics-section {
+        background: #1a1a2e;
+        border: 1px solid #2a2a4a;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+    .analytics-section h3 {
+        margin: 0 0 16px;
+        color: #e0e0e0;
+        font-size: 1.1rem;
+    }
+
+    /* Heatmap */
+    .heatmap-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .heatmap-header h3 { margin-bottom: 0; }
+    .heatmap-year-nav {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .heatmap-nav-btn {
+        background: #2a2a4a;
+        border: none;
+        color: #ccc;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+    .heatmap-nav-btn:hover { background: #3a3a5a; }
+    #heatmap-year {
+        color: #e0e0e0;
+        font-weight: 600;
+        font-size: 1rem;
+        min-width: 50px;
+        text-align: center;
+    }
+    .heatmap-months {
+        display: flex;
+        padding-left: 30px;
+        margin-bottom: 4px;
+    }
+    .heatmap-months span {
+        font-size: 0.7rem;
+        color: #666;
+    }
+    .heatmap-container {
+        display: flex;
+        gap: 4px;
+        overflow-x: auto;
+    }
+    .heatmap-days-label {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding-top: 0;
+    }
+    .heatmap-days-label span {
+        height: 13px;
+        line-height: 13px;
+        font-size: 0.65rem;
+        color: #666;
+        text-align: right;
+        width: 22px;
+    }
+    .heatmap-grid {
+        display: flex;
+        gap: 3px;
+    }
+    .heatmap-week {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .heatmap-cell {
+        width: 13px;
+        height: 13px;
+        border-radius: 2px;
+        background: #161B22;
+    }
+    .heatmap-cell[data-level="0"] { background: #161B22; }
+    .heatmap-cell[data-level="1"] { background: #0D1B2A; }
+    .heatmap-cell[data-level="2"] { background: #1B6EB5; }
+    .heatmap-cell[data-level="3"] { background: #6366f1; }
+    .heatmap-cell[data-level="4"] { background: #F9A825; }
+    .heatmap-cell:hover {
+        outline: 1px solid #fff;
+        outline-offset: -1px;
+    }
+    .heatmap-legend {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        justify-content: flex-end;
+        margin-top: 8px;
+        font-size: 0.75rem;
+        color: #666;
+    }
+    .heatmap-legend .heatmap-cell {
+        width: 12px;
+        height: 12px;
+        display: inline-block;
+    }
+    .heatmap-tooltip {
+        position: fixed;
+        background: #222;
+        color: #eee;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        pointer-events: none;
+        z-index: 999;
+        display: none;
+    }
+
+    /* Weak Points */
+    .weakpoint-item {
+        margin-bottom: 12px;
+    }
+    .weakpoint-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+    }
+    .weakpoint-name {
+        color: #e0e0e0;
+        font-size: 0.9rem;
+    }
+    .weakpoint-pct {
+        color: #888;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .weakpoint-bar-bg {
+        background: #2a2a4a;
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .weakpoint-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.6s ease;
+    }
+    .weakpoint-detail {
+        font-size: 0.75rem;
+        color: #666;
+        margin-top: 2px;
+    }
+    .loading-text {
+        text-align: center;
+        color: #666;
+        padding: 20px;
+    }
+    .empty-state-analytics {
+        text-align: center;
+        color: #666;
+        padding: 30px 20px;
+    }
+    .empty-state-analytics .empty-icon { font-size: 2rem; margin-bottom: 8px; }
+
+    @@media (max-width: 640px) {
+        .analytics-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .analytics-week-row {
+            grid-template-columns: 1fr;
+        }
+        .week-items {
+            flex-direction: column;
+            gap: 8px;
+        }
+    }
+</style>
+
+<div class="heatmap-tooltip" id="heatmap-tooltip"></div>
+
+<script>
+(function() {
+    let currentYear = @DateTime.Now.Year;
+
+    // Load stats
+    async function loadStats() {
+        try {
+            const res = await fetch('/Analytics/Stats');
+            const d = await res.json();
+            document.getElementById('stat-days').textContent = d.studyDays;
+            document.getElementById('stat-chapters').textContent = d.totalChapters;
+            document.getElementById('stat-quizzes').textContent = d.totalQuizzes;
+            document.getElementById('stat-avg').innerHTML = d.avgScore + '<span class="stat-sub">%</span>';
+            document.getElementById('stat-streak').textContent = d.streak;
+            document.getElementById('week-minutes').textContent = d.week.minutes;
+            document.getElementById('week-chapters').textContent = d.week.chapters;
+            document.getElementById('week-quizzes').textContent = d.week.quizzes;
+        } catch(e) { console.error('Stats error', e); }
+    }
+
+    // Load heatmap
+    async function loadHeatmap(year) {
+        try {
+            const res = await fetch('/Analytics/Heatmap?year=' + year);
+            const data = await res.json();
+            renderHeatmap(data, year);
+        } catch(e) { console.error('Heatmap error', e); }
+    }
+
+    function renderHeatmap(data, year) {
+        const grid = document.getElementById('heatmap-grid');
+        const monthsEl = document.getElementById('heatmap-months');
+        grid.innerHTML = '';
+        monthsEl.innerHTML = '';
+
+        // Build lookup
+        const lookup = {};
+        data.forEach(d => { lookup[d.date] = d.level; });
+
+        const startDate = new Date(year, 0, 1);
+        const endDate = new Date(year, 11, 31);
+
+        // Adjust start to Sunday
+        const startDay = startDate.getDay();
+        const adjustedStart = new Date(startDate);
+        adjustedStart.setDate(adjustedStart.getDate() - startDay);
+
+        // Build weeks
+        let weeks = [];
+        let currentWeek = [];
+        let d = new Date(adjustedStart);
+
+        while (d <= endDate || currentWeek.length > 0) {
+            const dayOfWeek = d.getDay();
+            const dateStr = d.toISOString().slice(0, 10);
+            const inYear = d.getFullYear() === year;
+            currentWeek.push({
+                date: dateStr,
+                level: inYear ? (lookup[dateStr] || 0) : -1,
+                inYear
+            });
+            if (dayOfWeek === 6 || d > endDate) {
+                weeks.push(currentWeek);
+                currentWeek = [];
+                if (d > endDate) break;
+            }
+            d = new Date(d.getTime() + 86400000);
+        }
+
+        // Month labels
+        const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+        let monthPositions = [];
+        let weekIndex = 0;
+        weeks.forEach((week, wi) => {
+            week.forEach(day => {
+                if (day.inYear) {
+                    const m = parseInt(day.date.slice(5,7)) - 1;
+                    if (!monthPositions[m]) monthPositions[m] = wi;
+                }
+            });
+        });
+
+        // Render month labels
+        const totalWeeks = weeks.length;
+        const cellSize = 16; // 13px + 3px gap
+        for (let m = 0; m < 12; m++) {
+            const pos = monthPositions[m] || 0;
+            const nextPos = m < 11 ? (monthPositions[m+1] || totalWeeks) : totalWeeks;
+            const span = document.createElement('span');
+            span.textContent = monthNames[m];
+            span.style.width = ((nextPos - pos) * cellSize) + 'px';
+            span.style.flexShrink = '0';
+            monthsEl.appendChild(span);
+        }
+
+        // Render grid
+        const tooltip = document.getElementById('heatmap-tooltip');
+        weeks.forEach(week => {
+            const col = document.createElement('div');
+            col.className = 'heatmap-week';
+            week.forEach(day => {
+                const cell = document.createElement('div');
+                cell.className = 'heatmap-cell';
+                if (day.inYear) {
+                    cell.setAttribute('data-level', day.level);
+                    cell.setAttribute('data-date', day.date);
+                    cell.addEventListener('mouseenter', function(e) {
+                        const lvlText = ['無活動','輕度','中度','高度','密集'];
+                        tooltip.textContent = day.date + ' - ' + lvlText[day.level];
+                        tooltip.style.display = 'block';
+                        tooltip.style.left = (e.clientX + 10) + 'px';
+                        tooltip.style.top = (e.clientY - 30) + 'px';
+                    });
+                    cell.addEventListener('mouseleave', function() {
+                        tooltip.style.display = 'none';
+                    });
+                } else {
+                    cell.style.visibility = 'hidden';
+                }
+                col.appendChild(cell);
+            });
+            grid.appendChild(col);
+        });
+    }
+
+    // Load weak points
+    async function loadWeakPoints() {
+        try {
+            const res = await fetch('/Analytics/WeakPoints');
+            const data = await res.json();
+            const container = document.getElementById('weakpoints-container');
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div class="empty-state-analytics"><div class="empty-icon">🎯</div><p>還沒有測驗資料，做幾個測驗來看看弱點分析吧！</p></div>';
+                return;
+            }
+
+            let html = '';
+            data.forEach(item => {
+                const acc = item.accuracy;
+                const color = acc >= 80 ? '#4CAF50' : acc >= 60 ? '#F9A825' : acc >= 40 ? '#FF9800' : '#f44336';
+                html += `<div class="weakpoint-item">
+                    <div class="weakpoint-header">
+                        <span class="weakpoint-name">${item.categoryName}</span>
+                        <span class="weakpoint-pct" style="color:${color}">${acc}%</span>
+                    </div>
+                    <div class="weakpoint-bar-bg">
+                        <div class="weakpoint-bar-fill" style="width:${acc}%;background:${color}"></div>
+                    </div>
+                    <div class="weakpoint-detail">答對 ${item.correctCount} / ${item.totalQuestions} 題</div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        } catch(e) { console.error('WeakPoints error', e); }
+    }
+
+    // Year navigation
+    document.getElementById('heatmap-prev').addEventListener('click', function() {
+        currentYear--;
+        document.getElementById('heatmap-year').textContent = currentYear;
+        loadHeatmap(currentYear);
+    });
+    document.getElementById('heatmap-next').addEventListener('click', function() {
+        currentYear++;
+        document.getElementById('heatmap-year').textContent = currentYear;
+        loadHeatmap(currentYear);
+    });
+
+    // Log activity on page visit
+    fetch('/Analytics/LogActivity', { method: 'POST' }).catch(() => {});
+
+    // Init
+    loadStats();
+    loadHeatmap(currentYear);
+    loadWeakPoints();
+})();
+</script>
