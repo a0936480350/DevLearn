@@ -32,9 +32,10 @@
 <div class="home-layout">
 
     <!-- ══════════ Hero ══════════ -->
-    <section class="hero" style="position:relative;background:linear-gradient(135deg, rgba(0,184,148,0.8), rgba(9,132,227,0.7)), url('/images/hero-coding.jpg') center/cover no-repeat;">
+    <section class="hero" style="position:relative;background:linear-gradient(135deg, #0a1628 0%, #0f2027 30%, #203a43 60%, #2c5364 100%);overflow:hidden;">
         <canvas id="heroParticles" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
         <div class="hero-bg" style="background:none;"></div>
+        <div style="position:absolute;top:0;left:0;width:100%;height:100%;background-image:radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 1px);background-size:24px 24px;z-index:0;"></div>
         <div class="hero-content" style="position:relative;z-index:1;">
             <div class="hero-badge">完整 .NET 學習路徑</div>
             <h1>從零開始，<br><span class="highlight">完整學會 .NET</span></h1>
@@ -54,6 +55,19 @@
             </div>
         </div>
     </section>
+
+    <style>
+        .floating-shape {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.03;
+        }
+    </style>
+    <div class="floating-shape" style="width:300px;height:300px;background:#00b894;top:20%;left:-100px;filter:blur(80px);"></div>
+    <div class="floating-shape" style="width:400px;height:400px;background:#6366f1;bottom:10%;right:-150px;filter:blur(100px);"></div>
+    <div class="floating-shape" style="width:200px;height:200px;background:#f59e0b;top:60%;left:50%;filter:blur(60px);"></div>
 
     <!-- ══════════ 開發者的話 ══════════ -->
     <section style="padding:40px 24px;max-width:900px;margin:0 auto;">
@@ -158,16 +172,26 @@
                 </p>
                 <a href="#core-path" style="color:var(--accent);font-weight:600;text-decoration:none;">開始學習 →</a>
             </div>
-            <div style="border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4);">
-                <img src="/images/code-screen.jpg" alt="程式碼學習" style="width:100%;height:280px;object-fit:cover;" />
+            <div style="width:100%;height:280px;border-radius:16px;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4);">
+                <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 30% 50%, rgba(0,184,148,0.1) 0%, transparent 50%),radial-gradient(circle at 70% 80%, rgba(99,102,241,0.1) 0%, transparent 50%);"></div>
+                <div style="text-align:center;position:relative;z-index:1;">
+                    <div style="font-size:60px;margin-bottom:10px;">💻</div>
+                    <div style="font-size:18px;font-weight:700;color:#e2e8f0;">完整程式碼範例</div>
+                    <div style="font-size:13px;color:#94a3b8;margin-top:6px;">每章附詳細說明與錯誤分析</div>
+                </div>
             </div>
         </div>
     </section>
 
     <section style="padding:60px 0;max-width:1100px;margin:0 auto;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;padding:0 24px;">
-            <div style="border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4);">
-                <img src="/images/team-learning.jpg" alt="團隊學習" style="width:100%;height:280px;object-fit:cover;" />
+            <div style="width:100%;height:280px;border-radius:16px;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4);">
+                <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 30% 50%, rgba(0,184,148,0.1) 0%, transparent 50%),radial-gradient(circle at 70% 80%, rgba(99,102,241,0.1) 0%, transparent 50%);"></div>
+                <div style="text-align:center;position:relative;z-index:1;">
+                    <div style="font-size:60px;margin-bottom:10px;">👨‍🏫</div>
+                    <div style="font-size:18px;font-weight:700;color:#e2e8f0;">一對一專業教學</div>
+                    <div style="font-size:13px;color:#94a3b8;margin-top:6px;">根據你的程度量身打造課程</div>
+                </div>
             </div>
             <div>
                 <h2 style="font-size:1.8rem;font-weight:800;margin-bottom:16px;">找到最適合你的老師</h2>
@@ -191,13 +215,23 @@
                 </p>
                 <a href="#core-path" style="color:var(--accent);font-weight:600;text-decoration:none;">開始學習 →</a>
             </div>
-            <div style="border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4);">
-                <img src="/images/code-screen.jpg" alt="程式碼學習" style="width:100%;height:280px;object-fit:cover;" />
+            <div style="width:100%;height:280px;border-radius:16px;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4);">
+                <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 70% 30%, rgba(245,158,11,0.1) 0%, transparent 50%),radial-gradient(circle at 20% 70%, rgba(0,184,148,0.1) 0%, transparent 50%);"></div>
+                <div style="text-align:center;position:relative;z-index:1;">
+                    <div style="font-size:60px;margin-bottom:10px;">📖</div>
+                    <div style="font-size:18px;font-weight:700;color:#e2e8f0;">系統化學習路徑</div>
+                    <div style="font-size:13px;color:#94a3b8;margin-top:6px;">從基礎到進階完整覆蓋</div>
+                </div>
             </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;">
-            <div style="border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4);">
-                <img src="/images/tech-bg.jpg" alt="互動學習" style="width:100%;height:280px;object-fit:cover;" />
+            <div style="width:100%;height:280px;border-radius:16px;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4);">
+                <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 50% 50%, rgba(233,30,99,0.1) 0%, transparent 50%),radial-gradient(circle at 80% 20%, rgba(99,102,241,0.1) 0%, transparent 50%);"></div>
+                <div style="text-align:center;position:relative;z-index:1;">
+                    <div style="font-size:60px;margin-bottom:10px;">🎮</div>
+                    <div style="font-size:18px;font-weight:700;color:#e2e8f0;">遊戲化互動學習</div>
+                    <div style="font-size:13px;color:#94a3b8;margin-top:6px;">邊玩邊學，越學越上癮</div>
+                </div>
             </div>
             <div>
                 <h2 style="font-size:1.8rem;font-weight:800;margin-bottom:16px;color:var(--text);">邊玩邊學，不再枯燥</h2>

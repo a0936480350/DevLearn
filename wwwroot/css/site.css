@@ -218,7 +218,7 @@ a:hover { color: var(--accent2); }
     text-align: center;
     padding: 4rem 2rem;
     overflow: hidden;
-    background: linear-gradient(135deg, rgba(0,184,148,0.85), rgba(9,132,227,0.85)), url('/images/hero-coding.jpg') center/cover;
+    background: linear-gradient(135deg, #0a1628 0%, #0f2027 30%, #203a43 60%, #2c5364 100%);
     border-bottom: none;
 }
 .hero-bg {
@@ -273,33 +273,44 @@ a:hover { color: var(--accent2); }
 }
 .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; }
 .btn-cta-primary {
-    background: #fff;
-    color: var(--accent);
-    border: none;
-    border-radius: 24px;
-    padding: 12px 32px;
-    font-size: .9rem;
-    font-weight: 700;
+    background: linear-gradient(135deg, #00b894, #00a884) !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 14px 32px !important;
+    border-radius: 30px !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
+    transition: all 0.3s !important;
+    box-shadow: 0 4px 15px rgba(0,184,148,0.3) !important;
     cursor: pointer;
     text-decoration: none;
-    transition: background 0.2s, transform 0.1s;
     font-family: var(--font-sans);
-    box-shadow: 0 2px 8px rgba(0,0,0,.1);
 }
-.btn-cta-primary:hover { background: #f0f0f0; transform: translateY(-1px); color: var(--accent3); text-decoration:none; }
+.btn-cta-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(0,184,148,0.5) !important;
+    text-decoration: none;
+    color: #fff !important;
+}
 .btn-cta-secondary {
-    background: transparent;
-    color: #fff;
-    border: 2px solid rgba(255,255,255,.5);
-    border-radius: 24px;
-    padding: 10px 28px;
-    font-size: .9rem;
-    font-weight: 600;
+    background: transparent !important;
+    color: #e2e8f0 !important;
+    border: 2px solid rgba(255,255,255,0.3) !important;
+    padding: 12px 28px !important;
+    border-radius: 30px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s !important;
     cursor: pointer;
     text-decoration: none;
-    transition: all .2s;
+    font-size: .9rem;
 }
-.btn-cta-secondary:hover { border-color: #fff; color: #fff; transform: translateY(-1px); text-decoration:none; background: rgba(255,255,255,.1); }
+.btn-cta-secondary:hover {
+    border-color: #00b894 !important;
+    color: #00b894 !important;
+    background: rgba(0,184,148,0.1) !important;
+    transform: translateY(-1px);
+    text-decoration: none;
+}
 
 .hero-stats { display: flex; justify-content: center; gap: 2rem; }
 .stat {
@@ -1894,15 +1905,37 @@ a:hover { color: var(--accent2); }
 
 /* 卡片 hover 特效 */
 .category-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0,184,148,0.15);
-    border-color: var(--accent);
+    transform: translateY(-8px) !important;
+    box-shadow: 0 15px 40px rgba(0,184,148,0.2) !important;
+    border-color: var(--accent) !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Category card colored top accent based on nth-child */
+.category-card:nth-child(1) { border-top: 3px solid #00b894; }
+.category-card:nth-child(2) { border-top: 3px solid #6366f1; }
+.category-card:nth-child(3) { border-top: 3px solid #ef4444; }
+.category-card:nth-child(4) { border-top: 3px solid #f59e0b; }
+.category-card:nth-child(5) { border-top: 3px solid #e91e63; }
+.category-card:nth-child(6) { border-top: 3px solid #00bcd4; }
+.category-card:nth-child(7) { border-top: 3px solid #9c27b0; }
+.category-card:nth-child(8) { border-top: 3px solid #4caf50; }
+
+/* Feature navigation cards - add subtle gradient background */
+.feature-card, .nav-feature-card {
+    background: linear-gradient(145deg, var(--bg2), var(--bg3)) !important;
+    border: 1px solid var(--border);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-card:hover, .nav-feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 /* 按鈕 hover 光暈 */
 .btn-cta-primary:hover {
-    animation: glow 1.5s infinite;
+    animation: none;
 }
 
 /* 側邊欄 hover */
@@ -2000,7 +2033,7 @@ a:hover { color: var(--accent2); }
 
 /* Parallax-like scroll effect for hero */
 .hero {
-    background-attachment: fixed;
+    background-attachment: scroll;
 }
 
 /* Reading progress bar */
@@ -2013,4 +2046,23 @@ a:hover { color: var(--accent2); }
     z-index: 999999;
     transition: width 0.1s;
     box-shadow: 0 0 10px rgba(0,184,148,0.5);
+}
+
+/* Gradient text for section titles */
+.section-title-gradient {
+    background: linear-gradient(135deg, #00b894, #6366f1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Animated underline */
+.section-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #00b894, #6366f1);
+    margin: 12px auto 0;
+    border-radius: 2px;
 }
