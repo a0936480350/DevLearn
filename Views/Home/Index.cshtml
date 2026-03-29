@@ -25,6 +25,7 @@
         ["aimodel"]        = ("AI 模型與語言",     "🧠", "#7C4DFF", "LLM、RAG、Embedding、IPAS 知識"),
         ["claudecode"]     = ("Claude Code 工具",  "🔌", "#00BCD4", "不用 CMD 做專案、No-Code 流程"),
         ["project"]        = ("專案實戰",          "🛒", "#4CAF50", "電商、部落格、API 微服務完整開發"),
+        ["iot"]            = ("IoT & POS 系統",    "🍓", "#FF5722", "Raspberry Pi、POS 開發、硬體整合"),
     };
 }
 
@@ -49,6 +50,47 @@
                 <div class="stat"><span class="stat-num clr-1">@Model.Count</span><small>章節內容</small></div>
                 <div class="stat"><span class="stat-num clr-2">@(corePath.Length + advancedModules.Count)</span><small>主題分類</small></div>
                 <div class="stat"><span class="stat-num clr-3">Free</span><small>完全免費</small></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ 開發者的話 ══════════ -->
+    <section style="padding:40px 24px;max-width:900px;margin:0 auto;">
+        <div style="background:linear-gradient(135deg, rgba(0,184,148,0.08), rgba(99,102,241,0.08));border:1px solid rgba(0,184,148,0.2);border-radius:16px;padding:32px;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:-20px;right:-20px;font-size:80px;opacity:0.05;">💻</div>
+            <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;">
+                <div style="flex-shrink:0;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#00b894,#6366f1);display:flex;align-items:center;justify-content:center;font-size:24px;">👋</div>
+                <div style="flex:1;min-width:280px;">
+                    <h2 style="font-size:1.3rem;font-weight:700;margin:0 0 12px 0;color:var(--text);">嗨！我是 Mike，歡迎來到 DevLearn</h2>
+                    <p style="color:var(--text-muted);line-height:1.8;margin:0 0 16px 0;font-size:0.92rem;">
+                        這個平台是我的 Side Project，起因很簡單——<strong style="color:var(--accent);">學程式不應該無聊</strong>。
+                        傳統的教學網站通常只有文字和程式碼，缺少互動和樂趣。所以我想做一個結合
+                        <strong style="color:#6366f1;">遊戲化學習</strong>、<strong style="color:#6366f1;">老師媒合</strong>、
+                        <strong style="color:#6366f1;">即時社群</strong>的學習平台，讓大家能邊玩邊學。
+                    </p>
+                    <p style="color:var(--text-muted);line-height:1.8;margin:0 0 16px 0;font-size:0.92rem;">
+                        🤖 整個網站是我用 <strong style="color:var(--accent);">Claude Code（AI 輔助開發工具）</strong>從零打造的，
+                        包括 93+ 章教學內容、12 種遊戲玩法、老師預約系統、即時聊天室，全部在短時間內完成。
+                        這也證明了——善用 AI 工具，一個人也能做出完整的產品。
+                    </p>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+                        <span style="background:rgba(0,184,148,0.15);color:#00b894;padding:3px 10px;border-radius:20px;font-size:0.75rem;">ASP.NET Core 8</span>
+                        <span style="background:rgba(99,102,241,0.15);color:#818cf8;padding:3px 10px;border-radius:20px;font-size:0.75rem;">PostgreSQL</span>
+                        <span style="background:rgba(249,168,37,0.15);color:#F9A825;padding:3px 10px;border-radius:20px;font-size:0.75rem;">SignalR 即時通訊</span>
+                        <span style="background:rgba(233,30,99,0.15);color:#E91E63;padding:3px 10px;border-radius:20px;font-size:0.75rem;">Azure 雲端</span>
+                        <span style="background:rgba(0,188,212,0.15);color:#00BCD4;padding:3px 10px;border-radius:20px;font-size:0.75rem;">Claude Code AI</span>
+                    </div>
+                    <p style="color:var(--text-muted);line-height:1.8;margin:0 0 12px 0;font-size:0.92rem;">
+                        📞 如果你在使用過程中遇到任何問題，或有想要的功能，歡迎透過右下角聊天室的<strong style="color:var(--accent);">「客服」分頁</strong>告訴我！
+                        每一條建議我都會認真看。
+                    </p>
+                    <p style="color:var(--text);font-size:0.95rem;margin:0;font-weight:600;">
+                        沒有壓力，按自己的節奏學習就好。希望大家在這裡開心學程式，一起成長！🚀
+                    </p>
+                    <p style="color:var(--text-muted);font-size:0.82rem;margin:12px 0 0 0;text-align:right;">
+                        —— Mike（邱瀚賢）｜DevLearn 開發者
+                    </p>
+                </div>
             </div>
         </div>
     </section>

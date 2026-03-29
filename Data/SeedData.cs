@@ -5,20 +5,13 @@ namespace DotNetLearning.Data;
 
 public static class SeedData
 {
-    private const int EXPECTED_CHAPTERS = 999; // 強制重建以加入新章節
-
     public static void Initialize(AppDbContext db)
     {
         db.Database.EnsureCreated();
 
-        // 已有正確數量 + 有 questions → 跳過
-        var chCount = db.Chapters.Count();
-        var qCount = db.Questions.Count();
-        if (chCount >= EXPECTED_CHAPTERS && qCount > 0) return;
-
-        // 需要重建 → 砍掉 DB 重來
-        db.Database.EnsureDeleted();
-        db.Database.EnsureCreated();
+        // 已有章節 → 不砍，只補新的
+        var existingChapterIds = db.Chapters.Select(c => c.Id).ToHashSet();
+        var existingQuestionIds = db.Questions.Select(q => q.Id).ToHashSet();
 
         // 從各分類檔案收集所有章節
         var chapters = new List<Chapter>();
@@ -43,24 +36,45 @@ public static class SeedData
         chapters.AddRange(SeedChapters_IoT.GetChapters());
         chapters.AddRange(SeedChapters_IoT2.GetChapters());
         chapters.AddRange(SeedChapters_IoT3.GetChapters());
+        chapters.AddRange(SeedChapters_DevLearn.GetChapters());
 
-        db.Chapters.AddRange(chapters);
-        db.SaveChanges();
+        // 只新增不存在的章節（不砍舊資料）
+        var newChapters = chapters.Where(c => !existingChapterIds.Contains(c.Id)).ToList();
+        if (newChapters.Count > 0)
+        {
+            db.Chapters.AddRange(newChapters);
+            db.SaveChanges();
+            Console.WriteLine($"[Seed] Added {newChapters.Count} new chapters (total: {db.Chapters.Count()})");
+        }
 
-        // 測驗題（過濾掉已移除分類的題目）
-        var validChapterIds = chapters.Select(c => c.Id).ToHashSet();
+        // 只新增不存在的測驗題
+        var allChapterIds = db.Chapters.Select(c => c.Id).ToHashSet();
         var questions = SeedQuestions.GetQuestions()
-            .Where(q => validChapterIds.Contains(q.ChapterId))
+            .Where(q => allChapterIds.Contains(q.ChapterId) && !existingQuestionIds.Contains(q.Id))
             .ToList();
-        db.Questions.AddRange(questions);
-        db.SaveChanges();
+        if (questions.Count > 0)
+        {
+            db.Questions.AddRange(questions);
+            db.SaveChanges();
+            Console.WriteLine($"[Seed] Added {questions.Count} new questions");
+        }
 
-        // 程式碼填字遊戲
-        db.CodePuzzles.AddRange(SeedCodePuzzles.GetPuzzles());
-        db.SaveChanges();
+        // 程式碼填字遊戲（只在沒有時才加）
+        if (!db.CodePuzzles.Any())
+        {
+            db.CodePuzzles.AddRange(SeedCodePuzzles.GetPuzzles());
+            db.SaveChanges();
+            Console.WriteLine("[Seed] Added code puzzles");
+        }
 
-        // 程式碼偵探 Bug 挑戰
-        db.BugChallenges.AddRange(SeedBugChallenges.GetChallenges());
-        db.SaveChanges();
+        // 程式碼偵探 Bug 挑戰（只在沒有時才加）
+        if (!db.BugChallenges.Any())
+        {
+            db.BugChallenges.AddRange(SeedBugChallenges.GetChallenges());
+            db.SaveChanges();
+            Console.WriteLine("[Seed] Added bug challenges");
+        }
+
+        Console.WriteLine($"[Seed] Done. Chapters: {db.Chapters.Count()}, Questions: {db.Questions.Count()}");
     }
 }

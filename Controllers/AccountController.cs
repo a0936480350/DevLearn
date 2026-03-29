@@ -12,6 +12,12 @@ public class AccountController : Controller
 
     private string GetAnonId() => HttpContext.Session.GetString("SessionId") ?? "";
 
+    private async Task<bool> IsBanned()
+    {
+        var user = HttpContext.Items["CurrentUser"] as SiteUser;
+        return user?.IsBanned ?? false;
+    }
+
     // 個人檔案頁面
     public async Task<IActionResult> Profile()
     {
@@ -27,21 +33,17 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Register(string nickname, string email, string password, string confirmPassword)
+    public async Task<IActionResult> Register(string nickname, string email)
     {
         var anonId = GetAnonId();
         var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == anonId);
         if (user == null) return RedirectToAction("Register");
 
-        // Password validation
-        if (string.IsNullOrWhiteSpace(password) || password.Length < 4)
+        // 保留字檢查
+        var reserved = new[] { "admin", "管理員", "系統", "system" };
+        if (reserved.Any(r => nickname.Equals(r, StringComparison.OrdinalIgnoreCase)))
         {
-            ViewBag.Error = "密碼至少需要 4 個字元";
-            return View();
-        }
-        if (password != confirmPassword)
-        {
-            ViewBag.Error = "兩次輸入的密碼不一致";
+            ViewBag.Error = "此暱稱為系統保留，請換一個";
             return View();
         }
 
@@ -64,7 +66,7 @@ public class AccountController : Controller
         user.Nickname = nickname;
         user.Email = email;
         user.IsRegistered = true;
-        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);
+        user.Role = "member";
         await _db.SaveChangesAsync();
 
         // 註冊完導到登入頁，讓用戶重新登入
@@ -80,7 +82,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Login(string nickname, string email, string? password)
+    public async Task<IActionResult> Login(string nickname, string email)
     {
         if (string.IsNullOrWhiteSpace(nickname) || string.IsNullOrWhiteSpace(email))
         {
@@ -94,21 +96,6 @@ public class AccountController : Controller
         {
             ViewBag.Error = "暱稱或 Email 不正確，請確認後重試";
             return View();
-        }
-
-        // Password verification
-        if (!string.IsNullOrEmpty(registered.PasswordHash))
-        {
-            if (string.IsNullOrWhiteSpace(password) || !BCrypt.Net.BCrypt.Verify(password, registered.PasswordHash))
-            {
-                ViewBag.Error = "密碼錯誤";
-                return View();
-            }
-        }
-        else
-        {
-            // Old user without password - allow login but prompt to set one
-            ViewBag.Warning = "建議到個人資料頁設定密碼以提升帳號安全性";
         }
 
         // 把當前 cookie 的匿名 ID 替換成已註冊用戶的 ID
@@ -138,6 +125,8 @@ public class AccountController : Controller
         // Admin email check
         if (email == "1234@hotmail.com")
         {
+            registered.Role = "admin";
+            await _db.SaveChangesAsync();
             HttpContext.Response.Cookies.Append("AdminAuth", "pxmart-admin-verified-2026", new CookieOptions
             {
                 HttpOnly = true,
@@ -151,6 +140,8 @@ public class AccountController : Controller
         var teacher = await _db.Teachers.FirstOrDefaultAsync(t => t.SiteUserId == registered.Id && t.IsApproved);
         if (teacher != null)
         {
+            registered.Role = "teacher";
+            await _db.SaveChangesAsync();
             return Redirect("/Teacher/Dashboard");
         }
 
@@ -160,8 +151,9 @@ public class AccountController : Controller
     // 登出
     public IActionResult Logout()
     {
-        // Clear the anonymous cookie - give new identity
+        // 完全清除所有身份，乾淨登出
         Response.Cookies.Delete("DotNetLearner");
+        Response.Cookies.Delete("AdminAuth");
         HttpContext.Session.Clear();
         return Redirect("/");
     }
@@ -195,18 +187,21 @@ public class AccountController : Controller
     public async Task<IActionResult> Status()
     {
         var anonId = HttpContext.Session.GetString("SessionId") ?? "";
-        var isAdmin = HttpContext.Request.Cookies.ContainsKey("AdminAuth");
+        var isAdminCookie = HttpContext.Request.Cookies.ContainsKey("AdminAuth");
         var user = HttpContext.Items["CurrentUser"] as DotNetLearning.Models.SiteUser;
 
         var userId = user?.Id ?? 0;
         var teacher = await _db.Teachers.FirstOrDefaultAsync(t => t.SiteUserId == userId && t.IsApproved);
 
         return Json(new {
-            isAdmin,
-            isTeacher = teacher != null,
+            isAdmin = user?.Role == "admin" || isAdminCookie,
+            isTeacher = user?.Role == "teacher",
             isRegistered = user?.IsRegistered ?? false,
+            isBanned = user?.IsBanned ?? false,
+            role = user?.Role ?? "guest",
             nickname = user?.Nickname ?? "訪客",
-            anonymousId = anonId.Substring(0, Math.Min(8, anonId.Length))
+            email = user?.Email ?? "",
+            anonymousId = anonId.Length > 8 ? anonId.Substring(0, 8) : anonId
         });
     }
 

@@ -103,7 +103,7 @@
         .chat-msg-time{font-size:10px;color:var(--text-dim)}
         .chat-msg-text{font-size:13px;color:var(--text);line-height:1.5;word-break:break-word}
 
-        .chat-input-area{position:absolute;bottom:0;left:0;right:0;display:flex;gap:8px;padding:8px;border-top:1px solid rgba(255,255,255,0.1);background:rgba(15,17,23,0.98);flex-shrink:0;z-index:10}
+        .chat-input-area{position:sticky;bottom:0;display:flex;gap:8px;padding:8px;border-top:1px solid rgba(255,255,255,0.1);background:rgba(15,17,23,0.98);flex-shrink:0;z-index:10}
         .chat-input-area input{flex:1;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;outline:none;font-family:'Noto Sans TC',sans-serif}
         .chat-input-area input:focus{border-color:var(--accent)}
         .chat-input-area button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Noto Sans TC',sans-serif;white-space:nowrap}
@@ -215,7 +215,8 @@
                             <option value="其他">&#x2753; &#x5176;&#x4ED6;</option>
                         </select>
                         <textarea id="supportContent" placeholder="&#x8ACB;&#x63CF;&#x8FF0;&#x60A8;&#x7684;&#x554F;&#x984C;..." style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;min-height:70px;resize:vertical;font-family:'Noto Sans TC',sans-serif;margin-bottom:8px;"></textarea>
-                        <button onclick="submitSupportTicket()" style="width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans TC',sans-serif;">&#x50B3;&#x9001;</button>
+                        <button id="supportSubmitBtn" onclick="submitSupportTicket()" style="width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans TC',sans-serif;">提交回報</button>
+                        <div id="supportSuccessMsg" style="display:none;margin-top:8px;padding:8px 12px;background:rgba(56,189,114,0.15);color:#38bd72;border:1px solid rgba(56,189,114,0.3);border-radius:8px;font-size:13px;text-align:center;font-weight:600;"></div>
                     </div>
                 </div>
                 <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">&#x1F4CB; &#x6211;&#x7684;&#x5DE5;&#x55AE;</div>
@@ -252,6 +253,7 @@
         let chatJoined = !!chatNick;
         let unreadCount = 0;
         let connection = null;
+        let _chatUserStatus = null; // cached account status
 
         const panel = document.getElementById('chatPanel');
         const toggleBtn = document.getElementById('chatToggleBtn');
@@ -286,14 +288,99 @@
             });
         }
 
+        // Force sync chat nickname with logged-in user on every page load
+        fetch('/Account/Status').then(function(r){ return r.json(); }).then(function(d){
+            if(d.isRegistered && d.nickname){
+                chatNick = d.nickname;
+                localStorage.setItem('chatNick', d.nickname);
+                localStorage.setItem('chatEmoji', localStorage.getItem('chatEmoji') || '\u{1F464}');
+                chatJoined = true;
+                setupDiv.style.display = 'none';
+                msgsDiv.style.display = 'flex';
+                inputArea.style.display = 'flex';
+            }
+        }).catch(function(){});
+
+        // Auto-fill nickname for registered users
+        function checkAndFillNickname(){
+            fetch('/Account/Status').then(function(r){ return r.json(); }).then(function(d){
+                _chatUserStatus = d;
+                window._chatUserStatus = d;
+                if(d.isRegistered && d.nickname){
+                    // Force sync chat nickname with logged-in user
+                    chatNick = d.nickname;
+                    chatEmoji = localStorage.getItem('chatEmoji') || '\u{1F464}';
+                    localStorage.setItem('chatNick', d.nickname);
+                    localStorage.setItem('chatEmoji', chatEmoji);
+                    nickInput.value = d.nickname;
+                    nickInput.readOnly = true;
+                    nickInput.style.opacity = '0.7';
+                    nickInput.title = '\u5DF2\u8A3B\u518A\u7528\u6236\uFF0C\u66B1\u7A31\u81EA\u52D5\u586B\u5165';
+                    // Skip the nickname setup screen and auto-join
+                    chatJoined = true;
+                    setupDiv.style.display = 'none';
+                    msgsDiv.style.display = 'flex';
+                    inputArea.style.display = 'flex';
+                    // Update displayed username if element exists
+                    var nameEl = document.getElementById('chatUserName');
+                    if(nameEl) nameEl.textContent = d.nickname;
+                } else {
+                    nickInput.readOnly = false;
+                    nickInput.style.opacity = '1';
+                }
+                // Enforce registration on PM and Support tabs
+                enforcePmSupportRegistration(d);
+            }).catch(function(){});
+        }
+
+        function enforcePmSupportRegistration(d){
+            // PM tab gate
+            var pmGate = document.getElementById('pmRegistrationGate');
+            var pmConvList = document.getElementById('pmConvList');
+            var pmChatView = document.getElementById('pmChatView');
+            if(!d.isRegistered){
+                if(!pmGate){
+                    pmGate = document.createElement('div');
+                    pmGate.id = 'pmRegistrationGate';
+                    pmGate.style.cssText = 'padding:40px 20px;text-align:center;';
+                    pmGate.innerHTML = '<div style="font-size:28px;margin-bottom:12px;">\u{1F4DD}</div><div style="color:var(--text-muted);font-size:14px;line-height:1.8;">\u8ACB\u5148\u8A3B\u518A\u624D\u80FD\u4F7F\u7528\u6B64\u529F\u80FD</div><a href="/Account/Register" style="display:inline-block;margin-top:12px;padding:8px 20px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">\u524D\u5F80\u8A3B\u518A</a>';
+                    document.getElementById('pmTabContent').insertBefore(pmGate, pmConvList);
+                }
+                pmGate.style.display = 'block';
+                pmConvList.style.display = 'none';
+                pmChatView.style.display = 'none';
+            } else if(pmGate){
+                pmGate.style.display = 'none';
+            }
+            // Support tab gate
+            var supGate = document.getElementById('supportRegistrationGate');
+            var supContent = document.getElementById('supportTabContent').children[0];
+            if(!d.isRegistered){
+                if(!supGate){
+                    supGate = document.createElement('div');
+                    supGate.id = 'supportRegistrationGate';
+                    supGate.style.cssText = 'padding:40px 20px;text-align:center;';
+                    supGate.innerHTML = '<div style="font-size:28px;margin-bottom:12px;">\u{1F4DD}</div><div style="color:var(--text-muted);font-size:14px;line-height:1.8;">\u8ACB\u5148\u8A3B\u518A\u624D\u80FD\u4F7F\u7528\u6B64\u529F\u80FD</div><a href="/Account/Register" style="display:inline-block;margin-top:12px;padding:8px 20px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">\u524D\u5F80\u8A3B\u518A</a>';
+                    document.getElementById('supportTabContent').insertBefore(supGate, supContent);
+                }
+                supGate.style.display = 'block';
+                supContent.style.display = 'none';
+            } else if(supGate){
+                supGate.style.display = 'none';
+                supContent.style.display = '';
+            }
+        }
+
         window.toggleChat = function(){
             chatOpen = !chatOpen;
             panel.classList.toggle('open', chatOpen);
+            toggleBtn.style.display = chatOpen ? 'none' : '';
             if(chatOpen){
                 unreadCount = 0;
                 unreadBadge.style.display = 'none';
                 if(!connection) initSignalR();
                 if(chatJoined) msgInput.focus();
+                checkAndFillNickname();
             }
         };
 
@@ -315,7 +402,10 @@
         window.sendChatMsg = function(){
             const msg = msgInput.value.trim();
             if(!msg || !connection) return;
-            connection.invoke('SendMessage', chatNick, msg, chatEmoji).catch(function(err){ console.error(err); });
+            // Always use the current nickname (may have been updated by login sync)
+            var currentNick = localStorage.getItem('chatNick') || chatNick || '\u533F\u540D';
+            var currentEmoji = localStorage.getItem('chatEmoji') || chatEmoji || '\u{1F600}';
+            connection.invoke('SendMessage', currentNick, msg, currentEmoji).catch(function(err){ console.error(err); });
             msgInput.value = '';
             msgInput.focus();
         };
@@ -404,10 +494,10 @@
             document.getElementById('pmTabContent').classList.toggle('active', tab === 'pm');
             document.getElementById('supportTabContent').classList.toggle('active', tab === 'support');
             if (tab === 'pm') {
-                loadPmConversations();
+                if(window._chatUserStatus && window._chatUserStatus.isRegistered) loadPmConversations();
             }
             if (tab === 'support') {
-                loadSupportTickets();
+                if(window._chatUserStatus && window._chatUserStatus.isRegistered) loadSupportTickets();
             }
         };
 
@@ -552,19 +642,33 @@
             var category = document.getElementById('supportCategory').value;
             var content = document.getElementById('supportContent').value.trim();
             if (!content) { alert('\u8ACB\u8F38\u5165\u554F\u984C\u5167\u5BB9'); return; }
+            var submitBtn = document.getElementById('supportSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '\u63D0\u4EA4\u4E2D...';
             fetch('/Support/Submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ category: category, content: content })
             }).then(function(r){ return r.json(); }).then(function(d) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '\u63D0\u4EA4\u56DE\u5831';
                 if (d.success) {
                     document.getElementById('supportContent').value = '';
+                    document.getElementById('supportCategory').selectedIndex = 0;
+                    var successMsg = document.getElementById('supportSuccessMsg');
+                    successMsg.textContent = '\u2705 \u5DF2\u63D0\u4EA4\uFF01\u6211\u5011\u6703\u76E1\u5FEB\u8655\u7406';
+                    successMsg.style.display = 'block';
+                    setTimeout(function(){ successMsg.style.display = 'none'; }, 4000);
                     document.getElementById('supportFormBody').style.display = 'none';
                     loadSupportTickets();
                 } else {
                     alert('\u63D0\u4EA4\u5931\u6557');
                 }
-            }).catch(function(){ alert('\u63D0\u4EA4\u5931\u6557'); });
+            }).catch(function(){
+                submitBtn.disabled = false;
+                submitBtn.textContent = '\u63D0\u4EA4\u56DE\u5831';
+                alert('\u63D0\u4EA4\u5931\u6557');
+            });
         };
 
         window.loadSupportTickets = function() {
@@ -640,15 +744,18 @@
         fetch('/Account/Status').then(r=>r.json()).then(function(d){
             var el = document.getElementById('navUserLink');
             if(!el) return;
-            if(d.isAdmin){
+            if(d.isBanned){
+                el.innerHTML = '<span style="background:rgba(239,68,68,.2);color:#ef4444;border:1px solid rgba(239,68,68,.4);border-radius:10px;padding:1px 10px;font-size:.78rem;font-weight:600;">\u{1F6AB} \u5DF2\u5C01\u9396</span>';
+                el.href = '#';
+            } else if(d.role === 'admin'){
                 el.href = '/Admin/Dashboard';
-                el.innerHTML = '<span style="background:rgba(220,53,69,.2);color:#ff6b6b;border:1px solid rgba(220,53,69,.4);border-radius:10px;padding:1px 10px;font-size:.78rem;font-weight:600;">\u{1F6E1}\uFE0F \u7BA1\u7406\u54E1</span>' +
+                el.innerHTML = '<span style="background:rgba(239,68,68,.15);color:#ff6b6b;border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:1px 10px;font-size:.78rem;font-weight:600;">\u{1F6E1}\uFE0F \u7BA1\u7406\u54E1</span>' +
                     ' <a href="/Admin/Logout" style="color:#ff6b6b;font-size:.72rem;text-decoration:none;opacity:.8;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.8">\u767B\u51FA</a>';
-            } else if(d.isTeacher){
+            } else if(d.role === 'teacher'){
                 el.href = '/Teacher/Dashboard';
-                el.innerHTML = '<span style="background:rgba(99,102,241,.1);color:#818cf8;border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:1px 10px;font-size:.78rem;font-weight:600;">\u{1F468}\u200D\u{1F3EB} ' + d.nickname + '</span>' +
+                el.innerHTML = '<span style="background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.3);border-radius:10px;padding:1px 10px;font-size:.78rem;font-weight:600;">\u{1F468}\u200D\u{1F3EB} ' + d.nickname + '</span>' +
                     ' <a href="/Account/Logout" style="color:#8b949e;font-size:.72rem;text-decoration:none;opacity:.8;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.8">\u767B\u51FA</a>';
-            } else if(d.isRegistered){
+            } else if(d.role === 'member'){
                 el.href = '/Account/Profile';
                 el.innerHTML = '<span style="background:rgba(56,189,114,.15);color:#38bd72;border:1px solid rgba(56,189,114,.3);border-radius:10px;padding:1px 10px;font-size:.78rem;font-weight:600;">\u{1F464} ' + d.nickname + '</span>' +
                     ' <a href="/Account/Logout" style="color:#8b949e;font-size:.72rem;text-decoration:none;opacity:.8;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.8" onclick="return confirm(\'\u78BA\u5B9A\u8981\u767B\u51FA\u55CE\uFF1F\u767B\u51FA\u5F8C\u5C07\u4F7F\u7528\u65B0\u7684\u533F\u540D\u8EAB\u4EFD\')">\u767B\u51FA</a>';
@@ -780,5 +887,299 @@
         }, 10000);
     })();
     </script>
+
+    <!-- Global: auto-fill all nickname/email fields for registered users -->
+    <script>
+    (function(){
+        fetch('/Account/Status').then(function(r){return r.json();}).then(function(d){
+            window._userStatus = d;
+            if(!d.isRegistered) return;
+
+            // Auto-fill nickname fields
+            document.querySelectorAll('input[name="nickname"], input[name="Nickname"], input[name="userName"], input[name="UserName"], input[name="name"], input[name="studentName"]').forEach(function(input){
+                if(input.type === 'hidden' || input.closest('.search-box') || input.closest('.filter') || input.closest('.nav-search')) return;
+                input.value = d.nickname;
+                input.readOnly = true;
+                input.style.opacity = '0.7';
+                input.style.cursor = 'not-allowed';
+            });
+
+            // Auto-fill by ID for forms that use id instead of name
+            var nicknameIds = ['askNickname','answerNickname','regNickname','sub-nickname','nicknameInput','ideaNickname','replyNickname'];
+            nicknameIds.forEach(function(id){
+                var el = document.getElementById(id);
+                if(el && !el.readOnly){
+                    el.value = d.nickname;
+                    el.readOnly = true;
+                    el.style.opacity = '0.7';
+                    el.style.cursor = 'not-allowed';
+                }
+            });
+
+            // Auto-fill email fields
+            if(d.email){
+                document.querySelectorAll('input[name="email"], input[name="Email"], input[name="userEmail"], input[name="studentEmail"]').forEach(function(input){
+                    if(input.type === 'hidden' || input.type === 'password' || input.closest('.search-box')) return;
+                    input.value = d.email;
+                });
+            }
+        }).catch(function(){});
+    })();
+    </script>
+<!-- Gesture Control CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.min.js"></script>
+
+<!-- Gesture Control UI -->
+<button id="gestureToggleBtn" onclick="toggleGesture()" style="
+    position:fixed;bottom:20px;left:20px;z-index:9998;
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;
+    border:none;border-radius:25px;padding:10px 18px;cursor:pointer;
+    font-size:14px;font-weight:600;box-shadow:0 4px 15px rgba(99,102,241,0.4);
+    display:flex;align-items:center;gap:6px;transition:all 0.3s;">
+    🎥 手勢控制
+</button>
+
+<div id="gesturePanel" style="
+    position:fixed;bottom:70px;left:20px;z-index:9998;
+    background:rgba(15,17,23,0.95);backdrop-filter:blur(20px);
+    border:1px solid rgba(99,102,241,0.3);border-radius:16px;
+    padding:12px;display:none;width:280px;">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-weight:700;font-size:14px;color:#e2e8f0;">🎥 手勢控制</span>
+        <button onclick="toggleGesture()" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:18px;">✕</button>
+    </div>
+
+    <!-- Webcam preview -->
+    <div style="position:relative;border-radius:10px;overflow:hidden;margin-bottom:8px;background:#000;">
+        <video id="gestureVideo" style="width:100%;border-radius:10px;transform:scaleX(-1);" playsinline></video>
+        <canvas id="gestureCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;transform:scaleX(-1);"></canvas>
+        <div id="gestureStatus" style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.6);color:#00b894;padding:2px 8px;border-radius:8px;font-size:11px;">等待偵測...</div>
+        <div id="gestureAction" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(99,102,241,0.8);color:#fff;padding:4px 12px;border-radius:8px;font-size:13px;font-weight:600;display:none;"></div>
+    </div>
+
+    <!-- Gesture guide -->
+    <div style="font-size:11px;color:#94a3b8;line-height:1.6;">
+        <div>👆 <span style="color:#e2e8f0;">食指向上</span> → 頁面上捲</div>
+        <div>👇 <span style="color:#e2e8f0;">食指向下</span> → 頁面下捲</div>
+        <div>👈 <span style="color:#e2e8f0;">手掌向左揮</span> → 上一章</div>
+        <div>👉 <span style="color:#e2e8f0;">手掌向右揮</span> → 下一章</div>
+        <div>✋ <span style="color:#e2e8f0;">手掌張開</span> → 暫停/繼續</div>
+        <div>👍 <span style="color:#e2e8f0;">比讚</span> → 標記完成</div>
+        <div>✊ <span style="color:#e2e8f0;">握拳</span> → 回到頂部</div>
+    </div>
+</div>
+
+<style>
+@@media (max-width: 600px) {
+    #gestureToggleBtn { bottom: 80px !important; left: 10px !important; font-size: 12px !important; padding: 8px 14px !important; }
+    #gesturePanel { bottom: 130px !important; left: 10px !important; width: 240px !important; }
+}
+</style>
+
+<script>
+var gestureActive = false;
+var gestureCamera = null;
+var lastGestureTime = 0;
+var lastHandX = null;
+var gestureThrottle = 800;
+
+function toggleGesture() {
+    var panel = document.getElementById('gesturePanel');
+    var btn = document.getElementById('gestureToggleBtn');
+
+    if (gestureActive) {
+        gestureActive = false;
+        if (gestureCamera) gestureCamera.stop();
+        var video = document.getElementById('gestureVideo');
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(t => t.stop());
+            video.srcObject = null;
+        }
+        panel.style.display = 'none';
+        btn.style.background = 'linear-gradient(135deg,#6366f1,#8b5cf6)';
+        btn.innerHTML = '🎥 手勢控制';
+        return;
+    }
+
+    panel.style.display = 'block';
+    btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
+    btn.innerHTML = '⏹ 停止';
+    gestureActive = true;
+
+    var video = document.getElementById('gestureVideo');
+    var canvas = document.getElementById('gestureCanvas');
+    var ctx = canvas.getContext('2d');
+    var statusEl = document.getElementById('gestureStatus');
+    var actionEl = document.getElementById('gestureAction');
+
+    var hands = new Hands({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}`
+    });
+
+    hands.setOptions({
+        maxNumHands: 1,
+        modelComplexity: 0,
+        minDetectionConfidence: 0.6,
+        minTrackingConfidence: 0.5
+    });
+
+    hands.onResults(function(results) {
+        if (!gestureActive) return;
+
+        canvas.width = video.videoWidth || 280;
+        canvas.height = video.videoHeight || 210;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+            var landmarks = results.multiHandLandmarks[0];
+            statusEl.textContent = '✋ 偵測到手部';
+            statusEl.style.color = '#00b894';
+
+            drawHand(ctx, landmarks, canvas.width, canvas.height);
+
+            var gesture = detectGesture(landmarks);
+            if (gesture && Date.now() - lastGestureTime > gestureThrottle) {
+                executeGesture(gesture, actionEl);
+                lastGestureTime = Date.now();
+            }
+        } else {
+            statusEl.textContent = '等待偵測...';
+            statusEl.style.color = '#94a3b8';
+            lastHandX = null;
+        }
+    });
+
+    navigator.mediaDevices.getUserMedia({ video: { width: 280, height: 210, facingMode: 'user' } })
+        .then(function(stream) {
+            video.srcObject = stream;
+            video.play();
+
+            gestureCamera = new Camera(video, {
+                onFrame: async () => { if(gestureActive) await hands.send({image: video}); },
+                width: 280,
+                height: 210
+            });
+            gestureCamera.start();
+        })
+        .catch(function(err) {
+            statusEl.textContent = '無法開啟鏡頭: ' + err.message;
+            statusEl.style.color = '#ef4444';
+        });
+}
+
+function drawHand(ctx, landmarks, w, h) {
+    var connections = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+    ctx.strokeStyle = 'rgba(99,102,241,0.6)';
+    ctx.lineWidth = 2;
+    connections.forEach(function(c) {
+        ctx.beginPath();
+        ctx.moveTo(landmarks[c[0]].x * w, landmarks[c[0]].y * h);
+        ctx.lineTo(landmarks[c[1]].x * w, landmarks[c[1]].y * h);
+        ctx.stroke();
+    });
+
+    landmarks.forEach(function(lm, i) {
+        ctx.beginPath();
+        ctx.arc(lm.x * w, lm.y * h, i === 8 ? 5 : 3, 0, 2 * Math.PI);
+        ctx.fillStyle = i === 8 ? '#00b894' : '#6366f1';
+        ctx.fill();
+    });
+}
+
+function detectGesture(lm) {
+    var wrist = lm[0];
+    var thumbTip = lm[4];
+    var indexTip = lm[8];
+    var indexMcp = lm[5];
+    var middleTip = lm[12];
+    var middleMcp = lm[9];
+    var ringTip = lm[16];
+    var ringMcp = lm[13];
+    var pinkyTip = lm[20];
+    var pinkyMcp = lm[17];
+
+    var indexUp = indexTip.y < indexMcp.y - 0.05;
+    var middleUp = middleTip.y < middleMcp.y - 0.05;
+    var ringUp = ringTip.y < ringMcp.y - 0.05;
+    var pinkyUp = pinkyTip.y < pinkyMcp.y - 0.05;
+    var thumbOut = Math.abs(thumbTip.x - wrist.x) > 0.1;
+
+    if (thumbTip.y < wrist.y - 0.15 && !indexUp && !middleUp && !ringUp && !pinkyUp) {
+        return 'thumbsup';
+    }
+
+    if (!indexUp && !middleUp && !ringUp && !pinkyUp && !thumbOut) {
+        return 'fist';
+    }
+
+    if (indexUp && middleUp && ringUp && pinkyUp) {
+        var currentX = wrist.x;
+        if (lastHandX !== null) {
+            var dx = currentX - lastHandX;
+            if (dx > 0.12) { lastHandX = currentX; return 'swipe_left'; }
+            if (dx < -0.12) { lastHandX = currentX; return 'swipe_right'; }
+        }
+        lastHandX = currentX;
+        return 'palm';
+    }
+
+    if (indexUp && !middleUp && !ringUp && !pinkyUp) {
+        if (indexTip.y < wrist.y - 0.2) return 'point_up';
+        if (indexTip.y > wrist.y + 0.1) return 'point_down';
+    }
+
+    lastHandX = wrist.x;
+    return null;
+}
+
+function executeGesture(gesture, actionEl) {
+    var msg = '';
+    switch(gesture) {
+        case 'point_up':
+            window.scrollBy({ top: -300, behavior: 'smooth' });
+            msg = '👆 上捲';
+            break;
+        case 'point_down':
+            window.scrollBy({ top: 300, behavior: 'smooth' });
+            msg = '👇 下捲';
+            break;
+        case 'swipe_left':
+            var prevBtn = document.querySelector('.prev-link');
+            if (prevBtn) prevBtn.click();
+            else history.back();
+            msg = '👈 上一頁';
+            break;
+        case 'swipe_right':
+            var nextBtn = document.querySelector('.next-link');
+            if (nextBtn) nextBtn.click();
+            else history.forward();
+            msg = '👉 下一頁';
+            break;
+        case 'palm':
+            msg = '✋ 暫停偵測 3 秒';
+            gestureThrottle = 3000;
+            setTimeout(function(){ gestureThrottle = 800; }, 3000);
+            break;
+        case 'thumbsup':
+            var completeBtn = document.querySelector('.btn-complete, [onclick*="markComplete"]');
+            if (completeBtn) completeBtn.click();
+            msg = '👍 標記完成！';
+            break;
+        case 'fist':
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            msg = '✊ 回到頂部';
+            break;
+    }
+
+    if (msg) {
+        actionEl.textContent = msg;
+        actionEl.style.display = 'block';
+        setTimeout(function(){ actionEl.style.display = 'none'; }, 1500);
+    }
+}
+</script>
+
 </body>
 </html>

@@ -22,6 +22,10 @@
     var recentErrors = (List<ErrorLog>)(ViewBag.RecentErrors ?? new List<ErrorLog>());
     int totalSiteUsers = (int)(ViewBag.TotalSiteUsers ?? 0);
     int registeredUsers = (int)(ViewBag.RegisteredUsers ?? 0);
+    int memberCount = (int)(ViewBag.MemberCount ?? 0);
+    int teacherRoleCount = (int)(ViewBag.TeacherRoleCount ?? 0);
+    int adminCount = (int)(ViewBag.AdminCount ?? 0);
+    int bannedCount = (int)(ViewBag.BannedCount ?? 0);
     int totalTeachers = (int)(ViewBag.TotalTeachers ?? 0);
     int approvedTeachers = (int)(ViewBag.ApprovedTeachers ?? 0);
     int totalBookings = (int)(ViewBag.TotalBookings ?? 0);
@@ -348,31 +352,93 @@
             }
         </div>
 
+        <!-- 📞 客戶回報 -->
+        <div style="background:var(--bg3,#242836);border-radius:12px;padding:20px;margin-bottom:24px;border:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 style="margin:0;font-size:1.1rem;">📞 客戶回報</h3>
+                <a href="/Admin/SupportTickets" style="color:#6366f1;font-size:0.85rem;text-decoration:none;">查看全部 →</a>
+            </div>
+
+            <!-- Stats row -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+                <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:1.5rem;font-weight:700;color:#6366f1;">@ViewBag.TotalTickets</div>
+                    <div style="font-size:0.75rem;color:#94a3b8;">總工單數</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:1.5rem;font-weight:700;color:#f59e0b;">@ViewBag.PendingTickets</div>
+                    <div style="font-size:0.75rem;color:#94a3b8;">待處理</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:12px;text-align:center;">
+                    <div style="font-size:1.5rem;font-weight:700;color:#22c55e;">@(ViewBag.TotalTickets - ViewBag.PendingTickets)</div>
+                    <div style="font-size:0.75rem;color:#94a3b8;">已處理</div>
+                </div>
+            </div>
+
+            <!-- Recent tickets -->
+            @if(ViewBag.RecentTickets != null && ((List<DotNetLearning.Models.SupportTicket>)ViewBag.RecentTickets).Count > 0) {
+            <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <th style="text-align:left;padding:6px;color:#94a3b8;">用戶</th>
+                    <th style="text-align:left;padding:6px;color:#94a3b8;">分類</th>
+                    <th style="text-align:left;padding:6px;color:#94a3b8;">內容</th>
+                    <th style="text-align:left;padding:6px;color:#94a3b8;">狀態</th>
+                    <th style="text-align:left;padding:6px;color:#94a3b8;">時間</th>
+                </tr>
+                @foreach(var t in (List<DotNetLearning.Models.SupportTicket>)ViewBag.RecentTickets) {
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+                    <td style="padding:6px;">@t.UserName</td>
+                    <td style="padding:6px;"><span style="background:rgba(99,102,241,0.15);color:#818cf8;padding:1px 8px;border-radius:4px;font-size:0.7rem;">@t.Category</span></td>
+                    <td style="padding:6px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">@t.Content</td>
+                    <td style="padding:6px;">
+                        @if(t.Status == "pending") {
+                            <span style="color:#f59e0b;">⏳ 待處理</span>
+                        } else {
+                            <span style="color:#22c55e;">✅ 已處理</span>
+                        }
+                    </td>
+                    <td style="padding:6px;color:#94a3b8;">@t.CreatedAt.ToString("MM/dd HH:mm")</td>
+                </tr>
+                }
+            </table>
+            } else {
+            <div style="text-align:center;color:#94a3b8;padding:20px;">暫無客戶回報</div>
+            }
+        </div>
+
         <!-- Platform Stats Row -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px;">
             <div style="background:#0f3460;border:1px solid rgba(34,153,221,0.15);border-radius:10px;padding:14px;text-align:center;">
                 <div style="font-size:24px;font-weight:800;color:#2299dd;">@totalSiteUsers</div>
-                <div style="font-size:12px;color:#8b949e;">總用戶</div>
+                <div style="font-size:12px;color:#8b949e;">&#x1F465; &#x7E3D;&#x7528;&#x6236;</div>
             </div>
             <div style="background:#0f3460;border:1px solid rgba(56,189,114,0.15);border-radius:10px;padding:14px;text-align:center;">
-                <div style="font-size:24px;font-weight:800;color:#38bd72;">@registeredUsers</div>
-                <div style="font-size:12px;color:#8b949e;">已註冊</div>
+                <div style="font-size:24px;font-weight:800;color:#38bd72;">@memberCount</div>
+                <div style="font-size:12px;color:#8b949e;">&#x1F464; &#x6703;&#x54E1;</div>
             </div>
-            <div style="background:#0f3460;border:1px solid rgba(34,153,221,0.15);border-radius:10px;padding:14px;text-align:center;">
-                <div style="font-size:24px;font-weight:800;color:#58a6ff;">@totalTeachers</div>
-                <div style="font-size:12px;color:#8b949e;">老師數</div>
+            <div style="background:#0f3460;border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:14px;text-align:center;">
+                <div style="font-size:24px;font-weight:800;color:#a78bfa;">@teacherRoleCount</div>
+                <div style="font-size:12px;color:#8b949e;">&#x1F468;&#x200D;&#x1F3EB; &#x8001;&#x5E2B;</div>
+            </div>
+            <div style="background:#0f3460;border:1px solid rgba(239,68,68,0.15);border-radius:10px;padding:14px;text-align:center;">
+                <div style="font-size:24px;font-weight:800;color:#ff6b6b;">@adminCount</div>
+                <div style="font-size:12px;color:#8b949e;">&#x1F6E1;&#xFE0F; &#x7BA1;&#x7406;&#x54E1;</div>
+            </div>
+            <div style="background:#0f3460;border:1px solid rgba(239,68,68,0.15);border-radius:10px;padding:14px;text-align:center;">
+                <div style="font-size:24px;font-weight:800;color:#ef4444;">@bannedCount</div>
+                <div style="font-size:12px;color:#8b949e;">&#x1F6AB; &#x5DF2;&#x5C01;&#x9396;</div>
             </div>
             <div style="background:#0f3460;border:1px solid rgba(249,168,37,0.15);border-radius:10px;padding:14px;text-align:center;">
                 <div style="font-size:24px;font-weight:800;color:#F9A825;">@(totalTeachers - approvedTeachers)</div>
-                <div style="font-size:12px;color:#8b949e;">待審核</div>
+                <div style="font-size:12px;color:#8b949e;">&#x23F3; &#x5F85;&#x5BE9;&#x6838;</div>
             </div>
             <div style="background:#0f3460;border:1px solid rgba(34,153,221,0.15);border-radius:10px;padding:14px;text-align:center;">
                 <div style="font-size:24px;font-weight:800;color:#2299dd;">@totalBookings</div>
-                <div style="font-size:12px;color:#8b949e;">總預約</div>
+                <div style="font-size:12px;color:#8b949e;">&#x1F4C5; &#x7E3D;&#x9810;&#x7D04;</div>
             </div>
             <div style="background:#0f3460;border:1px solid rgba(227,179,65,0.15);border-radius:10px;padding:14px;text-align:center;">
                 <div style="font-size:24px;font-weight:800;color:#e3b341;">@pendingBookings</div>
-                <div style="font-size:12px;color:#8b949e;">待確認預約</div>
+                <div style="font-size:12px;color:#8b949e;">&#x231B; &#x5F85;&#x78BA;&#x8A8D;&#x9810;&#x7D04;</div>
             </div>
         </div>
 

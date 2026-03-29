@@ -15,4 +15,7 @@ public class SiteUser
     public DateTime LastActiveAt { get; set; } = DateTime.Now;
     public string? AvatarUrl { get; set; }
     public string PasswordHash { get; set; } = ""; // BCrypt hashed password
+    public string Role { get; set; } = "guest"; // guest/member/teacher/admin
+    public bool IsBanned { get; set; } = false;
+    public string BanReason { get; set; } = "";
 }

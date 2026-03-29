@@ -60,7 +60,10 @@ public class AdminController : Controller
 
     public IActionResult Logout()
     {
+        // 清除所有 cookie 和 session，完全登出
         HttpContext.Response.Cookies.Delete("AdminAuth");
+        HttpContext.Response.Cookies.Delete("DotNetLearner");
+        HttpContext.Session.Clear();
         return Redirect("/");
     }
 
@@ -176,9 +179,21 @@ public class AdminController : Controller
             .Take(5)
             .ToListAsync();
 
+        // 客戶回報統計
+        ViewBag.TotalTickets = await _db.SupportTickets.CountAsync();
+        ViewBag.PendingTickets = await _db.SupportTickets.CountAsync(t => t.Status == "pending");
+        ViewBag.RecentTickets = await _db.SupportTickets
+            .OrderByDescending(t => t.CreatedAt)
+            .Take(5)
+            .ToListAsync();
+
         // System stats
         ViewBag.TotalSiteUsers = await _db.SiteUsers.CountAsync();
         ViewBag.RegisteredUsers = await _db.SiteUsers.CountAsync(u => u.IsRegistered);
+        ViewBag.MemberCount = await _db.SiteUsers.CountAsync(u => u.Role == "member");
+        ViewBag.TeacherRoleCount = await _db.SiteUsers.CountAsync(u => u.Role == "teacher");
+        ViewBag.AdminCount = await _db.SiteUsers.CountAsync(u => u.Role == "admin");
+        ViewBag.BannedCount = await _db.SiteUsers.CountAsync(u => u.IsBanned);
         ViewBag.TotalTeachers = await _db.Teachers.CountAsync();
         ViewBag.ApprovedTeachers = await _db.Teachers.CountAsync(t => t.IsApproved);
         ViewBag.TotalBookings = await _db.Bookings.CountAsync();
@@ -193,12 +208,18 @@ public class AdminController : Controller
     {
         if (!IsAdmin()) return RedirectToAction("Login");
 
-        var query = _db.UserProfiles.AsQueryable();
+        var query = _db.SiteUsers.AsQueryable();
         if (!string.IsNullOrWhiteSpace(search))
             query = query.Where(u => u.Nickname.Contains(search));
 
         ViewBag.Search = search;
-        ViewBag.Users = await query.OrderByDescending(u => u.LastActiveAt).ToListAsync();
+        ViewBag.SiteUsers = await query.OrderByDescending(u => u.LastActiveAt).ToListAsync();
+
+        // Keep UserProfiles for backward compatibility
+        var profileQuery = _db.UserProfiles.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(search))
+            profileQuery = profileQuery.Where(u => u.Nickname.Contains(search));
+        ViewBag.Users = await profileQuery.OrderByDescending(u => u.LastActiveAt).ToListAsync();
         return View();
     }
 
@@ -575,6 +596,68 @@ public class AdminController : Controller
         return Json(new { count = sorted.Count, items = sorted });
     }
 
+    // ========== User Role & Ban Management ==========
+
+    [HttpPost]
+    public async Task<IActionResult> ChangeUserRole([FromBody] ChangeRoleReq req)
+    {
+        if (!IsAdmin()) return Unauthorized();
+        var user = await _db.SiteUsers.FindAsync(req.Id);
+        if (user == null) return NotFound();
+
+        var oldRole = user.Role;
+        user.Role = req.Role;
+
+        // If promoting to teacher, check if Teacher record exists
+        if (req.Role == "teacher")
+        {
+            user.IsRegistered = true;
+            var existingTeacher = await _db.Teachers.FirstOrDefaultAsync(t => t.SiteUserId == user.Id);
+            if (existingTeacher == null)
+            {
+                _db.Teachers.Add(new Teacher { SiteUserId = user.Id, Name = user.Nickname, IsApproved = true, IsActive = true });
+            }
+            else
+            {
+                existingTeacher.IsApproved = true;
+                existingTeacher.IsActive = true;
+            }
+        }
+
+        // If promoting to admin
+        if (req.Role == "admin")
+        {
+            user.IsRegistered = true;
+        }
+
+        // If demoting from teacher
+        if (oldRole == "teacher" && req.Role != "teacher")
+        {
+            var teacher = await _db.Teachers.FirstOrDefaultAsync(t => t.SiteUserId == user.Id);
+            if (teacher != null)
+            {
+                teacher.IsActive = false;
+            }
+        }
+
+        await LogAudit("Update", "User", req.Id, $"Changed role: {oldRole} → {req.Role} for {user.Nickname}");
+        await _db.SaveChangesAsync();
+        return Ok(new { success = true });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> BanUser([FromBody] BanUserReq req)
+    {
+        if (!IsAdmin()) return Unauthorized();
+        var user = await _db.SiteUsers.FindAsync(req.Id);
+        if (user == null) return NotFound();
+        user.IsBanned = req.Ban;
+        user.BanReason = req.Reason ?? "";
+        await LogAudit(req.Ban ? "Ban" : "Unban", "User", req.Id, $"{(req.Ban ? "Banned" : "Unbanned")} user: {user.Nickname}, reason: {req.Reason}");
+        await _db.SaveChangesAsync();
+        return Ok(new { success = true });
+    }
+
     // ========== Audit Helper ==========
 
     private async Task LogAudit(string action, string entityType, int entityId, string details)
@@ -797,3 +880,5 @@ public record UpdateChapterReq(int Id, string? Title, string? Content, bool? IsP
 public record AdminDeleteReq(int Id);
 public record RejectTeacherReq(int Id, string? Reason);
 public record ReplyTicketReq(int Id, string Reply);
+public record ChangeRoleReq(int Id, string Role);
+public record BanUserReq(int Id, bool Ban, string? Reason);

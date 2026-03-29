@@ -155,6 +155,9 @@ using (var scope = app.Services.CreateScope())
             ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""AvatarUrl"" TEXT;
             ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""PasswordHash"" TEXT DEFAULT '';
             ALTER TABLE ""SupportTickets"" ADD COLUMN IF NOT EXISTS ""IsReplyRead"" BOOLEAN DEFAULT FALSE;
+            ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""Role"" TEXT DEFAULT 'guest';
+            ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""IsBanned"" BOOLEAN DEFAULT FALSE;
+            ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""BanReason"" TEXT DEFAULT '';
             CREATE TABLE IF NOT EXISTS ""TeacherPosts"" (
                 ""Id"" SERIAL PRIMARY KEY, ""TeacherId"" INTEGER DEFAULT 0, ""Title"" TEXT DEFAULT '',
                 ""Content"" TEXT DEFAULT '', ""Type"" TEXT DEFAULT 'article', ""VideoUrl"" TEXT DEFAULT '',
@@ -209,11 +212,21 @@ using (var scope = app.Services.CreateScope())
             AnonymousId = "admin-master-001",
             Nickname = "admin",
             Email = "1234@hotmail.com",
-            IsRegistered = true
+            IsRegistered = true,
+            Role = "admin"
         });
         db.SaveChanges();
         Console.WriteLine("[DB] Admin account created.");
     }
+
+    // Migrate existing data: set Role for registered users and admin
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"UPDATE ""SiteUsers"" SET ""Role"" = 'member' WHERE ""IsRegistered"" = TRUE AND (""Role"" = 'guest' OR ""Role"" IS NULL OR ""Role"" = '');");
+        db.Database.ExecuteSqlRaw(@"UPDATE ""SiteUsers"" SET ""Role"" = 'admin' WHERE ""Email"" = '1234@hotmail.com';");
+        Console.WriteLine("[DB] Role migration completed.");
+    }
+    catch (Exception ex) { Console.WriteLine($"[DB] Role migration note: {ex.Message}"); }
 }
 
 if (!app.Environment.IsDevelopment())
@@ -324,6 +337,12 @@ app.Use(async (context, next) =>
     // Store user info in HttpContext.Items for easy access
     context.Items["CurrentUser"] = user;
     context.Items["AnonymousId"] = anonymousId;
+
+    // Check if user is banned
+    if (user.IsBanned)
+    {
+        context.Items["IsBanned"] = true;
+    }
 
     await next();
 });
