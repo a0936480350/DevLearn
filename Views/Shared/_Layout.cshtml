@@ -1246,7 +1246,7 @@ function toggleGesture() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                // ═══ 雙手比YA偵測 = 回首頁（需雙手持續500ms）═══
+                // ═══ 雙手比YA偵測 = 回首頁 ═══
                 if (results.multiHandLandmarks.length >= 2) {
                     var h1 = results.multiHandLandmarks[0];
                     var h2 = results.multiHandLandmarks[1];
@@ -1257,17 +1257,11 @@ function toggleGesture() {
                     var h2mid = h2[12].y < h2[10].y;
                     var h2ring = h2[16].y < h2[14].y;
                     if (h1idx && h1mid && !h1ring && h2idx && h2mid && !h2ring) {
-                        if (!window._doubleYaStart) window._doubleYaStart = Date.now();
-                        if (Date.now() - window._doubleYaStart >= 500 && Date.now() - lastGestureTime > 2500) {
+                        if (Date.now() - lastGestureTime > 1500) {
                             executeGesture('ok_home', actionEl);
                             lastGestureTime = Date.now();
-                            window._doubleYaStart = null;
                         }
-                    } else {
-                        window._doubleYaStart = null;
                     }
-                } else {
-                    window._doubleYaStart = null;
                 }
 
                 var landmarks = results.multiHandLandmarks[0];
@@ -1370,7 +1364,7 @@ function toggleGesture() {
                         progressEl.style.display = 'none';
                     }
 
-                    // 其他手勢（雙指捲動、雙手YA回首頁、握拳回頂部）
+                    // 其他手勢（雙指捲動、OK回首頁、握拳回頂部）
                     var gesture = detectGesture(landmarks, window._smoothX, window._smoothY);
                     if (gesture && Date.now() - lastGestureTime > gestureThrottle) {
                         executeGesture(gesture, actionEl);
@@ -1467,6 +1461,16 @@ function detectGesture(lm, screenX, screenY) {
     // ═══ 1. 靠近鏡頭 = 點擊（在 onResults 裡處理，這裡不重複）═══
 
     // ═══ 2. ✌️✌️ 雙手比YA = 回首頁（用兩隻手偵測改為：食指+中指都伸+無名小指收+拇指收）═══
+    // 因為 MediaPipe 設定 maxNumHands=1，無法偵測雙手
+    // 改成：比OK（拇指碰食指）= 回首頁
+    var thumbToIndex = Math.sqrt(
+        Math.pow(thumbTip.x - indexTip.x, 2) +
+        Math.pow(thumbTip.y - indexTip.y, 2)
+    );
+    if (thumbToIndex < 0.04 && !middleUp && !ringUp && !pinkyUp) {
+        return 'ok_home';
+    }
+
     // ═══ 3. ✊ 握拳 = 回到頂部 ═══
     if (!indexUp && !middleUp && !ringUp && !pinkyUp && !thumbOut) {
         return 'fist';
@@ -1560,7 +1564,7 @@ function executeGesture(gesture, actionEl) {
             break;
         case 'ok_home':
             window.location.href = '/';
-            msg = '✌️✌️ 回首頁';
+            msg = '👌 回首頁';
             break;
         case 'fist':
             window.scrollTo({ top: 0, behavior: 'smooth' });
