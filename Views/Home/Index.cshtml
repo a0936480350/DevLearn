@@ -32,9 +32,10 @@
 <div class="home-layout">
 
     <!-- ══════════ Hero ══════════ -->
-    <section class="hero" style="background:linear-gradient(135deg, rgba(0,184,148,0.8), rgba(9,132,227,0.7)), url('/images/hero-coding.jpg') center/cover no-repeat;">
+    <section class="hero" style="position:relative;background:linear-gradient(135deg, rgba(0,184,148,0.8), rgba(9,132,227,0.7)), url('/images/hero-coding.jpg') center/cover no-repeat;">
+        <canvas id="heroParticles" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
         <div class="hero-bg" style="background:none;"></div>
-        <div class="hero-content">
+        <div class="hero-content" style="position:relative;z-index:1;">
             <div class="hero-badge">完整 .NET 學習路徑</div>
             <h1>從零開始，<br><span class="highlight">完整學會 .NET</span></h1>
             <p class="hero-desc">
@@ -528,5 +529,141 @@ loadIdeaWall();
             document.getElementById('teacherPostsGrid').innerHTML = '<div style="color:var(--text-muted);font-size:13px;">載入失敗</div>';
         });
 })();
+</script>
+
+<script>
+(function(){
+    var canvas = document.getElementById('heroParticles');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var particles = [];
+    var mouseX = 0, mouseY = 0;
+
+    function resize() {
+        canvas.width = canvas.parentElement.offsetWidth;
+        canvas.height = canvas.parentElement.offsetHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Create particles
+    for (var i = 0; i < 60; i++) {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.5,
+            size: Math.random() * 3 + 1,
+            opacity: Math.random() * 0.5 + 0.1,
+            color: Math.random() > 0.5 ? '0,184,148' : '99,102,241'
+        });
+    }
+
+    canvas.parentElement.addEventListener('mousemove', function(e) {
+        var rect = canvas.getBoundingClientRect();
+        mouseX = e.clientX - rect.left;
+        mouseY = e.clientY - rect.top;
+    });
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        particles.forEach(function(p, i) {
+            // Move
+            p.x += p.vx;
+            p.y += p.vy;
+
+            // Wrap around
+            if (p.x < 0) p.x = canvas.width;
+            if (p.x > canvas.width) p.x = 0;
+            if (p.y < 0) p.y = canvas.height;
+            if (p.y > canvas.height) p.y = 0;
+
+            // Draw particle
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(' + p.color + ',' + p.opacity + ')';
+            ctx.fill();
+
+            // Draw connections between nearby particles
+            particles.forEach(function(p2, j) {
+                if (i >= j) return;
+                var dx = p.x - p2.x;
+                var dy = p.y - p2.y;
+                var dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 120) {
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.strokeStyle = 'rgba(0,184,148,' + (0.15 * (1 - dist / 120)) + ')';
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            });
+
+            // Mouse interaction - particles move away
+            var mdx = p.x - mouseX;
+            var mdy = p.y - mouseY;
+            var mDist = Math.sqrt(mdx * mdx + mdy * mdy);
+            if (mDist < 100) {
+                p.vx += mdx * 0.001;
+                p.vy += mdy * 0.001;
+            }
+
+            // Damping
+            p.vx *= 0.99;
+            p.vy *= 0.99;
+        });
+
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
+</script>
+
+<script>
+// Typewriter effect for hero
+(function(){
+    var el = document.querySelector('.hero-content h1');
+    if (!el) return;
+    var original = el.innerHTML;
+    el.innerHTML = '';
+    el.style.visibility = 'visible';
+    var i = 0;
+    function type() {
+        if (i < original.length) {
+            // Handle HTML tags
+            if (original[i] === '<') {
+                var end = original.indexOf('>', i);
+                el.innerHTML += original.substring(i, end + 1);
+                i = end + 1;
+            } else {
+                el.innerHTML += original[i];
+                i++;
+            }
+            setTimeout(type, 30);
+        }
+    }
+    setTimeout(type, 500);
+})();
+</script>
+
+<script>
+// Counter animation
+document.querySelectorAll('.stat-num').forEach(function(el) {
+    var target = parseInt(el.textContent);
+    if (isNaN(target)) return; // Skip "Free" etc
+    var current = 0;
+    var step = Math.ceil(target / 40);
+    el.textContent = '0';
+    var interval = setInterval(function() {
+        current += step;
+        if (current >= target) {
+            current = target;
+            clearInterval(interval);
+        }
+        el.textContent = current;
+    }, 30);
+});
 </script>
 }

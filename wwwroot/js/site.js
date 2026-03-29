@@ -129,6 +129,35 @@ function showToast(message, type) {
     }, 3000);
 }
 
+// Cursor trail effect (desktop only)
+if (window.innerWidth > 768) {
+    document.addEventListener('mousemove', function(e) {
+        var trail = document.createElement('div');
+        trail.style.cssText = 'position:fixed;pointer-events:none;z-index:99990;width:6px;height:6px;border-radius:50%;background:rgba(0,184,148,0.4);left:' + e.clientX + 'px;top:' + e.clientY + 'px;transition:all 0.5s;';
+        document.body.appendChild(trail);
+        setTimeout(function() {
+            trail.style.transform = 'scale(0)';
+            trail.style.opacity = '0';
+        }, 50);
+        setTimeout(function() { trail.remove(); }, 600);
+    });
+}
+
+// Reading progress bar
+(function(){
+    var bar = document.createElement('div');
+    bar.id = 'readingProgress';
+    bar.style.width = '0%';
+    document.body.prepend(bar);
+
+    window.addEventListener('scroll', function() {
+        var scrollTop = window.scrollY;
+        var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        var progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        bar.style.width = progress + '%';
+    });
+})();
+
 // Show toast on page load for returning users
 if (document.referrer && document.referrer.includes(location.hostname)) {
     // User navigated within the site - subtle transition
