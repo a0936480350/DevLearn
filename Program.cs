@@ -202,7 +202,11 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex) { Console.WriteLine($"[DB] Table creation note: {ex.Message}"); }
 
-    SeedData.Initialize(db);
+    // 在背景執行 seed（不阻塞 App 啟動，避免 Azure 超時）
+    Task.Run(() => {
+        try { SeedData.Initialize(db); Console.WriteLine("[Seed] Background seed completed."); }
+        catch (Exception ex) { Console.WriteLine($"[Seed] Background seed error: {ex.Message}"); }
+    });
 
     // 確保 Admin 帳號存在
     if (!db.SiteUsers.Any(u => u.Email == "1234@hotmail.com"))
