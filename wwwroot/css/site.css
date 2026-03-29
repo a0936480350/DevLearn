@@ -1801,3 +1801,168 @@ a:hover { color: var(--accent2); }
 
 /* Page-light utility class */
 .page-light { background: var(--bg2); color: var(--text); }
+
+/* ═══ 動畫特效 ═══ */
+
+/* 頁面載入淡入 */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-40px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 5px rgba(0,184,148,0.3); }
+    50% { box-shadow: 0 0 20px rgba(0,184,148,0.6); }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes typewriter {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink {
+    0%, 100% { border-color: transparent; }
+    50% { border-color: var(--accent); }
+}
+
+/* 粒子背景效果 */
+@keyframes particle-float {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+}
+
+/* 套用動畫到元素 */
+.hero { animation: fadeIn 1s ease-out; }
+.hero-content h1 { animation: fadeInUp 0.8s ease-out 0.2s both; }
+.hero-desc { animation: fadeInUp 0.8s ease-out 0.4s both; }
+.hero-cta { animation: fadeInUp 0.8s ease-out 0.6s both; }
+.hero-stats { animation: fadeInUp 0.8s ease-out 0.8s both; }
+
+.category-card { animation: fadeInUp 0.6s ease-out both; }
+.category-card:nth-child(1) { animation-delay: 0.1s; }
+.category-card:nth-child(2) { animation-delay: 0.2s; }
+.category-card:nth-child(3) { animation-delay: 0.3s; }
+.category-card:nth-child(4) { animation-delay: 0.4s; }
+.category-card:nth-child(5) { animation-delay: 0.5s; }
+.category-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* 卡片 hover 特效 */
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,184,148,0.15);
+    border-color: var(--accent);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 按鈕 hover 光暈 */
+.btn-cta-primary:hover {
+    animation: glow 1.5s infinite;
+}
+
+/* 側邊欄 hover */
+.sidebar a:hover {
+    transform: translateX(5px);
+    transition: transform 0.2s;
+}
+
+/* 成就解鎖動畫 */
+@keyframes achievementPop {
+    0% { transform: scale(0) rotate(-15deg); opacity: 0; }
+    50% { transform: scale(1.2) rotate(5deg); }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+/* Toast 通知動畫 */
+@keyframes toastSlideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes toastSlideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+/* 打字機效果 class */
+.typewriter {
+    overflow: hidden;
+    border-right: 3px solid var(--accent);
+    white-space: nowrap;
+    animation: typewriter 2s steps(30) 1s both, blink 0.7s step-end infinite;
+}
+
+/* 漂浮效果 */
+.float-animation { animation: float 3s ease-in-out infinite; }
+
+/* 骨架屏載入 */
+.skeleton {
+    background: linear-gradient(90deg, var(--bg3) 25%, var(--bg2) 50%, var(--bg3) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+}
+
+/* 頁面切換過渡 */
+.page-transition {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+/* 捲動顯示動畫 */
+.scroll-reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+}
+.scroll-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 頁面載入動畫 */
+#pageLoader {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg); z-index: 999999;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.3s;
+}
+#pageLoader.hidden { opacity: 0; pointer-events: none; }
+.loader-spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

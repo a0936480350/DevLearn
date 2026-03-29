@@ -232,6 +232,21 @@ using (var scope = app.Services.CreateScope())
 if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
 
+// 404 自訂頁面
+app.UseStatusCodePages(async context =>
+{
+    if (context.HttpContext.Response.StatusCode == 404)
+    {
+        context.HttpContext.Response.ContentType = "text/html; charset=utf-8";
+        var filePath = Path.Combine(app.Environment.ContentRootPath, "Views", "Shared", "Error404.cshtml");
+        // 直接讀取 HTML（Error404.cshtml 不用 Layout，是純 HTML）
+        var html = await File.ReadAllTextAsync(filePath);
+        // Razor 的 @@ 在靜態讀取時要還原成 @
+        html = html.Replace("@@keyframes", "@keyframes");
+        await context.HttpContext.Response.WriteAsync(html);
+    }
+});
+
 // 後端全域錯誤自動記錄到 DB
 app.Use(async (context, next) =>
 {

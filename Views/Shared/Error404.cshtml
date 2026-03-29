@@ -1,0 +1,48 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>404 - 找不到頁面</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0f1117; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .container { text-align: center; animation: fadeInUp 0.8s ease-out; }
+        .code { font-size: 120px; font-weight: 900; background: linear-gradient(135deg, #00b894, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: float 3s ease-in-out infinite; }
+        .msg { font-size: 24px; margin: 20px 0; color: #94a3b8; }
+        .desc { font-size: 14px; color: #64748b; margin-bottom: 30px; }
+        .btn { display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #00b894, #6366f1); color: #fff; text-decoration: none; border-radius: 25px; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,184,148,0.3); }
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .particle { position: absolute; width: 6px; height: 6px; background: rgba(99,102,241,0.3); border-radius: 50%; }
+        @@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @@keyframes particle-move { 0% { transform: translateY(100vh); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 0.5; } 100% { transform: translateY(-10vh); opacity: 0; } }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="container" style="position:relative;z-index:1;">
+        <div class="code">404</div>
+        <div class="msg">哎呀！這個頁面去冒險了</div>
+        <div class="desc">你找的頁面可能已經搬家、改名，或正在學習 .NET 的路上迷路了</div>
+        <a href="/" class="btn">回到首頁 🏠</a>
+    </div>
+    <script>
+        var container = document.getElementById('particles');
+        for (var i = 0; i < 30; i++) {
+            var p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.animationDuration = (5 + Math.random() * 10) + 's';
+            p.style.animationDelay = Math.random() * 5 + 's';
+            p.style.animation = 'particle-move ' + (5 + Math.random() * 10) + 's linear infinite';
+            p.style.width = p.style.height = (3 + Math.random() * 6) + 'px';
+            container.appendChild(p);
+        }
+    </script>
+</body>
+</html>

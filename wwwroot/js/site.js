@@ -1,3 +1,12 @@
+// Page loader
+window.addEventListener('load', function() {
+    var loader = document.getElementById('pageLoader');
+    if (loader) {
+        loader.classList.add('hidden');
+        setTimeout(function() { loader.remove(); }, 300);
+    }
+});
+
 // ── 進度 Badge ─────────────────────────────────────────
 (async () => {
     try {
@@ -84,4 +93,48 @@ async function markComplete(chapterId) {
     if (btn) { btn.textContent = '✅ 已完成'; btn.classList.add('is-done'); }
     const navItem = document.querySelector(`.nav-item.active`);
     if (navItem) { navItem.classList.add('done'); const c = navItem.querySelector('.nav-check'); if (c) c.textContent = '✅'; }
+}
+
+// Scroll reveal animation
+document.addEventListener('DOMContentLoaded', function() {
+    var reveals = document.querySelectorAll('.scroll-reveal, .category-card, section > div');
+
+    function checkReveal() {
+        reveals.forEach(function(el) {
+            var top = el.getBoundingClientRect().top;
+            if (top < window.innerHeight - 50) {
+                el.classList.add('visible');
+            }
+        });
+    }
+
+    window.addEventListener('scroll', checkReveal);
+    checkReveal(); // Initial check
+});
+
+// Toast notification
+function showToast(message, type) {
+    type = type || 'success';
+    var colors = { success: '#00b894', error: '#ef4444', info: '#6366f1', warning: '#f59e0b' };
+    var icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+
+    var toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;top:80px;right:20px;z-index:99999;background:rgba(15,17,23,0.95);border:1px solid ' + colors[type] + ';border-radius:12px;padding:14px 20px;color:#e2e8f0;font-size:14px;max-width:350px;animation:toastSlideIn 0.3s ease-out;backdrop-filter:blur(10px);display:flex;align-items:center;gap:10px;';
+    toast.innerHTML = '<span style="font-size:20px;">' + icons[type] + '</span><span>' + message + '</span>';
+    document.body.appendChild(toast);
+
+    setTimeout(function() {
+        toast.style.animation = 'toastSlideOut 0.3s ease-in forwards';
+        setTimeout(function() { toast.remove(); }, 300);
+    }, 3000);
+}
+
+// Show toast on page load for returning users
+if (document.referrer && document.referrer.includes(location.hostname)) {
+    // User navigated within the site - subtle transition
+} else if (location.pathname === '/') {
+    // First visit or direct URL
+    setTimeout(function() {
+        showToast('歡迎來到 DevLearn！試試左下角的手勢控制 🎥', 'info');
+    }, 2000);
 }
