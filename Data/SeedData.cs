@@ -37,6 +37,7 @@ public static class SeedData
         chapters.AddRange(SeedChapters_IoT2.GetChapters());
         chapters.AddRange(SeedChapters_IoT3.GetChapters());
         chapters.AddRange(SeedChapters_DevLearn.GetChapters());
+        chapters.AddRange(SeedChapters_Whiteboard.GetChapters());
 
         // 只新增不存在的章節（不砍舊資料）
         var newChapters = chapters.Where(c => !existingChapterIds.Contains(c.Id)).ToList();
@@ -57,6 +58,25 @@ public static class SeedData
             db.Questions.AddRange(questions);
             db.SaveChanges();
             Console.WriteLine($"[Seed] Added {questions.Count} new questions");
+        }
+
+        // IoT 測驗題
+        var iotQuestions = SeedQuestions_IoT.GetQuestions()
+            .Where(q => !existingQuestionIds.Contains(q.Id))
+            .ToList();
+        if (iotQuestions.Count > 0)
+        {
+            db.Questions.AddRange(iotQuestions);
+            db.SaveChanges();
+            Console.WriteLine($"[Seed] Added {iotQuestions.Count} IoT questions");
+        }
+
+        // 程式碼擂台挑戰（第二批）
+        if (db.ArenaChallenges.Count() < 8)
+        {
+            db.ArenaChallenges.AddRange(SeedArenaChallenges2.GetChallenges());
+            db.SaveChanges();
+            Console.WriteLine("[Seed] Added arena challenges batch 2");
         }
 
         // 程式碼填字遊戲（只在沒有時才加）

@@ -114,12 +114,15 @@ public class AccountController : Controller
         HttpContext.Session.SetString("SessionId", registered.AnonymousId);
         HttpContext.Session.SetString("sid", registered.AnonymousId);
 
+        // Update LastActiveAt on login
+        registered.LastActiveAt = DateTime.Now;
+
         // Delete the orphaned anonymous record (if different)
         if (currentUser != null && currentUser.Id != registered.Id && !currentUser.IsRegistered)
         {
             _db.SiteUsers.Remove(currentUser);
-            await _db.SaveChangesAsync();
         }
+        await _db.SaveChangesAsync();
 
         // 統一登入：判斷角色導向
         // Admin email check

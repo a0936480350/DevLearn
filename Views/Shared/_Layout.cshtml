@@ -70,7 +70,7 @@
         #chatToggleBtn:hover{transform:scale(1.05);box-shadow:0 6px 28px rgba(99,102,241,.4)}
         #chatToggleBtn .chat-unread{display:none;background:var(--accent3);color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;position:absolute;top:-4px;right:-4px}
 
-        #chatPanel{position:fixed;top:0;right:-360px;width:340px;height:100dvh;height:100vh;z-index:9999;display:flex;flex-direction:column;background:rgba(13,17,23,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-left:1px solid var(--border);transition:right .35s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 30px rgba(0,0,0,.4)}
+        #chatPanel{position:fixed;top:0;right:-360px;width:340px;height:100dvh;height:100vh;z-index:9999;display:flex;flex-direction:column;background:rgba(13,17,23,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-left:1px solid var(--border);transition:right .35s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 30px rgba(0,0,0,.4);overflow:hidden}
         #chatPanel.open{right:0}
 
         .chat-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);background:rgba(19,34,56,.8);min-height:54px}
@@ -89,7 +89,7 @@
         .chat-join-btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 24px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Noto Sans TC',sans-serif}
         .chat-join-btn:hover{background:var(--accent2)}
 
-        .chat-messages{flex:1;overflow-y:auto;padding:12px;padding-bottom:60px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+        .chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;min-height:0}
         .chat-messages::-webkit-scrollbar{width:5px}
         .chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
 
@@ -103,7 +103,7 @@
         .chat-msg-time{font-size:10px;color:var(--text-dim)}
         .chat-msg-text{font-size:13px;color:var(--text);line-height:1.5;word-break:break-word}
 
-        .chat-input-area{position:sticky;bottom:0;display:flex;gap:8px;padding:8px;border-top:1px solid rgba(255,255,255,0.1);background:rgba(15,17,23,0.98);flex-shrink:0;z-index:10}
+        .chat-input-area{display:flex;gap:8px;padding:8px;border-top:1px solid rgba(255,255,255,0.1);background:rgba(15,17,23,0.98);flex-shrink:0;z-index:10}
         .chat-input-area input{flex:1;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;outline:none;font-family:'Noto Sans TC',sans-serif}
         .chat-input-area input:focus{border-color:var(--accent)}
         .chat-input-area button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Noto Sans TC',sans-serif;white-space:nowrap}
@@ -927,8 +927,9 @@
     })();
     </script>
 <!-- Gesture Control CDN -->
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@@mediapipe/hands@@0.4.1675469240/hands.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@@mediapipe/face_mesh@@0.4.1633559619/face_mesh.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@@mediapipe/camera_utils@@0.3.1675466862/camera_utils.min.js"></script>
 
 <!-- Gesture Control UI -->
 <button id="gestureToggleBtn" onclick="toggleGesture()" style="
@@ -937,8 +938,30 @@
     border:none;border-radius:25px;padding:10px 18px;cursor:pointer;
     font-size:14px;font-weight:600;box-shadow:0 4px 15px rgba(99,102,241,0.4);
     display:flex;align-items:center;gap:6px;transition:all 0.3s;">
-    🎥 手勢控制
+    🎥 <span id="gestureToggleBtnLabel">手勢控制</span>
 </button>
+
+<div id="gestureCursor" style="
+    position:fixed;top:50%;left:50%;z-index:99999;pointer-events:none;
+    width:40px;height:40px;border-radius:50%;
+    border:3px solid #00b894;background:rgba(0,184,148,0.25);
+    box-shadow:0 0 20px rgba(0,184,148,0.5),0 0 40px rgba(0,184,148,0.2);
+    transform:translate(-50%,-50%);display:none;"></div>
+<div id="cursorLabel" style="
+    position:fixed;z-index:99999;pointer-events:none;display:none;
+    color:#00b894;font-size:11px;font-weight:700;
+    text-shadow:0 0 10px rgba(0,0,0,0.8);
+    transform:translate(-50%,10px);">👆 移動中</div>
+<div id="cursorProgress" style="
+    position:fixed;z-index:99999;pointer-events:none;display:none;
+    width:40px;height:40px;transform:translate(-50%,-50%);">
+    <svg width="40" height="40" viewBox="0 0 40 40">
+        <circle cx="20" cy="20" r="18" fill="none" stroke="rgba(99,102,241,0.3)" stroke-width="3"/>
+        <circle id="cursorProgressCircle" cx="20" cy="20" r="18" fill="none" stroke="#00b894" stroke-width="3"
+            stroke-dasharray="113" stroke-dashoffset="113" stroke-linecap="round"
+            transform="rotate(-90 20 20)" style="transition:stroke-dashoffset 0.1s;"/>
+    </svg>
+</div>
 
 <div id="gesturePanel" style="
     position:fixed;bottom:70px;left:20px;z-index:9998;
@@ -947,7 +970,7 @@
     padding:12px;display:none;width:280px;">
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <span style="font-weight:700;font-size:14px;color:#e2e8f0;">🎥 手勢控制</span>
+        <span id="gesturePanelTitle" style="font-weight:700;font-size:14px;color:#e2e8f0;">🎥 手勢控制</span>
         <button onclick="toggleGesture()" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:18px;">✕</button>
     </div>
 
@@ -959,22 +982,74 @@
         <div id="gestureAction" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(99,102,241,0.8);color:#fff;padding:4px 12px;border-radius:8px;font-size:13px;font-weight:600;display:none;"></div>
     </div>
 
-    <!-- Gesture guide -->
-    <div style="font-size:11px;color:#94a3b8;line-height:1.6;">
-        <div>👆 <span style="color:#e2e8f0;">食指向上</span> → 頁面上捲</div>
-        <div>👇 <span style="color:#e2e8f0;">食指向下</span> → 頁面下捲</div>
-        <div>👈 <span style="color:#e2e8f0;">手掌向左揮</span> → 上一章</div>
-        <div>👉 <span style="color:#e2e8f0;">手掌向右揮</span> → 下一章</div>
-        <div>✋ <span style="color:#e2e8f0;">手掌張開</span> → 暫停/繼續</div>
-        <div>👍 <span style="color:#e2e8f0;">比讚</span> → 標記完成</div>
-        <div>✊ <span style="color:#e2e8f0;">握拳</span> → 回到頂部</div>
+    <!-- 使用說明 -->
+    <div style="background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);border-radius:8px;padding:8px;margin-bottom:8px;font-size:10px;color:#94a3b8;line-height:1.5;">
+        💡 <strong style="color:#e2e8f0;">使用方式</strong>：點上方按鈕開啟鏡頭。<br>
+        <span id="instructionText">將手舉到鏡頭前方約 30-50 公分處，系統會自動偵測手勢。</span>
+        所有運算在你的瀏覽器本地完成，影像不會上傳到任何伺服器。
     </div>
+
+    <!-- Gesture guide -->
+    <div style="font-size:11px;color:#94a3b8;line-height:1.8;">
+        <div id="handGuide" style="display:none;">
+            <div style="font-weight:600;color:#e2e8f0;margin-bottom:6px;font-size:12px;">像觸控板一樣操作：</div>
+            <div style="border-left:2px solid #00b894;padding-left:8px;margin-bottom:6px;">
+                <div style="color:#00b894;font-weight:600;font-size:11px;margin-bottom:2px;">游標控制</div>
+                <div>☝️ <span style="color:#e2e8f0;">一指移動</span> → 移動游標</div>
+                <div>🫳 <span style="color:#e2e8f0;">手靠近鏡頭</span> → 點擊（進度環提示）</div>
+                <div>🖐 <span style="color:#e2e8f0;">手離開畫面</span> → 游標定點不動</div>
+            </div>
+            <div style="border-left:2px solid #6366f1;padding-left:8px;margin-bottom:6px;">
+                <div style="color:#818cf8;font-weight:600;font-size:11px;margin-bottom:2px;">捲動 & 翻頁</div>
+                <div>✌️⬆⬇ <span style="color:#e2e8f0;">兩指上下移</span> → 捲動頁面</div>
+                <div>🤟←→ <span style="color:#e2e8f0;">三指左右揮</span> → 上/下一頁</div>
+            </div>
+            <div style="border-left:2px solid #f59e0b;padding-left:8px;">
+                <div style="color:#f59e0b;font-weight:600;font-size:11px;margin-bottom:2px;">快捷操作</div>
+                <div>✌️✌️ <span style="color:#e2e8f0;">雙手比 YA</span> → 回首頁</div>
+                <div>✊ <span style="color:#e2e8f0;">握拳</span> → 回到頂部</div>
+                <div>🖐 <span style="color:#e2e8f0;">五指張開不動</span> → 暫停 3 秒</div>
+            </div>
+            <div style="margin-top:8px;font-size:10px;color:#64748b;">手距 30-50cm ｜ 橘色=可點擊 ｜ 靠近有進度環</div>
+        </div>
+        <div id="headGuide" style="display:none;">
+            <div style="font-weight:600;color:#e2e8f0;margin-bottom:4px;font-size:12px;">頭部指令：</div>
+            <div>😌 <span style="color:#e2e8f0;">低頭</span> → 頁面下捲</div>
+            <div>😤 <span style="color:#e2e8f0;">抬頭</span> → 頁面上捲</div>
+            <div>😏 <span style="color:#e2e8f0;">頭向左偏</span> → 上一頁</div>
+            <div>😏 <span style="color:#e2e8f0;">頭向右偏</span> → 下一頁</div>
+            <div>😮 <span style="color:#e2e8f0;">張嘴</span> → 標記完成</div>
+            <div>😳 <span style="color:#e2e8f0;">挑眉</span> → 回到頂部</div>
+            <div style="margin-top:6px;font-size:10px;color:#64748b;">間隔 1 秒 ｜ 正對鏡頭 30-50cm</div>
+        </div>
+    </div>
+</div>
+
+<button id="voiceToggleBtn" onclick="toggleVoice()" style="
+    position:fixed;bottom:20px;left:170px;z-index:9998;
+    background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;
+    border:none;border-radius:25px;padding:10px 18px;cursor:pointer;
+    font-size:14px;font-weight:600;box-shadow:0 4px 15px rgba(239,68,68,0.4);
+    display:flex;align-items:center;gap:6px;transition:all 0.3s;">
+    🎤 語音控制
+</button>
+
+<div id="voiceStatus" style="
+    position:fixed;bottom:60px;left:170px;z-index:9998;
+    background:rgba(15,17,23,0.95);backdrop-filter:blur(20px);
+    border:1px solid rgba(239,68,68,0.3);border-radius:12px;
+    padding:10px 16px;display:none;font-size:13px;color:#e2e8f0;
+    max-width:250px;">
+    <div id="voiceText" style="margin-bottom:6px;">🎤 聆聽中...</div>
+    <div id="voiceResult" style="color:#00b894;font-weight:600;"></div>
 </div>
 
 <style>
 @@media (max-width: 600px) {
     #gestureToggleBtn { bottom: 80px !important; left: 10px !important; font-size: 12px !important; padding: 8px 14px !important; }
     #gesturePanel { bottom: 130px !important; left: 10px !important; width: 240px !important; }
+    #voiceToggleBtn { bottom: 80px !important; left: 130px !important; font-size: 12px !important; padding: 8px 14px !important; }
+    #voiceStatus { bottom: 130px !important; left: 10px !important; }
 }
 </style>
 
@@ -984,6 +1059,23 @@ var gestureCamera = null;
 var lastGestureTime = 0;
 var lastHandX = null;
 var gestureThrottle = 800;
+var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+// 跳頁後自動重連手勢控制
+if (localStorage.getItem('gestureOn') === 'true') {
+    setTimeout(function(){ toggleGesture(); }, 1500);
+}
+if (localStorage.getItem('voiceOn') === 'true') {
+    setTimeout(function(){ toggleVoice(); }, 2000);
+}
+
+// Set button label and guide based on device
+document.getElementById('gestureToggleBtnLabel').textContent = isMobile ? '頭部控制' : '手勢控制';
+document.getElementById(isMobile ? 'headGuide' : 'handGuide').style.display = 'block';
+document.getElementById('instructionText').textContent = isMobile
+    ? '正對前置鏡頭，用頭部動作控制頁面。'
+    : '將手舉到鏡頭前方約 30-50 公分處，系統會自動偵測手勢。';
+document.getElementById('gesturePanelTitle').textContent = isMobile ? '🎥 頭部控制' : '🎥 手勢控制';
 
 function toggleGesture() {
     var panel = document.getElementById('gesturePanel');
@@ -991,6 +1083,7 @@ function toggleGesture() {
 
     if (gestureActive) {
         gestureActive = false;
+        localStorage.setItem('gestureOn', 'false');
         if (gestureCamera) gestureCamera.stop();
         var video = document.getElementById('gestureVideo');
         if (video.srcObject) {
@@ -999,7 +1092,10 @@ function toggleGesture() {
         }
         panel.style.display = 'none';
         btn.style.background = 'linear-gradient(135deg,#6366f1,#8b5cf6)';
-        btn.innerHTML = '🎥 手勢控制';
+        btn.innerHTML = '🎥 ' + (isMobile ? '頭部控制' : '手勢控制');
+        document.getElementById('gestureCursor').style.display = 'none';
+        document.getElementById('cursorProgress').style.display = 'none';
+        var cl = document.getElementById('cursorLabel'); if(cl) cl.style.display = 'none';
         return;
     }
 
@@ -1007,6 +1103,7 @@ function toggleGesture() {
     btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
     btn.innerHTML = '⏹ 停止';
     gestureActive = true;
+    localStorage.setItem('gestureOn', 'true');
 
     var video = document.getElementById('gestureVideo');
     var canvas = document.getElementById('gestureCanvas');
@@ -1014,59 +1111,283 @@ function toggleGesture() {
     var statusEl = document.getElementById('gestureStatus');
     var actionEl = document.getElementById('gestureAction');
 
-    var hands = new Hands({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}`
-    });
-
-    hands.setOptions({
-        maxNumHands: 1,
-        modelComplexity: 0,
-        minDetectionConfidence: 0.6,
-        minTrackingConfidence: 0.5
-    });
-
-    hands.onResults(function(results) {
-        if (!gestureActive) return;
-
-        canvas.width = video.videoWidth || 280;
-        canvas.height = video.videoHeight || 210;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-            var landmarks = results.multiHandLandmarks[0];
-            statusEl.textContent = '✋ 偵測到手部';
-            statusEl.style.color = '#00b894';
-
-            drawHand(ctx, landmarks, canvas.width, canvas.height);
-
-            var gesture = detectGesture(landmarks);
-            if (gesture && Date.now() - lastGestureTime > gestureThrottle) {
-                executeGesture(gesture, actionEl);
-                lastGestureTime = Date.now();
-            }
-        } else {
-            statusEl.textContent = '等待偵測...';
-            statusEl.style.color = '#94a3b8';
-            lastHandX = null;
-        }
-    });
-
-    navigator.mediaDevices.getUserMedia({ video: { width: 280, height: 210, facingMode: 'user' } })
-        .then(function(stream) {
-            video.srcObject = stream;
-            video.play();
-
-            gestureCamera = new Camera(video, {
-                onFrame: async () => { if(gestureActive) await hands.send({image: video}); },
-                width: 280,
-                height: 210
-            });
-            gestureCamera.start();
-        })
-        .catch(function(err) {
-            statusEl.textContent = '無法開啟鏡頭: ' + err.message;
-            statusEl.style.color = '#ef4444';
+    if (isMobile) {
+        // Use Face Mesh for head tracking
+        var faceMesh = new FaceMesh({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@@mediapipe/face_mesh@@0.4.1633559619/${file}`
         });
+
+        faceMesh.setOptions({
+            maxNumFaces: 1,
+            refineLandmarks: true,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+
+        var baseNoseY = null;
+        var baseNoseX = null;
+        var mouthOpenThreshold = 0.04;
+        var headTiltThreshold = 0.03;
+        var headNodThreshold = 0.04;
+
+        faceMesh.onResults(function(results) {
+            if (!gestureActive) return;
+
+            canvas.width = video.videoWidth || 280;
+            canvas.height = video.videoHeight || 210;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                var face = results.multiFaceLandmarks[0];
+                statusEl.textContent = '🙂 偵測到臉部';
+                statusEl.style.color = '#00b894';
+
+                // Draw face outline
+                drawFaceOutline(ctx, face, canvas.width, canvas.height);
+
+                // Key landmarks
+                var noseTip = face[1];
+                var chin = face[152];
+                var forehead = face[10];
+                var upperLip = face[13];
+                var lowerLip = face[14];
+                var leftEyeTop = face[159];
+                var leftEyeBottom = face[145];
+                var rightEyeTop = face[386];
+                var rightEyeBottom = face[374];
+
+                // Set baseline on first detection
+                if (baseNoseY === null) {
+                    baseNoseY = noseTip.y;
+                    baseNoseX = noseTip.x;
+                    return;
+                }
+
+                // Calculate head movements
+                var nodAmount = noseTip.y - baseNoseY;
+                var tiltAmount = noseTip.x - baseNoseX;
+
+                // Mouth open detection
+                var mouthOpen = Math.abs(upperLip.y - lowerLip.y);
+
+                // Eye open detection (for eyebrow raise)
+                var leftEyeOpen = Math.abs(leftEyeTop.y - leftEyeBottom.y);
+                var rightEyeOpen = Math.abs(rightEyeTop.y - rightEyeBottom.y);
+                var eyeOpen = (leftEyeOpen + rightEyeOpen) / 2;
+
+                var gesture = null;
+
+                // Detect gestures with throttle
+                if (Date.now() - lastGestureTime > 1000) {
+                    if (mouthOpen > mouthOpenThreshold) {
+                        gesture = 'thumbsup';
+                    }
+                    else if (eyeOpen > 0.025) {
+                        gesture = 'fist';
+                    }
+                    else if (nodAmount > headNodThreshold) {
+                        gesture = 'point_down';
+                    }
+                    else if (nodAmount < -headNodThreshold) {
+                        gesture = 'point_up';
+                    }
+                    else if (tiltAmount > headTiltThreshold) {
+                        gesture = 'swipe_left';
+                    }
+                    else if (tiltAmount < -headTiltThreshold) {
+                        gesture = 'swipe_right';
+                    }
+
+                    if (gesture) {
+                        executeGesture(gesture, actionEl);
+                        lastGestureTime = Date.now();
+                        baseNoseY = noseTip.y;
+                        baseNoseX = noseTip.x;
+                    }
+                }
+
+                // Slowly drift baseline to adapt to head position changes
+                baseNoseY = baseNoseY * 0.95 + noseTip.y * 0.05;
+                baseNoseX = baseNoseX * 0.95 + noseTip.x * 0.05;
+
+            } else {
+                statusEl.textContent = '等待偵測臉部...';
+                statusEl.style.color = '#94a3b8';
+                baseNoseY = null;
+                baseNoseX = null;
+            }
+        });
+
+        gestureCamera = new Camera(video, {
+            onFrame: async () => { if(gestureActive) await faceMesh.send({image: video}); },
+            width: 280,
+            height: 210
+        });
+        gestureCamera.start();
+
+    } else {
+        // Desktop: existing hand gesture code
+        var hands = new Hands({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@@mediapipe/hands@@0.4.1675469240/${file}`
+        });
+
+        hands.setOptions({
+            maxNumHands: 2,
+            modelComplexity: 0,
+            minDetectionConfidence: 0.6,
+            minTrackingConfidence: 0.5
+        });
+
+        hands.onResults(function(results) {
+            if (!gestureActive) return;
+
+            canvas.width = video.videoWidth || 280;
+            canvas.height = video.videoHeight || 210;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                // ═══ 雙手比YA偵測 = 回首頁 ═══
+                if (results.multiHandLandmarks.length >= 2) {
+                    var h1 = results.multiHandLandmarks[0];
+                    var h2 = results.multiHandLandmarks[1];
+                    var h1idx = h1[8].y < h1[6].y;
+                    var h1mid = h1[12].y < h1[10].y;
+                    var h1ring = h1[16].y < h1[14].y;
+                    var h2idx = h2[8].y < h2[6].y;
+                    var h2mid = h2[12].y < h2[10].y;
+                    var h2ring = h2[16].y < h2[14].y;
+                    if (h1idx && h1mid && !h1ring && h2idx && h2mid && !h2ring) {
+                        if (Date.now() - lastGestureTime > 1500) {
+                            executeGesture('ok_home', actionEl);
+                            lastGestureTime = Date.now();
+                        }
+                    }
+                }
+
+                var landmarks = results.multiHandLandmarks[0];
+                statusEl.textContent = results.multiHandLandmarks.length > 1 ? '✌️✌️ 雙手偵測' : '✋ 偵測到手部';
+                statusEl.style.color = '#00b894';
+
+                drawHand(ctx, landmarks, canvas.width, canvas.height);
+
+                var indexTip = landmarks[8];
+                var wrist = landmarks[0];
+                var cursorEl = document.getElementById('gestureCursor');
+                var progressEl = document.getElementById('cursorProgress');
+                var labelEl = document.getElementById('cursorLabel');
+
+                // 只有食指在畫面內才移動游標（x: 0.05~0.95, y: 0.05~0.95）
+                var inFrame = indexTip.x > 0.05 && indexTip.x < 0.95 && indexTip.y > 0.05 && indexTip.y < 0.95;
+
+                if (inFrame) {
+                    // 映射手指位置到螢幕（鏡像 X）
+                    var screenX = (1 - indexTip.x) * window.innerWidth;
+                    var screenY = indexTip.y * window.innerHeight;
+
+                    // 平滑移動（減少抖動）
+                    if (typeof window._smoothX === 'undefined') { window._smoothX = screenX; window._smoothY = screenY; }
+                    // Minimum movement threshold to reduce jitter
+                    var dx = Math.abs(screenX - window._smoothX);
+                    var dyMove = Math.abs(screenY - window._smoothY);
+                    if (dx > 5 || dyMove > 5) {
+                        window._smoothX = window._smoothX * 0.75 + screenX * 0.25;
+                        window._smoothY = window._smoothY * 0.75 + screenY * 0.25;
+                    }
+
+                    cursorEl.style.left = window._smoothX + 'px';
+                    cursorEl.style.top = window._smoothY + 'px';
+                    cursorEl.style.display = 'block';
+                    labelEl.style.left = window._smoothX + 'px';
+                    labelEl.style.top = window._smoothY + 'px';
+                    labelEl.style.display = 'block';
+                    progressEl.style.left = window._smoothX + 'px';
+                    progressEl.style.top = window._smoothY + 'px';
+
+                    // 偵測游標下方元素
+                    cursorEl.style.display = 'none';
+                    var hoveredEl = document.elementFromPoint(window._smoothX, window._smoothY);
+                    cursorEl.style.display = 'block';
+
+                    // 可點擊元素變橘色
+                    if (hoveredEl) {
+                        var link = hoveredEl.closest('a, button, [onclick]');
+                        if (link) {
+                            cursorEl.style.borderColor = '#f59e0b';
+                            cursorEl.style.background = 'rgba(245,158,11,0.3)';
+                            cursorEl.style.boxShadow = '0 0 25px rgba(245,158,11,0.6)';
+                            labelEl.textContent = '🫳 靠近點擊';
+                            labelEl.style.color = '#f59e0b';
+                        } else {
+                            cursorEl.style.borderColor = '#00b894';
+                            cursorEl.style.background = 'rgba(0,184,148,0.25)';
+                            cursorEl.style.boxShadow = '0 0 20px rgba(0,184,148,0.5)';
+                            labelEl.textContent = '☝️ 移動中';
+                            labelEl.style.color = '#00b894';
+                        }
+                    }
+
+                    // 靠近鏡頭偵測（z 軸：手掌大小變大 = 靠近）
+                    var palmSize = Math.sqrt(
+                        Math.pow(landmarks[0].x - landmarks[9].x, 2) +
+                        Math.pow(landmarks[0].y - landmarks[9].y, 2)
+                    );
+                    if (typeof window._basePalmSize === 'undefined') window._basePalmSize = palmSize;
+                    window._basePalmSize = window._basePalmSize * 0.95 + palmSize * 0.05;
+
+                    var pushRatio = palmSize / window._basePalmSize;
+
+                    // 手掌放大 1.4 倍以上 = 靠近鏡頭 = 點擊
+                    if (pushRatio > 1.4 && Date.now() - lastGestureTime > 1000) {
+                        cursorEl.style.display = 'none';
+                        var clickEl = document.elementFromPoint(window._smoothX, window._smoothY);
+                        cursorEl.style.display = 'block';
+                        if (clickEl) {
+                            clickEl.style.outline = '3px solid #00b894';
+                            clickEl.style.transition = 'outline 0.3s';
+                            setTimeout(function(){ clickEl.style.outline = ''; }, 600);
+                            clickEl.click();
+                            var aLink = clickEl.closest('a');
+                            if (aLink) window.location.href = aLink.href;
+                        }
+                        executeGesture('click', actionEl);
+                        lastGestureTime = Date.now();
+                        window._basePalmSize = palmSize;
+                    }
+
+                    // 進度環顯示靠近程度
+                    if (pushRatio > 1.1) {
+                        progressEl.style.display = 'block';
+                        var progress = Math.min((pushRatio - 1.1) / 0.2, 1);
+                        var circle = document.getElementById('cursorProgressCircle');
+                        if (circle) circle.setAttribute('stroke-dashoffset', 113 - (113 * progress));
+                    } else {
+                        progressEl.style.display = 'none';
+                    }
+
+                    // 其他手勢（雙指捲動、OK回首頁、握拳回頂部）
+                    var gesture = detectGesture(landmarks, window._smoothX, window._smoothY);
+                    if (gesture && Date.now() - lastGestureTime > gestureThrottle) {
+                        executeGesture(gesture, actionEl);
+                        lastGestureTime = Date.now();
+                    }
+                }
+                // 手出畫面 → 游標定點不動（不隱藏，保持最後位置）
+                // 不做任何事，游標留在原位
+
+            } else {
+                // 完全沒偵測到手 → 也保持游標定點
+                statusEl.textContent = '手離開了，游標已定點';
+                statusEl.style.color = '#f59e0b';
+            }
+        });
+
+        gestureCamera = new Camera(video, {
+            onFrame: async () => { if(gestureActive) await hands.send({image: video}); },
+            width: 280,
+            height: 210
+        });
+        gestureCamera.start();
+    }
 }
 
 function drawHand(ctx, landmarks, w, h) {
@@ -1088,46 +1409,120 @@ function drawHand(ctx, landmarks, w, h) {
     });
 }
 
-function detectGesture(lm) {
+function drawFaceOutline(ctx, face, w, h) {
+    var facePoints = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
+    ctx.strokeStyle = 'rgba(99,102,241,0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    facePoints.forEach(function(idx, i) {
+        var p = face[idx];
+        if (i === 0) ctx.moveTo(p.x * w, p.y * h);
+        else ctx.lineTo(p.x * w, p.y * h);
+    });
+    ctx.closePath();
+    ctx.stroke();
+
+    // Draw nose tip indicator
+    var nose = face[1];
+    ctx.beginPath();
+    ctx.arc(nose.x * w, nose.y * h, 5, 0, 2 * Math.PI);
+    ctx.fillStyle = '#00b894';
+    ctx.fill();
+}
+
+function detectGesture(lm, screenX, screenY) {
     var wrist = lm[0];
     var thumbTip = lm[4];
+    var thumbIp = lm[3];
     var indexTip = lm[8];
+    var indexPip = lm[6];
     var indexMcp = lm[5];
     var middleTip = lm[12];
+    var middlePip = lm[10];
     var middleMcp = lm[9];
     var ringTip = lm[16];
+    var ringPip = lm[14];
     var ringMcp = lm[13];
     var pinkyTip = lm[20];
+    var pinkyPip = lm[18];
     var pinkyMcp = lm[17];
 
-    var indexUp = indexTip.y < indexMcp.y - 0.05;
-    var middleUp = middleTip.y < middleMcp.y - 0.05;
-    var ringUp = ringTip.y < ringMcp.y - 0.05;
-    var pinkyUp = pinkyTip.y < pinkyMcp.y - 0.05;
-    var thumbOut = Math.abs(thumbTip.x - wrist.x) > 0.1;
+    // 用 tip vs pip 比較（更準確）
+    var indexUp = indexTip.y < indexPip.y;
+    var middleUp = middleTip.y < middlePip.y;
+    var ringUp = ringTip.y < ringPip.y;
+    var pinkyUp = pinkyTip.y < pinkyPip.y;
+    var thumbUp = thumbTip.y < thumbIp.y;
+    var thumbOut = Math.abs(thumbTip.x - indexMcp.x) > 0.06;
 
-    if (thumbTip.y < wrist.y - 0.15 && !indexUp && !middleUp && !ringUp && !pinkyUp) {
-        return 'thumbsup';
+    // 計算伸出的手指數量
+    var fingersUp = (indexUp?1:0) + (middleUp?1:0) + (ringUp?1:0) + (pinkyUp?1:0);
+
+    // ═══ 1. 靠近鏡頭 = 點擊（在 onResults 裡處理，這裡不重複）═══
+
+    // ═══ 2. ✌️✌️ 雙手比YA = 回首頁（用兩隻手偵測改為：食指+中指都伸+無名小指收+拇指收）═══
+    // 因為 MediaPipe 設定 maxNumHands=1，無法偵測雙手
+    // 改成：比OK（拇指碰食指）= 回首頁
+    var thumbToIndex = Math.sqrt(
+        Math.pow(thumbTip.x - indexTip.x, 2) +
+        Math.pow(thumbTip.y - indexTip.y, 2)
+    );
+    if (thumbToIndex < 0.04 && !middleUp && !ringUp && !pinkyUp) {
+        return 'ok_home';
     }
 
+    // ═══ 3. ✊ 握拳 = 回到頂部 ═══
     if (!indexUp && !middleUp && !ringUp && !pinkyUp && !thumbOut) {
         return 'fist';
     }
 
-    if (indexUp && middleUp && ringUp && pinkyUp) {
-        var currentX = wrist.x;
-        if (lastHandX !== null) {
-            var dx = currentX - lastHandX;
-            if (dx > 0.12) { lastHandX = currentX; return 'swipe_left'; }
-            if (dx < -0.12) { lastHandX = currentX; return 'swipe_right'; }
+    // ═══ 4. ✌️ 兩指上下 = 觸控板雙指捲動 ═══
+    if (indexUp && middleUp && !ringUp && !pinkyUp) {
+        // 追蹤兩指的 Y 軸移動方向
+        var twoFingerY = (indexTip.y + middleTip.y) / 2;
+        if (typeof window._lastTwoFingerY === 'undefined') window._lastTwoFingerY = null;
+
+        if (window._lastTwoFingerY !== null) {
+            var dy = twoFingerY - window._lastTwoFingerY;
+            if (dy > 0.04) {
+                window._lastTwoFingerY = twoFingerY;
+                return 'scroll_down';
+            }
+            if (dy < -0.04) {
+                window._lastTwoFingerY = twoFingerY;
+                return 'scroll_up';
+            }
         }
-        lastHandX = currentX;
+        window._lastTwoFingerY = twoFingerY;
+        return null; // 兩指靜止不觸發
+    } else {
+        window._lastTwoFingerY = null;
+    }
+
+    // ═══ 5. 🤟 三指左右揮 = 上下頁 ═══
+    if (indexUp && middleUp && ringUp && !pinkyUp) {
+        var currentX = wrist.x;
+        if (typeof window._lastThreeFingerX === 'undefined') window._lastThreeFingerX = null;
+
+        if (window._lastThreeFingerX !== null) {
+            var dx = currentX - window._lastThreeFingerX;
+            if (dx > 0.08) { window._lastThreeFingerX = currentX; return 'swipe_left'; }
+            if (dx < -0.08) { window._lastThreeFingerX = currentX; return 'swipe_right'; }
+        }
+        window._lastThreeFingerX = currentX;
+        return null;
+    } else {
+        window._lastThreeFingerX = null;
+    }
+
+    // ═══ 6. ✋ 五指張開不動 = 暫停 3 秒 ═══
+    if (indexUp && middleUp && ringUp && pinkyUp) {
         return 'palm';
     }
 
+    // ═══ 7. ☝️ 一指 = 移動游標（不觸發其他動作）═══
     if (indexUp && !middleUp && !ringUp && !pinkyUp) {
-        if (indexTip.y < wrist.y - 0.2) return 'point_up';
-        if (indexTip.y > wrist.y + 0.1) return 'point_down';
+        return null; // 純游標移動，不觸發任何動作
     }
 
     lastHandX = wrist.x;
@@ -1138,12 +1533,14 @@ function executeGesture(gesture, actionEl) {
     var msg = '';
     switch(gesture) {
         case 'point_up':
+        case 'scroll_up':
             window.scrollBy({ top: -300, behavior: 'smooth' });
-            msg = '👆 上捲';
+            msg = '✌️⬆ 上捲';
             break;
         case 'point_down':
+        case 'scroll_down':
             window.scrollBy({ top: 300, behavior: 'smooth' });
-            msg = '👇 下捲';
+            msg = '✌️⬇ 下捲';
             break;
         case 'swipe_left':
             var prevBtn = document.querySelector('.prev-link');
@@ -1162,10 +1559,12 @@ function executeGesture(gesture, actionEl) {
             gestureThrottle = 3000;
             setTimeout(function(){ gestureThrottle = 800; }, 3000);
             break;
-        case 'thumbsup':
-            var completeBtn = document.querySelector('.btn-complete, [onclick*="markComplete"]');
-            if (completeBtn) completeBtn.click();
-            msg = '👍 標記完成！';
+        case 'click':
+            msg = '👍 點擊！';
+            break;
+        case 'ok_home':
+            window.location.href = '/';
+            msg = '👌 回首頁';
             break;
         case 'fist':
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1178,6 +1577,178 @@ function executeGesture(gesture, actionEl) {
         actionEl.style.display = 'block';
         setTimeout(function(){ actionEl.style.display = 'none'; }, 1500);
     }
+}
+
+var voiceActive = false;
+var recognition = null;
+
+function toggleVoice() {
+    var btn = document.getElementById('voiceToggleBtn');
+    var status = document.getElementById('voiceStatus');
+
+    if (voiceActive) {
+        voiceActive = false;
+        localStorage.setItem('voiceOn', 'false');
+        if (recognition) recognition.stop();
+        btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
+        btn.innerHTML = '🎤 語音控制';
+        status.style.display = 'none';
+        return;
+    }
+
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert('你的瀏覽器不支援語音辨識，請使用 Chrome 或 Safari');
+        return;
+    }
+
+    voiceActive = true;
+    localStorage.setItem('voiceOn', 'true');
+    btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+    btn.innerHTML = '🎤 聆聽中...';
+    status.style.display = 'block';
+
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'zh-TW';
+
+    recognition.onresult = function(event) {
+        var text = '';
+        for (var i = event.resultIndex; i < event.results.length; i++) {
+            text += event.results[i][0].transcript;
+        }
+        document.getElementById('voiceText').textContent = '🎤 ' + text;
+        if (event.results[event.resultIndex].isFinal) {
+            processVoiceCommand(text.trim().toLowerCase());
+        }
+    };
+
+    recognition.onerror = function(e) {
+        document.getElementById('voiceText').textContent = '❌ ' + e.error;
+        if (e.error === 'not-allowed') {
+            alert('請允許麥克風權限');
+            toggleVoice();
+        }
+    };
+
+    recognition.onend = function() {
+        if (voiceActive) {
+            try { recognition.start(); } catch(e) {}
+        }
+    };
+
+    recognition.start();
+}
+
+function processVoiceCommand(text) {
+    var resultEl = document.getElementById('voiceResult');
+    var msg = '';
+
+    if (text.includes('回首頁') || text.includes('首頁') || text.includes('回家')) {
+        window.location.href = '/';
+        msg = '🏠 回首頁';
+    }
+    else if (text.includes('下一章') || text.includes('下一頁') || text.includes('繼續')) {
+        var nextBtn = document.querySelector('.next-link, a[href*="Chapter"]:last-of-type');
+        if (nextBtn) nextBtn.click();
+        msg = '➡️ 下一章';
+    }
+    else if (text.includes('上一章') || text.includes('上一頁') || text.includes('回去')) {
+        var prevBtn = document.querySelector('.prev-link');
+        if (prevBtn) prevBtn.click();
+        else history.back();
+        msg = '⬅️ 上一章';
+    }
+    else if (text.includes('往上') || text.includes('上捲') || text.includes('上面')) {
+        window.scrollBy({ top: -500, behavior: 'smooth' });
+        msg = '⬆️ 上捲';
+    }
+    else if (text.includes('往下') || text.includes('下捲') || text.includes('下面') || text.includes('繼續看')) {
+        window.scrollBy({ top: 500, behavior: 'smooth' });
+        msg = '⬇️ 下捲';
+    }
+    else if (text.includes('回頂部') || text.includes('最上面') || text.includes('回到頂部')) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        msg = '⬆️ 回頂部';
+    }
+    else if (text.includes('找') || text.includes('搜尋') || text.includes('搜索')) {
+        var keyword = text.replace(/找|搜尋|搜索|我要|幫我/g, '').trim();
+        if (keyword) {
+            var searchInput = document.querySelector('.search-input, input[type="search"], #globalSearch');
+            if (searchInput) {
+                searchInput.value = keyword;
+                searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                msg = '🔍 搜尋: ' + keyword;
+            } else {
+                window.location.href = '/?q=' + encodeURIComponent(keyword);
+                msg = '🔍 搜尋: ' + keyword;
+            }
+        }
+    }
+    else if (text.includes('簽到')) {
+        window.location.href = '/CheckIn';
+        msg = '📅 簽到頁';
+    }
+    else if (text.includes('排行') || text.includes('排名')) {
+        window.location.href = '/Leaderboard';
+        msg = '🏆 排行榜';
+    }
+    else if (text.includes('找老師') || text.includes('老師')) {
+        window.location.href = '/Teacher';
+        msg = '👨‍🏫 找老師';
+    }
+    else if (text.includes('每日') || text.includes('今日')) {
+        window.location.href = '/Daily';
+        msg = '📅 每日一題';
+    }
+    else if (text.includes('速度') || text.includes('挑戰')) {
+        window.location.href = '/Speed';
+        msg = '⏱️ 速度挑戰';
+    }
+    else if (text.includes('偵探') || text.includes('找錯')) {
+        window.location.href = '/Detective';
+        msg = '🔍 程式偵探';
+    }
+    else if (text.includes('分析') || text.includes('統計')) {
+        window.location.href = '/Analytics';
+        msg = '📊 學習分析';
+    }
+    else if (text.includes('問答')) {
+        window.location.href = '/QnA';
+        msg = '❓ 問答區';
+    }
+    else if (text.includes('擂台') || text.includes('比賽')) {
+        window.location.href = '/Arena';
+        msg = '⚔️ 擂台';
+    }
+    else if (text.includes('卡片') || text.includes('暗記')) {
+        window.location.href = '/Flashcard';
+        msg = '🃏 暗記卡片';
+    }
+    else if (text.includes('完成') || text.includes('標記')) {
+        var completeBtn = document.querySelector('.btn-complete, [onclick*="markComplete"]');
+        if (completeBtn) completeBtn.click();
+        msg = '✅ 標記完成';
+    }
+    else if (text.includes('登入') || text.includes('登錄')) {
+        window.location.href = '/Account/Login';
+        msg = '🔑 登入頁';
+    }
+    else if (text.includes('註冊')) {
+        window.location.href = '/Account/Register';
+        msg = '📝 註冊頁';
+    }
+    else if (text.includes('登出')) {
+        window.location.href = '/Account/Logout';
+        msg = '🚪 登出';
+    }
+    else {
+        msg = '🤔 不認識: ' + text;
+    }
+
+    resultEl.textContent = msg;
+    setTimeout(function(){ resultEl.textContent = ''; }, 3000);
 }
 </script>
 

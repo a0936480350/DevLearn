@@ -57,6 +57,36 @@ public static class SeedArenaChallenges
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now.AddDays(30),
                 IsActive = true
+            },
+            new ArenaChallenge
+            {
+                Title = "最快的斐波那契數列",
+                Description = "計算第 N 個斐波那契數（N 最大到 1000），比拼誰的演算法最快！可以使用遞迴、動態規劃、矩陣快速冪等任何方法。評比標準：正確性、執行速度、記憶體使用量。額外加分：處理大數（BigInteger）且不溢位。",
+                Category = "algorithm",
+                Difficulty = "intermediate",
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(30),
+                IsActive = true
+            },
+            new ArenaChallenge
+            {
+                Title = "設計一個簡易快取系統",
+                Description = "實作一個具有 LRU（Least Recently Used）淘汰策略的快取系統！需要支援：Get(key)、Set(key, value, ttl)、Delete(key)、以及容量上限自動淘汰。評比標準：執行緒安全性、時間複雜度、API 設計的優雅程度。進階挑戰：支援過期自動清除。",
+                Category = "system-design",
+                Difficulty = "advanced",
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(30),
+                IsActive = true
+            },
+            new ArenaChallenge
+            {
+                Title = "手寫一個 Mini ORM",
+                Description = "不使用 EF Core 或 Dapper，自己實作一個迷你 ORM！需要支援：透過泛型方法查詢資料表、自動將 DataReader 映射到物件、支援基本的 WHERE 條件篩選。評比標準：反射的運用、SQL 注入防護、程式碼的可擴展性。額外加分：支援 Insert 和 Update。",
+                Category = "system-design",
+                Difficulty = "advanced",
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(30),
+                IsActive = true
             }
         };
     }
