@@ -151,8 +151,8 @@
 
 <div class="td-page">
     <div class="td-nav-links">
-        <a href="/Teacher">&larr; 返回老師列表</a>
-        <a href="/Teacher">瀏覽更多老師 &rarr;</a>
+        <a href="/Teacher" data-i18n="td-back">&larr; 返回老師列表</a>
+        <a href="/Teacher" data-i18n="td-more">瀏覽更多老師 &rarr;</a>
     </div>
 
     <div class="td-hero">
@@ -174,9 +174,9 @@
                 <span>@teacher.AverageRating.ToString("F1")</span>
             </div>
             <div class="td-stats">
-                <span>&#x1F393; <strong>@teacher.TotalStudents</strong> &#x4F4D;&#x5B78;&#x751F;</span>
-                <span>&#x1F4DA; <strong>@teacher.TotalLessons</strong> &#x5802;&#x8AB2;</span>
-                <span>&#x1F4BC; <strong>@teacher.ExperienceYears</strong> &#x5E74;&#x7D93;&#x9A57;</span>
+                <span>&#x1F393; <strong>@teacher.TotalStudents</strong> <span data-i18n="td-students">位學生</span></span>
+                <span>&#x1F4DA; <strong>@teacher.TotalLessons</strong> <span data-i18n="td-lessons">堂課</span></span>
+                <span>&#x1F4BC; <strong>@teacher.ExperienceYears</strong> <span data-i18n="td-exp">年經驗</span></span>
             </div>
             <div class="td-skills">
                 @foreach (var s in skills)
@@ -188,58 +188,58 @@
     </div>
 
     <div class="td-section">
-        <h2>&#x1F4DD; &#x95DC;&#x65BC;&#x6211;</h2>
+        <h2 data-i18n="td-about">📝 關於我</h2>
         <div class="td-bio">@teacher.Bio</div>
     </div>
 
     <div class="td-section">
-        <h2>&#x1F393; &#x5B78;&#x6B77;&#x8207;&#x7D93;&#x6B77;</h2>
+        <h2 data-i18n="td-edu">🎓 學歷與經歷</h2>
         <div class="td-info-grid">
             <div class="td-info-item">
-                <div class="label">&#x5B78;&#x6B77;</div>
+                <div class="label" data-i18n="td-edu-label">學歷</div>
                 <div class="value">@teacher.Education</div>
             </div>
             <div class="td-info-item">
-                <div class="label">&#x6559;&#x5B78;&#x7D93;&#x9A57;</div>
-                <div class="value">@teacher.ExperienceYears &#x5E74;</div>
+                <div class="label" data-i18n="td-exp-label">教學經驗</div>
+                <div class="value">@teacher.ExperienceYears <span data-i18n="td-year">年</span></div>
             </div>
         </div>
     </div>
 
     <div class="td-section">
-        <h2>&#x1F4B0; &#x8AB2;&#x7A0B;&#x50F9;&#x683C;</h2>
+        <h2 data-i18n="td-pricing">💰 課程價格</h2>
         <div class="td-pricing">
             <div class="td-price-card featured">
-                <div class="price-label">&#x9AD4;&#x9A57;&#x8AB2;</div>
+                <div class="price-label" data-i18n="td-trial">體驗課</div>
                 <div class="price-value">NT$@teacher.TrialPrice</div>
-                <div class="price-unit">/ &#x5802;</div>
+                <div class="price-unit" data-i18n="td-per-lesson">/ 堂</div>
             </div>
             <div class="td-price-card">
-                <div class="price-label">&#x6B63;&#x5F0F;&#x8AB2;&#x7A0B;</div>
+                <div class="price-label" data-i18n="td-regular">正式課程</div>
                 <div class="price-value">NT$@teacher.HourlyRate</div>
-                <div class="price-unit">/ &#x5C0F;&#x6642;</div>
+                <div class="price-unit" data-i18n="td-per-hour">/ 小時</div>
             </div>
         </div>
     </div>
 
     <div class="td-section">
-        <h2>&#x1F4C5; &#x53EF;&#x9810;&#x7D04;&#x6642;&#x6BB5;&#xFF08;&#x9EDE;&#x64CA;&#x7DA0;&#x8272;&#x6642;&#x6BB5;&#x9810;&#x7D04;&#xFF09;</h2>
+        <h2 data-i18n="td-schedule">📅 可預約時段（點擊綠色時段預約）</h2>
         <div class="legend">
-            <span><span class="legend-dot green"></span> &#x53EF;&#x9810;&#x7D04;&#xFF08;&#x9EDE;&#x64CA;&#x5373;&#x53EF;&#x9810;&#x7D04;&#xFF09;</span>
-            <span><span class="legend-dot orange"></span> &#x5DF2;&#x88AB;&#x9810;&#x7D04;</span>
-            <span><span class="legend-dot gray"></span> &#x8001;&#x5E2B;&#x672A;&#x958B;&#x653E;</span>
+            <span><span class="legend-dot green"></span> <span data-i18n="td-slot-avail">可預約（點擊即可預約）</span></span>
+            <span><span class="legend-dot orange"></span> <span data-i18n="td-slot-booked">已被預約</span></span>
+            <span><span class="legend-dot gray"></span> <span data-i18n="td-slot-closed">老師未開放</span></span>
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-            <button onclick="changeDetailWeek(-1)" style="padding:6px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:13px;font-family:inherit;">&larr; &#x4E0A;&#x9031;</button>
+            <button onclick="changeDetailWeek(-1)" style="padding:6px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:13px;font-family:inherit;" data-i18n="td-prev-week">← 上週</button>
             <span id="detailWeekLabel" style="font-weight:700;font-size:14px;color:var(--text);"></span>
-            <button onclick="changeDetailWeek(1)" style="padding:6px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:13px;font-family:inherit;">&#x4E0B;&#x9031; &rarr;</button>
+            <button onclick="changeDetailWeek(1)" style="padding:6px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:13px;font-family:inherit;" data-i18n="td-next-week">下週 →</button>
         </div>
-        <span class="schedule-toggle" id="detailGridToggle" onclick="toggleDetailGrid()">&#x25BC; &#x6536;&#x8D77;</span>
+        <span class="schedule-toggle" id="detailGridToggle" onclick="toggleDetailGrid()" data-i18n="td-collapse">▼ 收起</span>
         <div id="detailGridContainer" style="overflow-x:auto;">
             <table class="schedule-grid" id="detailScheduleGrid">
                 <thead>
                     <tr>
-                        <th>&#x6642;&#x9593;</th>
+                        <th data-i18n="td-time">時間</th>
                         <th id="dth0"></th>
                         <th id="dth1"></th>
                         <th id="dth2"></th>
@@ -256,25 +256,25 @@
 
     <div style="display:flex;gap:12px;margin-top:16px;">
         <button class="book-btn" id="favBtn" onclick="toggleFavorite()" style="flex:0 0 auto;width:auto;padding:14px 24px;background:var(--bg3);border:2px solid var(--border);color:var(--text);margin-top:0;">
-            <span id="favIcon">&#x2764;&#xFE0F;</span> <span id="favText">收藏老師</span>
+            <span id="favIcon">&#x2764;&#xFE0F;</span> <span id="favText" data-i18n="td-fav">收藏老師</span>
         </button>
-        <button class="book-btn" onclick="openDmChat()" style="flex:0 0 auto;width:auto;padding:14px 24px;background:var(--bg3);border:2px solid rgba(99,102,241,.4);color:var(--accent);margin-top:0;">
-            &#x1F4AC; &#x806F;&#x7D61;&#x8001;&#x5E2B;
+        <button class="book-btn" onclick="openDmChat()" style="flex:0 0 auto;width:auto;padding:14px 24px;background:var(--bg3);border:2px solid rgba(99,102,241,.4);color:var(--accent);margin-top:0;" data-i18n="td-contact">
+            💬 聯絡老師
         </button>
-        <button class="book-btn" onclick="openBooking()" style="flex:1;margin-top:0;">&#x1F4E9; &#x7ACB;&#x5373;&#x9810;&#x7D04;</button>
+        <button class="book-btn" onclick="openBooking()" style="flex:1;margin-top:0;" data-i18n="td-book-now">📩 立即預約</button>
     </div>
 
     <!-- DM Chat Modal -->
     <div class="modal-overlay" id="dmChatModal">
         <div class="modal-box" style="display:flex;flex-direction:column;height:70vh;max-height:600px;padding:0;">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);">
-                <span style="font-size:16px;font-weight:700;">&#x1F4AC; &#x8207; @teacher.Name &#x79C1;&#x8A0A;</span>
+                <span style="font-size:16px;font-weight:700;" data-i18n="td-dm-title">💬 與 @teacher.Name 私訊</span>
                 <button onclick="closeDmChat()" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">&#x2715;</button>
             </div>
             <div id="dmMessages" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;"></div>
             <div style="display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);">
-                <input type="text" id="dmInput" placeholder="&#x8F38;&#x5165;&#x8A0A;&#x606F;..." maxlength="500" style="flex:1;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;" />
-                <button onclick="sendDm()" style="padding:10px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">&#x50B3;&#x9001;</button>
+                <input type="text" id="dmInput" data-i18n-placeholder="td-dm-ph" placeholder="&#x8F38;&#x5165;&#x8A0A;&#x606F;..." maxlength="500" style="flex:1;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;" />
+                <button onclick="sendDm()" style="padding:10px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;" data-i18n="td-dm-send">傳送</button>
             </div>
         </div>
     </div>
@@ -282,7 +282,7 @@
     @if (reviews.Count > 0)
     {
         <div class="td-section" style="margin-top:32px;">
-            <h2>&#x2B50; 學生評價 (@reviews.Count)</h2>
+            <h2>&#x2B50; <span data-i18n="td-reviews">學生評價</span> (@reviews.Count)</h2>
             @foreach (var r in reviews)
             {
                 <div class="review-item">
@@ -299,7 +299,7 @@
 
     <!-- 免費分享 -->
     <div class="td-section" style="margin-top:32px;">
-        <h2>&#x1F4DD; 免費分享</h2>
+        <h2 data-i18n="td-posts">📝 免費分享</h2>
         <div id="teacherPosts">
             <div style="color:var(--text-muted);font-size:13px;">載入中...</div>
         </div>
@@ -309,17 +309,17 @@
 <!-- Booking Modal -->
 <div class="modal-overlay" id="bookingModal">
     <div class="modal-box">
-        <h3>&#x1F4E9; &#x9810;&#x7D04;&#x8AB2;&#x7A0B; - @teacher.Name</h3>
+        <h3 data-i18n="td-booking-title">📩 預約課程 - @teacher.Name</h3>
         <form id="bookingForm" onsubmit="return false;">
-            <label>&#x59D3;&#x540D; *</label>
+            <label data-i18n="td-name-label">姓名 *</label>
             <input type="text" name="studentName" id="bkName" placeholder="&#x8ACB;&#x8F38;&#x5165;&#x60A8;&#x7684;&#x59D3;&#x540D;" required />
             <label>Email *</label>
             <input type="email" name="studentEmail" id="bkEmail" placeholder="your@@email.com" required />
-            <label>&#x96FB;&#x8A71;</label>
+            <label data-i18n="td-phone-label">電話</label>
             <input type="tel" name="studentPhone" id="bkPhone" placeholder="09xx-xxx-xxx" />
-            <label>&#x65E5;&#x671F; * <small style="color:var(--text-muted);font-weight:400;">&#xFF08;&#x53EF;&#x624B;&#x52D5;&#x9078;&#x64C7;&#xFF0C;&#x6216;&#x9EDE;&#x64CA;&#x4E0A;&#x65B9;&#x884C;&#x4E8B;&#x66C6;&#x7DA0;&#x8272;&#x6642;&#x6BB5;&#x81EA;&#x52D5;&#x586B;&#x5165;&#xFF09;</small></label>
+            <label data-i18n="td-date-label">日期 * <small style="color:var(--text-muted);font-weight:400;">&#xFF08;&#x53EF;&#x624B;&#x52D5;&#x9078;&#x64C7;&#xFF0C;&#x6216;&#x9EDE;&#x64CA;&#x4E0A;&#x65B9;&#x884C;&#x4E8B;&#x66C6;&#x7DA0;&#x8272;&#x6642;&#x6BB5;&#x81EA;&#x52D5;&#x586B;&#x5165;&#xFF09;</small></label>
             <input type="date" name="bookingDate" id="bkDate" required />
-            <label>&#x6642;&#x6BB5; *</label>
+            <label data-i18n="td-slot-label">時段 *</label>
             <select name="timeSlot" id="bkSlot" required>
                 <option value="">&#x8ACB;&#x9078;&#x64C7;&#x6642;&#x6BB5;</option>
                 <option value="08:00-08:50">08:00-08:50</option>
@@ -338,12 +338,12 @@
                 <option value="21:00-21:50">21:00-21:50</option>
                 <option value="22:00-22:50">22:00-22:50</option>
             </select>
-            <label>&#x5099;&#x8A3B;</label>
+            <label data-i18n="td-note-label">備註</label>
             <textarea name="studentNote" id="bkNote" placeholder="&#x60F3;&#x5B78;&#x4EC0;&#x9EBC;&#xFF1F;&#x76EE;&#x524D;&#x7684;&#x7A0B;&#x5EA6;&#xFF1F;"></textarea>
             <div id="bkMsg" style="margin-top:12px;font-size:13px;display:none;"></div>
             <div class="modal-actions">
-                <button type="button" class="cancel-btn" onclick="closeBooking()">&#x53D6;&#x6D88;</button>
-                <button type="button" class="confirm-btn" onclick="submitBooking()">&#x63D0;&#x4EA4;&#x9810;&#x7D04;</button>
+                <button type="button" class="cancel-btn" onclick="closeBooking()" data-i18n="td-cancel-btn">取消</button>
+                <button type="button" class="confirm-btn" onclick="submitBooking()" data-i18n="td-submit-btn">提交預約</button>
             </div>
         </form>
     </div>
@@ -369,7 +369,7 @@
             studentNote: form.querySelector('[name="studentNote"]') ? form.querySelector('[name="studentNote"]').value : ''
         };
         if (!data.studentName || !data.studentEmail || !data.bookingDate || !data.timeSlot) {
-            showMsg('請填寫必填欄位（姓名、Email、日期、時段）', 'red'); return;
+            showMsg(t('td-required-fields'), 'red'); return;
         }
         try {
             var res = await fetch('/Teacher/Book', {
@@ -384,13 +384,13 @@
                 return;
             }
             if (result.success) {
-                showMsg('預約成功！等待老師確認', '#4CAF50');
+                showMsg(t('td-book-success'), '#4CAF50');
                 setTimeout(function() { closeBooking(); location.reload(); }, 2000);
             } else {
-                showMsg('預約失敗：' + (result.message || '請稍後再試'), 'red');
+                showMsg(t('td-book-failed') + (result.message || '請稍後再試'), 'red');
             }
         } catch(e) {
-            showMsg('網路錯誤：' + e.message, 'red');
+            showMsg(t('td-network-error') + e.message, 'red');
         }
     }
     function showMsg(msg, color) {
@@ -429,7 +429,7 @@
     function toggleDetailGrid() {
         detailGridVisible = !detailGridVisible;
         document.getElementById('detailGridContainer').style.display = detailGridVisible ? 'block' : 'none';
-        document.getElementById('detailGridToggle').innerHTML = detailGridVisible ? '\u25BC \u6536\u8D77' : '\u25B6 \u5C55\u958B';
+        document.getElementById('detailGridToggle').textContent = detailGridVisible ? t('td-collapse') : t('td-expand');
     }
 
     function getDetailWeekDates(offset) {
@@ -691,12 +691,12 @@
         var btn = document.getElementById('favBtn');
         if (isFavorited) {
             icon.innerHTML = '\uD83D\uDC94';
-            text.textContent = '取消收藏';
+            text.textContent = t('td-unfav');
             btn.style.borderColor = '#e94560';
             btn.style.color = '#e94560';
         } else {
             icon.innerHTML = '\u2764\uFE0F';
-            text.textContent = '收藏老師';
+            text.textContent = t('td-fav');
             btn.style.borderColor = 'var(--border)';
             btn.style.color = 'var(--text)';
         }

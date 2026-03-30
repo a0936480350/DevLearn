@@ -173,28 +173,28 @@
             {
                 <div class="teacher-photo-placeholder">&#x1F468;&#x200D;&#x1F3EB;</div>
             }
-            <div class="title">&#x8001;&#x5E2B;&#x5F8C;&#x53F0;</div>
+            <div class="title" data-i18n="dash-brand">老師後台</div>
         </div>
-        <a href="/" class="home"><span class="icon">&#x1F3E0;</span><span>&#x56DE;&#x9996;&#x9801;</span></a>
+        <a href="/" class="home"><span class="icon">&#x1F3E0;</span><span data-i18n="dash-home">回首頁</span></a>
         <div class="sidebar-divider"></div>
 
         <!-- 教學管理 Section -->
-        <div class="sidebar-section-label">&#x1F4DA; &#x6559;&#x5B78;&#x7BA1;&#x7406;</div>
-        <a href="#" class="active" data-section="overview" onclick="showSection('overview',this)"><span class="icon">&#x1F4CA;</span><span>&#x7E3D;&#x89BD;</span></a>
-        <a href="#" data-section="profile" onclick="showSection('profile',this)"><span class="icon">&#x1F464;</span><span>&#x6211;&#x7684;&#x6A94;&#x6848;</span></a>
-        <a href="#" data-section="timeslots" onclick="showSection('timeslots',this)"><span class="icon">&#x1F552;</span><span>&#x6211;&#x7684;&#x6642;&#x6BB5;&#x8A2D;&#x5B9A;</span></a>
-        <a href="#" data-section="bookings" onclick="showSection('bookings',this)"><span class="icon">&#x1F4C5;</span><span>&#x5B78;&#x751F;&#x9810;&#x7D04;&#x7BA1;&#x7406;</span></a>
-        <a href="#" data-section="publish" onclick="showSection('publish',this)"><span class="icon">&#x1F4DD;</span><span>&#x767C;&#x5E03;&#x5167;&#x5BB9;</span></a>
+        <div class="sidebar-section-label" data-i18n="dash-teaching">📚 教學管理</div>
+        <a href="#" class="active" data-section="overview" onclick="showSection('overview',this)"><span class="icon">&#x1F4CA;</span><span data-i18n="dash-overview">總覽</span></a>
+        <a href="#" data-section="profile" onclick="showSection('profile',this)"><span class="icon">&#x1F464;</span><span data-i18n="dash-profile">我的檔案</span></a>
+        <a href="#" data-section="timeslots" onclick="showSection('timeslots',this)"><span class="icon">&#x1F552;</span><span data-i18n="dash-timeslots">我的時段設定</span></a>
+        <a href="#" data-section="bookings" onclick="showSection('bookings',this)"><span class="icon">&#x1F4C5;</span><span data-i18n="dash-bookings">學生預約管理</span></a>
+        <a href="#" data-section="publish" onclick="showSection('publish',this)"><span class="icon">&#x1F4DD;</span><span data-i18n="dash-publish">發布內容</span></a>
         <div class="sidebar-divider"></div>
 
         <!-- 學習專區 Section -->
-        <div class="sidebar-section-label">&#x1F393; &#x5B78;&#x7FD2;&#x5C08;&#x5340;</div>
-        <a href="#" data-section="browse-teachers" onclick="showSection('browse-teachers',this)"><span class="icon">&#x1F468;&#x200D;&#x1F3EB;</span><span>&#x700F;&#x89BD;&#x5176;&#x4ED6;&#x8001;&#x5E2B;</span></a>
-        <a href="#" data-section="my-bookings" onclick="showSection('my-bookings',this)"><span class="icon">&#x1F4C5;</span><span>&#x6211;&#x9810;&#x7D04;&#x7684;&#x8AB2;&#x7A0B;</span></a>
-        <a href="#" data-section="my-favorites" onclick="showSection('my-favorites',this)"><span class="icon">&#x2764;&#xFE0F;</span><span>&#x6536;&#x85CF;&#x7684;&#x8001;&#x5E2B;</span></a>
+        <div class="sidebar-section-label" data-i18n="dash-learning">🎓 學習專區</div>
+        <a href="#" data-section="browse-teachers" onclick="showSection('browse-teachers',this)"><span class="icon">&#x1F468;&#x200D;&#x1F3EB;</span><span data-i18n="dash-browse">瀏覽其他老師</span></a>
+        <a href="#" data-section="my-bookings" onclick="showSection('my-bookings',this)"><span class="icon">&#x1F4C5;</span><span data-i18n="dash-my-bookings">我預約的課程</span></a>
+        <a href="#" data-section="my-favorites" onclick="showSection('my-favorites',this)"><span class="icon">&#x2764;&#xFE0F;</span><span data-i18n="dash-my-fav">收藏的老師</span></a>
         <div class="sidebar-divider"></div>
 
-        <a href="/Account/Logout" class="logout"><span class="icon">&#x1F6AA;</span><span>&#x767B;&#x51FA;</span></a>
+        <a href="/Account/Logout" class="logout"><span class="icon">&#x1F6AA;</span><span data-i18n="dash-logout">登出</span></a>
     </nav>
 
     <div class="main">
@@ -203,10 +203,10 @@
             <div class="page-title">&#x1F4CA; &#x6559;&#x5B78;&#x7E3D;&#x89BD; - @teacher.Name</div>
 
             <div class="stats-row">
-                <div class="stat-card"><div class="value">@teacher.TotalStudents</div><div class="label">&#x7E3D;&#x5B78;&#x751F;&#x6578;</div></div>
-                <div class="stat-card"><div class="value">@teacher.TotalLessons</div><div class="label">&#x7E3D;&#x8AB2;&#x5802;&#x6578;</div></div>
-                <div class="stat-card"><div class="value">@teacher.AverageRating.ToString("F1")</div><div class="label">&#x5E73;&#x5747;&#x8A55;&#x5206;</div></div>
-                <div class="stat-card"><div class="value">NT$@(teacher.TotalLessons * teacher.HourlyRate)</div><div class="label">&#x7E3D;&#x6536;&#x5165;&#x4F30;&#x7B97;</div></div>
+                <div class="stat-card"><div class="value">@teacher.TotalStudents</div><div class="label" data-i18n="dash-stat-students">總學生數</div></div>
+                <div class="stat-card"><div class="value">@teacher.TotalLessons</div><div class="label" data-i18n="dash-stat-lessons">總課堂數</div></div>
+                <div class="stat-card"><div class="value">@teacher.AverageRating.ToString("F1")</div><div class="label" data-i18n="dash-stat-rating">平均評分</div></div>
+                <div class="stat-card"><div class="value">NT$@(teacher.TotalLessons * teacher.HourlyRate)</div><div class="label" data-i18n="dash-stat-income">總收入估算</div></div>
             </div>
 
             <!-- Upcoming Bookings Preview -->
@@ -220,7 +220,7 @@
                 {
                     <div style="overflow-x:auto;">
                         <table class="admin-table">
-                            <thead><tr><th>&#x5B78;&#x751F;</th><th>&#x65E5;&#x671F;</th><th>&#x6642;&#x6BB5;</th><th>&#x72C0;&#x614B;</th><th>&#x64CD;&#x4F5C;</th></tr></thead>
+                            <thead><tr><th data-i18n="dash-th-student">學生</th><th data-i18n="dash-th-date">日期</th><th data-i18n="dash-th-slot">時段</th><th data-i18n="dash-th-status">狀態</th><th data-i18n="dash-th-action">操作</th></tr></thead>
                             <tbody>
                                 @foreach (var b in upcoming.Take(5))
                                 {
@@ -232,12 +232,12 @@
                                         <td>
                                             @if (b.Status == "pending")
                                             {
-                                                <button class="btn btn-confirm btn-sm" onclick="respond(@b.Id,'confirmed')">&#x78BA;&#x8A8D;</button>
-                                                <button class="btn btn-cancel btn-sm" onclick="respond(@b.Id,'cancelled')">&#x53D6;&#x6D88;</button>
+                                                <button class="btn btn-confirm btn-sm" onclick="respond(@b.Id,'confirmed')" data-i18n="dash-btn-confirm">確認</button>
+                                                <button class="btn btn-cancel btn-sm" onclick="respond(@b.Id,'cancelled')" data-i18n="dash-btn-cancel">取消</button>
                                             }
                                             else if (b.Status == "confirmed")
                                             {
-                                                <button class="btn btn-complete btn-sm" onclick="respond(@b.Id,'completed')">&#x5B8C;&#x6210;</button>
+                                                <button class="btn btn-complete btn-sm" onclick="respond(@b.Id,'completed')" data-i18n="dash-btn-complete">完成</button>
                                             }
                                         </td>
                                     </tr>
@@ -314,21 +314,21 @@
             <div class="card">
                 <div class="card-title" id="dashCalendarTitle">&#x6211;&#x7684;&#x53EF;&#x4E0A;&#x8AB2;&#x6642;&#x6BB5;</div>
                 <div class="legend">
-                    <span><span class="legend-dot green"></span> &#x53EF;&#x4E0A;&#x8AB2;&#xFF08;&#x6211;&#x958B;&#x653E;&#x7684;&#x6642;&#x9593;&#xFF09;</span>
-                    <span><span class="legend-dot orange"></span> &#x5DF2;&#x88AB;&#x5B78;&#x751F;&#x9810;&#x7D04;</span>
-                    <span><span class="legend-dot gray"></span> &#x672A;&#x958B;&#x653E;</span>
+                    <span><span class="legend-dot green"></span> <span data-i18n="td-slot-avail">可預約（點擊即可預約）</span></span>
+                    <span><span class="legend-dot orange"></span> <span data-i18n="td-slot-booked">已被預約</span></span>
+                    <span><span class="legend-dot gray"></span> <span data-i18n="td-slot-closed">老師未開放</span></span>
                 </div>
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-                    <button onclick="changeDashWeek(-1)" style="padding:5px 14px;background:rgba(22,33,62,0.8);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#eee;cursor:pointer;font-size:13px;font-family:inherit;">&larr; &#x4E0A;&#x9031;</button>
+                    <button onclick="changeDashWeek(-1)" style="padding:5px 14px;background:rgba(22,33,62,0.8);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#eee;cursor:pointer;font-size:13px;font-family:inherit;" data-i18n="td-prev-week">← 上週</button>
                     <span id="dashWeekLabel" style="font-weight:700;font-size:14px;color:#eee;"></span>
-                    <button onclick="changeDashWeek(1)" style="padding:5px 14px;background:rgba(22,33,62,0.8);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#eee;cursor:pointer;font-size:13px;font-family:inherit;">&#x4E0B;&#x9031; &rarr;</button>
+                    <button onclick="changeDashWeek(1)" style="padding:5px 14px;background:rgba(22,33,62,0.8);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#eee;cursor:pointer;font-size:13px;font-family:inherit;" data-i18n="td-next-week">下週 →</button>
                 </div>
-                <span class="schedule-toggle" id="dashGridToggle" onclick="toggleDashGrid()">&#x25BC; &#x6536;&#x8D77;</span>
+                <span class="schedule-toggle" id="dashGridToggle" onclick="toggleDashGrid()" data-i18n="td-collapse">▼ 收起</span>
                 <div id="dashGridContainer" style="overflow-x:auto;">
                     <table class="schedule-grid" id="dashScheduleGrid">
                         <thead>
                             <tr>
-                                <th>&#x6642;&#x9593;</th>
+                                <th data-i18n="td-time">時間</th>
                                 <th id="dashTh0"></th>
                                 <th id="dashTh1"></th>
                                 <th id="dashTh2"></th>
@@ -359,7 +359,7 @@
                 {
                     <div style="overflow-x:auto;">
                         <table class="admin-table">
-                            <thead><tr><th>&#x5B78;&#x751F;</th><th>&#x65E5;&#x671F;</th><th>&#x6642;&#x6BB5;</th><th>Email</th><th>&#x96FB;&#x8A71;</th><th>&#x5099;&#x8A3B;</th><th>&#x72C0;&#x614B;</th><th>&#x64CD;&#x4F5C;</th></tr></thead>
+                            <thead><tr><th data-i18n="dash-th-student">學生</th><th data-i18n="dash-th-date">日期</th><th data-i18n="dash-th-slot">時段</th><th>Email</th><th>&#x96FB;&#x8A71;</th><th>&#x5099;&#x8A3B;</th><th data-i18n="dash-th-status">狀態</th><th data-i18n="dash-th-action">操作</th></tr></thead>
                             <tbody>
                                 @foreach (var b in upcoming)
                                 {
@@ -374,12 +374,12 @@
                                         <td>
                                             @if (b.Status == "pending")
                                             {
-                                                <button class="btn btn-confirm btn-sm" onclick="respond(@b.Id,'confirmed')">&#x78BA;&#x8A8D;</button>
-                                                <button class="btn btn-cancel btn-sm" onclick="respond(@b.Id,'cancelled')">&#x53D6;&#x6D88;</button>
+                                                <button class="btn btn-confirm btn-sm" onclick="respond(@b.Id,'confirmed')" data-i18n="dash-btn-confirm">確認</button>
+                                                <button class="btn btn-cancel btn-sm" onclick="respond(@b.Id,'cancelled')" data-i18n="dash-btn-cancel">取消</button>
                                             }
                                             else if (b.Status == "confirmed")
                                             {
-                                                <button class="btn btn-complete btn-sm" onclick="respond(@b.Id,'completed')">&#x5B8C;&#x6210;</button>
+                                                <button class="btn btn-complete btn-sm" onclick="respond(@b.Id,'completed')" data-i18n="dash-btn-complete">完成</button>
                                             }
                                         </td>
                                     </tr>
@@ -399,7 +399,7 @@
                 else
                 {
                     <table class="admin-table">
-                        <thead><tr><th>&#x5B78;&#x751F;</th><th>&#x65E5;&#x671F;</th><th>&#x6642;&#x6BB5;</th><th>&#x5099;&#x8A3B;</th></tr></thead>
+                        <thead><tr><th data-i18n="dash-th-student">學生</th><th data-i18n="dash-th-date">日期</th><th data-i18n="dash-th-slot">時段</th><th>&#x5099;&#x8A3B;</th></tr></thead>
                         <tbody>
                             @foreach (var b in completed)
                             {
@@ -525,7 +525,7 @@
         function toggleDashGrid() {
             dashGridVisible = !dashGridVisible;
             document.getElementById('dashGridContainer').style.display = dashGridVisible ? 'block' : 'none';
-            document.getElementById('dashGridToggle').innerHTML = dashGridVisible ? '\u25BC \u6536\u8D77' : '\u25B6 \u5C55\u958B';
+            document.getElementById('dashGridToggle').textContent = dashGridVisible ? t('td-collapse') : t('td-expand');
         }
 
         function getDashWeekDates(offset) {
@@ -786,7 +786,7 @@
                     var html = '';
                     bookings.forEach(function(b) {
                         var statusClass = 'badge-' + b.status;
-                        var statusText = b.status === 'pending' ? '\u5F85\u78BA\u8A8D' : b.status === 'confirmed' ? '\u5DF2\u78BA\u8A8D' : b.status === 'completed' ? '\u5DF2\u5B8C\u6210' : '\u5DF2\u53D6\u6D88';
+                        var statusText = b.status === 'pending' ? t('dash-status-pending') : b.status === 'confirmed' ? t('dash-status-confirmed') : b.status === 'completed' ? t('dash-status-completed') : t('dash-status-cancelled');
                         html += '<div class="booking-item">';
                         html += '<div class="booking-info">';
                         html += '<span class="bi-teacher">' + escapeHtml(b.teacherName) + '</span>';
@@ -868,5 +868,6 @@
     </script>
 
 <script>document.querySelectorAll('.sidebar a').forEach(a=>{a.addEventListener('click',()=>{if(window.innerWidth<=900){document.querySelector('.sidebar').classList.remove('open');document.querySelector('.mobile-overlay').classList.remove('open');}});});</script>
+<script src="/js/site.js"></script>
 </body>
 </html>
