@@ -20,7 +20,7 @@
             <span style="font-weight:800;font-size:1.1rem;color:#fff;">⚡ DevLearn</span>
         </a>
         <div class="nav-search">
-            <input type="text" id="globalSearch" placeholder="搜尋章節..." autocomplete="off" />
+            <input type="text" id="globalSearch" placeholder="搜尋章節..." autocomplete="off" data-i18n-placeholder="nav-search" />
             <div id="searchResults" class="search-dropdown"></div>
         </div>
         <div class="nav-right" id="navRight">
@@ -35,21 +35,21 @@
             <div class="nav-dropdown">
                 <button class="nav-scores-link nav-dropdown-btn" data-i18n="nav-games">🎮 遊戲 ▾</button>
                 <div class="nav-dropdown-menu">
-                    <a href="/Detective">🔍 程式碼偵探</a>
-                    <a href="/Speed">⏱️ 速度挑戰</a>
-                    <a href="/Puzzle">🧩 填字遊戲</a>
-                    <a href="/Arena">⚔️ 程式碼擂台</a>
+                    <a href="/Detective" data-i18n="nav-detective">🔍 程式碼偵探</a>
+                    <a href="/Speed" data-i18n="nav-speed">⏱️ 速度挑戰</a>
+                    <a href="/Puzzle" data-i18n="nav-puzzle">🧩 填字遊戲</a>
+                    <a href="/Arena" data-i18n="nav-arena">⚔️ 程式碼擂台</a>
                 </div>
             </div>
             <div class="nav-dropdown">
                 <button class="nav-scores-link nav-dropdown-btn" data-i18n="nav-tools">📚 工具 ▾</button>
                 <div class="nav-dropdown-menu">
-                    <a href="/Analytics">📊 學習分析</a>
-                    <a href="/Flashcard">🃏 暗記卡片</a>
-                    <a href="/Snippet">📌 程式碼收藏</a>
-                    <a href="/QnA">❓ 問答區</a>
-                    <a href="/Buddy">👥 學習夥伴</a>
-                    <a href="/Leaderboard">🏆 排行榜</a>
+                    <a href="/Analytics" data-i18n="nav-analytics">📊 學習分析</a>
+                    <a href="/Flashcard" data-i18n="nav-flashcard">🃏 暗記卡片</a>
+                    <a href="/Snippet" data-i18n="nav-snippet">📌 程式碼收藏</a>
+                    <a href="/QnA" data-i18n="nav-qna">❓ 問答區</a>
+                    <a href="/Buddy" data-i18n="nav-buddy">👥 學習夥伴</a>
+                    <a href="/Leaderboard" data-i18n="nav-leaderboard">🏆 排行榜</a>
                 </div>
             </div>
             <a href="/Teacher" class="nav-scores-link" data-i18n="nav-teacher">&#x1F468;&#x200D;&#x1F3EB; &#x627E;&#x8001;&#x5E2B;</a>
@@ -168,7 +168,7 @@
 
     <button id="chatToggleBtn" onclick="toggleChat()">
         <span class="chat-unread" id="chatUnread">0</span>
-        💬 聊天室
+        <span data-i18n="chat-title">💬 聊天室</span>
     </button>
 
     <div id="chatPanel">
@@ -177,16 +177,16 @@
             <button class="chat-close-btn" onclick="toggleChat()" title="&#x6700;&#x5C0F;&#x5316;">&#x2715;</button>
         </div>
         <div class="chat-tabs">
-            <button class="chat-tab active" id="tabPublic" onclick="switchChatTab('public')">&#x1F4AC; &#x516C;&#x958B;&#x804A;&#x5929;</button>
-            <button class="chat-tab" id="tabPm" onclick="switchChatTab('pm')">&#x1F4E9; &#x79C1;&#x8A0A; <span class="tab-badge" id="pmBadge" style="display:none">0</span></button>
-            <button class="chat-tab" id="tabSupport" onclick="switchChatTab('support')">&#x1F4DE; &#x5BA2;&#x670D; <span class="tab-badge" id="supportBadge" style="display:none">0</span></button>
+            <button class="chat-tab active" id="tabPublic" onclick="switchChatTab('public')" data-i18n="chat-public">&#x1F4AC; &#x516C;&#x958B;&#x804A;&#x5929;</button>
+            <button class="chat-tab" id="tabPm" onclick="switchChatTab('pm')"><span data-i18n="chat-private">&#x1F4E9; &#x79C1;&#x8A0A;</span> <span class="tab-badge" id="pmBadge" style="display:none">0</span></button>
+            <button class="chat-tab" id="tabSupport" onclick="switchChatTab('support')"><span data-i18n="chat-support">&#x1F4DE; &#x5BA2;&#x670D;</span> <span class="tab-badge" id="supportBadge" style="display:none">0</span></button>
         </div>
         <!-- Public Chat Tab -->
         <div class="pm-tab-content active" id="publicTabContent">
             <div class="chat-nickname-setup" id="chatSetup">
-                <label>&#x8A2D;&#x5B9A;&#x4F60;&#x7684;&#x66B1;&#x7A31;</label>
-                <input type="text" id="chatNickInput" placeholder="&#x8F38;&#x5165;&#x66B1;&#x7A31;..." maxlength="20" />
-                <label style="margin-top:8px">&#x9078;&#x64C7;&#x982D;&#x50CF;</label>
+                <label data-i18n="chat-nickname-label">&#x8A2D;&#x5B9A;&#x4F60;&#x7684;&#x66B1;&#x7A31;</label>
+                <input type="text" id="chatNickInput" placeholder="&#x8F38;&#x5165;&#x66B1;&#x7A31;..." maxlength="20" data-i18n-placeholder="chat-placeholder" />
+                <label style="margin-top:8px" data-i18n="chat-avatar-label">&#x9078;&#x64C7;&#x982D;&#x50CF;</label>
                 <div class="emoji-selector" id="emojiSelector">
                     <span class="selected" data-emoji="&#x1F600;">&#x1F600;</span>
                     <span data-emoji="&#x1F60E;">&#x1F60E;</span>
@@ -197,19 +197,19 @@
                     <span data-emoji="&#x1F525;">&#x1F525;</span>
                     <span data-emoji="&#x2B50;">&#x2B50;</span>
                 </div>
-                <button class="chat-join-btn" onclick="joinChat()">&#x52A0;&#x5165;&#x804A;&#x5929;</button>
+                <button class="chat-join-btn" onclick="joinChat()" data-i18n="chat-join">&#x52A0;&#x5165;&#x804A;&#x5929;</button>
             </div>
             <div class="chat-messages" id="chatMessages" style="display:none"></div>
             <div class="chat-input-area" id="chatInputArea" style="display:none">
-                <input type="text" id="chatMsgInput" placeholder="&#x8F38;&#x5165;&#x8A0A;&#x606F;..." maxlength="500" />
-                <button id="chatSendBtn" onclick="sendChatMsg()">&#x50B3;&#x9001;</button>
+                <input type="text" id="chatMsgInput" placeholder="&#x8F38;&#x5165;&#x8A0A;&#x606F;..." maxlength="500" data-i18n-placeholder="chat-placeholder" />
+                <button id="chatSendBtn" onclick="sendChatMsg()" data-i18n="chat-send">&#x50B3;&#x9001;</button>
             </div>
         </div>
         <!-- Support Tab -->
         <div class="pm-tab-content" id="supportTabContent">
             <div style="padding:10px 12px;overflow-y:auto;flex:1;">
                 <div id="supportNewForm">
-                    <div onclick="toggleSupportForm()" style="cursor:pointer;padding:8px 12px;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);border-radius:8px;font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px;text-align:center;">&#x2795; &#x65B0;&#x554F;&#x984C;</div>
+                    <div onclick="toggleSupportForm()" style="cursor:pointer;padding:8px 12px;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);border-radius:8px;font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px;text-align:center;" data-i18n="chat-support-new">&#x2795; &#x65B0;&#x554F;&#x984C;</div>
                     <div id="supportFormBody" style="display:none;margin-bottom:12px;">
                         <select id="supportCategory" style="width:100%;padding:7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;margin-bottom:8px;font-family:'Noto Sans TC',sans-serif;">
                             <option value="網站問題回報">🐛 網站問題回報</option>
@@ -221,11 +221,11 @@
                             <option value="其他">&#x2753; &#x5176;&#x4ED6;</option>
                         </select>
                         <textarea id="supportContent" placeholder="&#x8ACB;&#x63CF;&#x8FF0;&#x60A8;&#x7684;&#x554F;&#x984C;..." style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;min-height:70px;resize:vertical;font-family:'Noto Sans TC',sans-serif;margin-bottom:8px;"></textarea>
-                        <button id="supportSubmitBtn" onclick="submitSupportTicket()" style="width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans TC',sans-serif;">提交回報</button>
+                        <button id="supportSubmitBtn" onclick="submitSupportTicket()" style="width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans TC',sans-serif;" data-i18n="chat-support-submit">提交回報</button>
                         <div id="supportSuccessMsg" style="display:none;margin-top:8px;padding:8px 12px;background:rgba(56,189,114,0.15);color:#38bd72;border:1px solid rgba(56,189,114,0.3);border-radius:8px;font-size:13px;text-align:center;font-weight:600;"></div>
                     </div>
                 </div>
-                <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">&#x1F4CB; &#x6211;&#x7684;&#x5DE5;&#x55AE;</div>
+                <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:8px;" data-i18n="chat-support-tickets">&#x1F4CB; &#x6211;&#x7684;&#x5DE5;&#x55AE;</div>
                 <div id="supportTicketList" style="display:flex;flex-direction:column;gap:6px;"></div>
             </div>
         </div>
@@ -243,8 +243,8 @@
                 </div>
                 <div class="pm-chat-msgs" id="pmChatMsgs"></div>
                 <div class="pm-chat-input">
-                    <input type="text" id="pmChatInput" placeholder="&#x8F38;&#x5165;&#x79C1;&#x8A0A;..." maxlength="500" />
-                    <button onclick="sendPmMsg()">&#x50B3;&#x9001;</button>
+                    <input type="text" id="pmChatInput" placeholder="&#x8F38;&#x5165;&#x79C1;&#x8A0A;..." maxlength="500" data-i18n-placeholder="chat-pm-placeholder" />
+                    <button onclick="sendPmMsg()" data-i18n="chat-send">&#x50B3;&#x9001;</button>
                 </div>
             </div>
         </div>

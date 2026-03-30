@@ -104,8 +104,8 @@
 </style>
 
 <div style="position:relative;height:200px;background:linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.8)), url('/images/teacher-class.jpg') center/cover;display:flex;align-items:center;justify-content:center;flex-direction:column;">
-    <h1 style="color:#fff;font-size:2rem;font-weight:800;">找老師</h1>
-    <p style="color:rgba(255,255,255,0.8);">尋找最適合你的 .NET 專業老師</p>
+    <h1 style="color:#fff;font-size:2rem;font-weight:800;" data-i18n="teacher-title">找老師</h1>
+    <p style="color:rgba(255,255,255,0.8);" data-i18n="teacher-subtitle">尋找最適合你的 .NET 專業老師</p>
 </div>
 
 <div class="teacher-page">
@@ -114,11 +114,11 @@
         <input type="text" name="search" placeholder="&#x641C;&#x5C0B;&#x8001;&#x5E2B;&#x540D;&#x7A31;&#x3001;&#x5C08;&#x9577;..." value="@search" />
         <input type="number" name="minPrice" placeholder="&#x6700;&#x4F4E;&#x50F9;&#x683C;" value="@ViewBag.MinPrice" style="width:120px;" />
         <input type="number" name="maxPrice" placeholder="&#x6700;&#x9AD8;&#x50F9;&#x683C;" value="@ViewBag.MaxPrice" style="width:120px;" />
-        <button type="submit">&#x1F50D; &#x641C;&#x5C0B;</button>
+        <button type="submit" data-i18n="teacher-search-btn">&#x1F50D; &#x641C;&#x5C0B;</button>
     </form>
 
     <div class="skill-tags">
-        <a href="/Teacher" class="skill-tag @(string.IsNullOrEmpty(skill) ? "active" : "")">&#x5168;&#x90E8;</a>
+        <a href="/Teacher" class="skill-tag @(string.IsNullOrEmpty(skill) ? "active" : "")" data-i18n="teacher-all">&#x5168;&#x90E8;</a>
         <a href="/Teacher?skill=C%23" class="skill-tag @(skill == "C#" ? "active" : "")">C#</a>
         <a href="/Teacher?skill=ASP.NET" class="skill-tag @(skill == "ASP.NET" ? "active" : "")">ASP.NET</a>
         <a href="/Teacher?skill=Entity+Framework" class="skill-tag @(skill == "Entity Framework" ? "active" : "")">Entity Framework</a>
@@ -133,7 +133,7 @@
         <div class="no-result">
             <div class="icon">&#x1F50D;</div>
             <div>&#x76EE;&#x524D;&#x6C92;&#x6709;&#x7B26;&#x5408;&#x689D;&#x4EF6;&#x7684;&#x8001;&#x5E2B;</div>
-            <div style="margin-top:16px;"><a href="/Teacher/Apply" class="tc-btn">&#x2728; &#x7533;&#x8ACB;&#x6210;&#x70BA;&#x8001;&#x5E2B;</a></div>
+            <div style="margin-top:16px;"><a href="/Teacher/Apply" class="tc-btn" data-i18n="teacher-apply">&#x2728; &#x7533;&#x8ACB;&#x6210;&#x70BA;&#x8001;&#x5E2B;</a></div>
         </div>
     }
     else

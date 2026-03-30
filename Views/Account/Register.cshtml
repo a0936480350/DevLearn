@@ -105,9 +105,9 @@
 <body>
     @await Html.PartialAsync("_Navbar")
     <div class="form-card">
-        <a href="/" style="color:#2299dd;text-decoration:none;display:block;margin-bottom:20px;font-size:14px;">&#x1F3E0; &#x2190; 回首頁</a>
-        <div class="form-title">📝 註冊帳號</div>
-        <div class="form-subtitle">升級為正式會員，保存你的學習紀錄</div>
+        <a href="/" style="color:#2299dd;text-decoration:none;display:block;margin-bottom:20px;font-size:14px;" data-i18n="login-home">&#x1F3E0; &#x2190; 回首頁</a>
+        <div class="form-title" data-i18n="register-title">📝 註冊帳號</div>
+        <div class="form-subtitle" data-i18n="register-subtitle">升級為正式會員，保存你的學習紀錄</div>
 
         @if (ViewBag.Error != null)
         {
@@ -116,18 +116,18 @@
 
         <form method="post" action="/Account/Register" id="registerForm">
             <div class="form-group">
-                <label>暱稱</label>
+                <label data-i18n="login-nickname">暱稱</label>
                 <input type="text" name="nickname" placeholder="輸入你的暱稱" required maxlength="30" />
             </div>
             <div class="form-group">
-                <label>Email</label>
+                <label data-i18n="login-email">Email</label>
                 <div style="position:relative;">
                     <input type="password" name="email" placeholder="輸入您的 Email" required style="padding-right:40px;" />
                     <button type="button" onclick="toggleEmail(this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;cursor:pointer;">👁️</button>
                 </div>
                 <div style="font-size:12px;color:#8b949e;margin-top:6px;">💡 Email 不會公開顯示，僅用於登入驗證</div>
             </div>
-            <button type="submit" class="btn-submit">註冊</button>
+            <button type="submit" class="btn-submit" data-i18n="register-btn">註冊</button>
         </form>
         <script>
         function toggleEmail(btn) {
@@ -143,12 +143,13 @@
         </script>
 
         <div class="links">
-            已有帳號？<a href="/Account/Login">登入</a>
+            <span data-i18n="register-has-account">已有帳號？</span><a href="/Account/Login" data-i18n="register-login">登入</a>
             &nbsp;|&nbsp;
-            <a href="/">回首頁</a>
+            <a href="/" data-i18n="login-home">回首頁</a>
         </div>
     </div>
 
+    <script src="/js/site.js"></script>
     <script>
     // If there's a registration error, clear the email (password) field so user can retype
     (function(){
