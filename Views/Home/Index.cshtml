@@ -62,13 +62,13 @@
                 <div style="flex-shrink:0;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#00b894,#6366f1);display:flex;align-items:center;justify-content:center;font-size:24px;">👋</div>
                 <div style="flex:1;min-width:280px;">
                     <h2 style="font-size:1.3rem;font-weight:700;margin:0 0 12px 0;color:var(--text);" data-i18n="dev-title">嗨！我是 Mike，歡迎來到 DevLearn</h2>
-                    <p style="color:var(--text-muted);line-height:1.8;margin:0 0 16px 0;font-size:0.92rem;">
+                    <p style="color:var(--text-muted);line-height:1.8;margin:0 0 16px 0;font-size:0.92rem;" data-i18n="dev-p1">
                         這個平台是我的 Side Project，起因很簡單——<strong style="color:var(--accent);">學程式不應該無聊</strong>。
                         傳統的教學網站通常只有文字和程式碼，缺少互動和樂趣。所以我想做一個結合
                         <strong style="color:#6366f1;">遊戲化學習</strong>、<strong style="color:#6366f1;">老師媒合</strong>、
                         <strong style="color:#6366f1;">即時社群</strong>的學習平台，讓大家能邊玩邊學。
                     </p>
-                    <p style="color:var(--text-muted);line-height:1.8;margin:0 0 16px 0;font-size:0.92rem;">
+                    <p style="color:var(--text-muted);line-height:1.8;margin:0 0 16px 0;font-size:0.92rem;" data-i18n="dev-p2">
                         🤖 整個網站是我用 <strong style="color:var(--accent);">Claude Code（AI 輔助開發工具）</strong>從零打造的，
                         包括 93+ 章教學內容、12 種遊戲玩法、老師預約系統、即時聊天室，全部在短時間內完成。
                         這也證明了——善用 AI 工具，一個人也能做出完整的產品。
@@ -76,18 +76,17 @@
                     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
                         <span style="background:rgba(0,184,148,0.15);color:#00b894;padding:3px 10px;border-radius:20px;font-size:0.75rem;">ASP.NET Core 8</span>
                         <span style="background:rgba(99,102,241,0.15);color:#818cf8;padding:3px 10px;border-radius:20px;font-size:0.75rem;">PostgreSQL</span>
-                        <span style="background:rgba(249,168,37,0.15);color:#F9A825;padding:3px 10px;border-radius:20px;font-size:0.75rem;">SignalR 即時通訊</span>
-                        <span style="background:rgba(233,30,99,0.15);color:#E91E63;padding:3px 10px;border-radius:20px;font-size:0.75rem;">Azure 雲端</span>
+                        <span style="background:rgba(249,168,37,0.15);color:#F9A825;padding:3px 10px;border-radius:20px;font-size:0.75rem;">SignalR <span data-i18n="dev-signalr">即時通訊</span></span>
+                        <span style="background:rgba(233,30,99,0.15);color:#E91E63;padding:3px 10px;border-radius:20px;font-size:0.75rem;">Azure <span data-i18n="dev-azure">雲端</span></span>
                         <span style="background:rgba(0,188,212,0.15);color:#00BCD4;padding:3px 10px;border-radius:20px;font-size:0.75rem;">Claude Code AI</span>
                     </div>
-                    <p style="color:var(--text-muted);line-height:1.8;margin:0 0 12px 0;font-size:0.92rem;">
-                        🎥 試試左下角的<strong style="color:#8b5cf6;">「手勢控制」</strong>和<strong style="color:#ef4444;">「語音控制」</strong>！用手勢操控頁面，或直接說「找 LINQ」「下一章」「回首頁」就能導航。電腦用手勢、手機用頭部，還有語音指令。所有運算在本地完成，完全隱私安全。
+                    <p style="color:var(--text-muted);line-height:1.8;margin:0 0 12px 0;font-size:0.92rem;" data-i18n="dev-p3">
+                        🎥 試試左下角的「手勢控制」和「語音控制」！用手勢操控頁面，或直接說「找 LINQ」「下一章」「回首頁」就能導航。電腦用手勢、手機用頭部，還有語音指令。所有運算在本地完成，完全隱私安全。
                     </p>
-                    <p style="color:var(--text-muted);line-height:1.8;margin:0 0 12px 0;font-size:0.92rem;">
-                        📞 如果你在使用過程中遇到任何問題，或有想要的功能，歡迎透過右下角聊天室的<strong style="color:var(--accent);">「客服」分頁</strong>告訴我！
-                        每一條建議我都會認真看。
+                    <p style="color:var(--text-muted);line-height:1.8;margin:0 0 12px 0;font-size:0.92rem;" data-i18n="dev-p4">
+                        📞 如果你在使用過程中遇到任何問題，或有想要的功能，歡迎透過右下角聊天室的「客服」分頁告訴我！每一條建議我都會認真看。
                     </p>
-                    <p style="color:var(--text);font-size:0.95rem;margin:0;font-weight:600;">
+                    <p style="color:var(--text);font-size:0.95rem;margin:0;font-weight:600;" data-i18n="dev-p5">
                         沒有壓力，按自己的節奏學習就好。希望大家在這裡開心學程式，一起成長！🚀
                     </p>
                     <p style="color:var(--text-muted);font-size:0.82rem;margin:12px 0 0 0;text-align:right;" data-i18n="dev-signature">
@@ -227,8 +226,8 @@
                     <div class="path-icon">@cp.Icon</div>
                     <h3>@cp.Name</h3>
                     <p class="path-desc">@cp.Desc</p>
-                    <div class="path-meta">@chapters.Count 個章節</div>
-                    <a href="/Home/Chapter/@(chapters.FirstOrDefault()?.Slug ?? "#")" class="path-start-btn">開始 →</a>
+                    <div class="path-meta">@chapters.Count <span data-i18n="home-chapters-unit">個章節</span></div>
+                    <a href="/Home/Chapter/@(chapters.FirstOrDefault()?.Slug ?? "#")" class="path-start-btn" data-i18n="home-start-btn">開始 →</a>
                 </div>
                 @if (i < corePath.Length - 1)
                 {
@@ -251,20 +250,21 @@
                         <div class="cat-icon-wrap">@cp.Icon</div>
                         <div>
                             <h2>@cp.Name</h2>
-                            <small>@chapters.Count 個章節 · STEP @(i + 1)</small>
+                            <small>@chapters.Count <span data-i18n="home-chapters-unit">個章節</span> · STEP @(i + 1)</small>
                         </div>
-                        <a href="/Note/DownloadAll/@cp.Key" class="dl-all-btn">📥 筆記</a>
+                        <a href="/Note/DownloadAll/@cp.Key" class="dl-all-btn">📥 <span data-i18n="home-note-btn">筆記</span></a>
                     </div>
                     <ul class="chapter-list">
                         @foreach (var ch in chapters)
                         {
                             string label = ch.Level switch { "beginner" => "初學", "intermediate" => "中級", "advanced" => "進階", _ => "" };
                             string cls   = ch.Level switch { "beginner" => "badge-green", "intermediate" => "badge-blue", "advanced" => "badge-red", _ => "" };
+                            string i18nLevel = "ch-level-" + ch.Level;
                             <li>
                                 <a href="/Home/Chapter/@ch.Slug" class="chapter-link">
                                     <span class="ch-icon">@ch.Icon</span>
                                     <span class="ch-title">@ch.Title</span>
-                                    <span class="badge @cls">@label</span>
+                                    <span class="badge @cls" data-i18n="@i18nLevel">@label</span>
                                     <span class="ch-arrow">›</span>
                                 </a>
                             </li>
@@ -292,20 +292,21 @@
                         <div class="cat-icon-wrap">@mod.Value.Icon</div>
                         <div>
                             <h2>@mod.Value.Name</h2>
-                            <small>@chapters.Count 個章節</small>
+                            <small>@chapters.Count <span data-i18n="home-chapters-unit">個章節</span></small>
                         </div>
-                        <a href="/Note/DownloadAll/@mod.Key" class="dl-all-btn">📥 筆記</a>
+                        <a href="/Note/DownloadAll/@mod.Key" class="dl-all-btn">📥 <span data-i18n="home-note-btn">筆記</span></a>
                     </div>
                     <ul class="chapter-list">
                         @foreach (var ch in chapters)
                         {
                             string label = ch.Level switch { "beginner" => "初學", "intermediate" => "中級", "advanced" => "進階", _ => "" };
                             string cls   = ch.Level switch { "beginner" => "badge-green", "intermediate" => "badge-blue", "advanced" => "badge-red", _ => "" };
+                            string i18nLevel = "ch-level-" + ch.Level;
                             <li>
                                 <a href="/Home/Chapter/@ch.Slug" class="chapter-link">
                                     <span class="ch-icon">@ch.Icon</span>
                                     <span class="ch-title">@ch.Title</span>
-                                    <span class="badge @cls">@label</span>
+                                    <span class="badge @cls" data-i18n="@i18nLevel">@label</span>
                                     <span class="ch-arrow">›</span>
                                 </a>
                             </li>
@@ -502,12 +503,12 @@ loadIdeaWall();
         .then(posts => {
             var grid = document.getElementById('teacherPostsGrid');
             if (!posts || posts.length === 0) {
-                grid.innerHTML = '<div style="color:var(--text-muted);font-size:13px;">目前還沒有老師分享內容</div>';
+                grid.innerHTML = '<div style="color:var(--text-muted);font-size:13px;">' + __t('home-posts-empty') + '</div>';
                 return;
             }
             var html = '';
             posts.forEach(function(p) {
-                var typeName = p.type === 'video' ? '&#x1F3AC; 影片' : p.type === 'resource' ? '&#x1F4E6; 資源' : '&#x1F4DD; 文章';
+                var typeName = p.type === 'video' ? '🎬 ' + __t('home-post-video') : p.type === 'resource' ? '📦 ' + __t('home-post-resource') : '📝 ' + __t('home-post-article');
                 html += '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;transition:border-color 0.2s;cursor:pointer;" onclick="window.location.href=\'/Teacher/Detail/' + p.teacherId + '\'">';
                 html += '  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
                 html += '    <span style="font-size:11px;padding:2px 10px;border-radius:10px;background:rgba(99,102,241,0.1);color:var(--accent);">' + typeName + '</span>';
@@ -516,16 +517,16 @@ loadIdeaWall();
                 html += '  <div style="font-size:15px;font-weight:700;margin-bottom:8px;">' + p.title + '</div>';
                 html += '  <div style="font-size:13px;color:var(--text-muted);line-height:1.5;margin-bottom:12px;">' + p.preview + '</div>';
                 html += '  <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-muted);">';
-                html += '    <span>&#x1F468;&#x200D;&#x1F3EB; ' + p.teacherName + '</span>';
-                html += '    <span>&#x2764;&#xFE0F; ' + p.likes + ' 讚</span>';
+                html += '    <span>👨‍🏫 ' + p.teacherName + '</span>';
+                html += '    <span>❤️ ' + p.likes + ' ' + __t('home-post-likes') + '</span>';
                 html += '  </div>';
-                html += '  <div style="margin-top:10px;text-align:right;"><span style="font-size:13px;color:var(--accent);">閱讀更多 &rarr;</span></div>';
+                html += '  <div style="margin-top:10px;text-align:right;"><span style="font-size:13px;color:var(--accent);">' + __t('home-read-more') + ' &rarr;</span></div>';
                 html += '</div>';
             });
             grid.innerHTML = html;
         })
         .catch(function() {
-            document.getElementById('teacherPostsGrid').innerHTML = '<div style="color:var(--text-muted);font-size:13px;">載入失敗</div>';
+            document.getElementById('teacherPostsGrid').innerHTML = '<div style="color:var(--text-muted);font-size:13px;">' + __t('home-load-failed') + '</div>';
         });
 })();
 </script>
