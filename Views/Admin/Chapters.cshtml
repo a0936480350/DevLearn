@@ -70,37 +70,38 @@
     <button class="mobile-menu-btn" style="display:none;position:fixed;top:10px;left:10px;z-index:9997;background:#e94560;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:20px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.3);" onclick="document.querySelector('.sidebar').classList.toggle('open');document.querySelector('.mobile-overlay').classList.toggle('open');">&#9776;</button>
     <div class="mobile-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('open');"></div>
     <nav class="sidebar">
-        <div class="sidebar-brand"><div class="logo">&#x1F6E1;&#xFE0F;</div><div class="title">管理後台</div></div>
-        <a href="/"><span class="icon">&#x1F3E0;</span><span>回首頁</span></a>
-        <a href="@Url.Action("Dashboard")"><span class="icon">&#x1F4CA;</span><span>總覽</span></a>
-        <a href="@Url.Action("Users")"><span class="icon">&#x1F465;</span><span>使用者管理</span></a>
-        <a href="@Url.Action("Teachers")"><span class="icon">&#x1F468;&#x200D;&#x1F3EB;</span><span>老師管理</span></a>
-        <a href="@Url.Action("Bookings")"><span class="icon">&#x1F4C5;</span><span>預約管理</span></a>
-        <a href="@Url.Action("Chapters")" class="active"><span class="icon">&#x1F4D6;</span><span>章節管理</span></a>
-        <a href="@Url.Action("Questions")"><span class="icon">&#x2753;</span><span>題庫管理</span></a>
-        <a href="@Url.Action("Quizzes")"><span class="icon">&#x1F4DD;</span><span>測驗紀錄</span></a>
-        <a href="@Url.Action("Ideas")"><span class="icon">&#x1F4A1;</span><span>想法分享</span></a>
-        <a href="@Url.Action("ChatMessages")"><span class="icon">&#x1F4AC;</span><span>聊天紀錄</span></a>
-        <a href="@Url.Action("BugChallenges")"><span class="icon">&#x1F41B;</span><span>偵探遊戲</span></a>
-        <a href="@Url.Action("SpeedRuns")"><span class="icon">&#x26A1;</span><span>速度挑戰</span></a>
-        <a href="@Url.Action("DailyChallenges")"><span class="icon">&#x1F4C5;</span><span>每日一題</span></a>
-        <a href="@Url.Action("ArenaSubmissions")"><span class="icon">&#x1F3C6;</span><span>擂台管理</span></a>
-        <a href="@Url.Action("StudyBuddies")"><span class="icon">&#x1F91D;</span><span>學習夥伴</span></a>
-        <a href="@Url.Action("AuditLogs")"><span class="icon">&#x1F4CB;</span><span>操作紀錄</span></a>
-        <a href="@Url.Action("SupportTickets")"><span class="icon">&#x1F4DE;</span><span>客服工單</span></a>
-        <a href="@Url.Action("ErrorLogs")"><span class="icon">&#x1F6A8;</span><span>錯誤日誌</span></a>
-        <a href="@Url.Action("AIWorkLogs")"><span class="icon">&#x1F916;</span><span>AI 工作紀錄</span></a>
-        <a href="@Url.Action("Logout")" class="logout"><span class="icon">&#x1F6AA;</span><span>登出</span></a>
+        <div class="sidebar-brand"><div class="logo">&#x1F6E1;&#xFE0F;</div><div class="title" data-i18n="admin-sidebar-title">管理後台</div></div>
+    <div style="padding:8px 16px 4px;"><select id="langSelect" onchange="changeLang(this.value)" style="width:100%;padding:6px 10px;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#eee;font-size:13px;"><option value="zh">中文</option><option value="en">EN</option><option value="ja">日本語</option></select></div>
+        <a href="/"><span class="icon">&#x1F3E0;</span><span data-i18n="admin-sidebar-home">回首頁</span></a>
+        <a href="@Url.Action("Dashboard")"><span class="icon">&#x1F4CA;</span><span data-i18n="admin-sidebar-dashboard">總覽</span></a>
+        <a href="@Url.Action("Users")"><span class="icon">&#x1F465;</span><span data-i18n="admin-sidebar-users">使用者管理</span></a>
+        <a href="@Url.Action("Teachers")"><span class="icon">&#x1F468;&#x200D;&#x1F3EB;</span><span data-i18n="admin-sidebar-teachers">老師管理</span></a>
+        <a href="@Url.Action("Bookings")"><span class="icon">&#x1F4C5;</span><span data-i18n="admin-sidebar-bookings">預約管理</span></a>
+        <a href="@Url.Action("Chapters")" class="active"><span class="icon">&#x1F4D6;</span><span data-i18n="admin-sidebar-chapters">章節管理</span></a>
+        <a href="@Url.Action("Questions")"><span class="icon">&#x2753;</span><span data-i18n="admin-sidebar-questions">題庫管理</span></a>
+        <a href="@Url.Action("Quizzes")"><span class="icon">&#x1F4DD;</span><span data-i18n="admin-sidebar-quizzes">測驗紀錄</span></a>
+        <a href="@Url.Action("Ideas")"><span class="icon">&#x1F4A1;</span><span data-i18n="admin-sidebar-ideas">想法分享</span></a>
+        <a href="@Url.Action("ChatMessages")"><span class="icon">&#x1F4AC;</span><span data-i18n="admin-sidebar-chat">聊天紀錄</span></a>
+        <a href="@Url.Action("BugChallenges")"><span class="icon">&#x1F41B;</span><span data-i18n="admin-sidebar-bug">偵探遊戲</span></a>
+        <a href="@Url.Action("SpeedRuns")"><span class="icon">&#x26A1;</span><span data-i18n="admin-sidebar-speed">速度挑戰</span></a>
+        <a href="@Url.Action("DailyChallenges")"><span class="icon">&#x1F4C5;</span><span data-i18n="admin-sidebar-daily">每日一題</span></a>
+        <a href="@Url.Action("ArenaSubmissions")"><span class="icon">&#x1F3C6;</span><span data-i18n="admin-sidebar-arena">擂台管理</span></a>
+        <a href="@Url.Action("StudyBuddies")"><span class="icon">&#x1F91D;</span><span data-i18n="admin-sidebar-buddy">學習夥伴</span></a>
+        <a href="@Url.Action("AuditLogs")"><span class="icon">&#x1F4CB;</span><span data-i18n="admin-sidebar-audit">操作紀錄</span></a>
+        <a href="@Url.Action("SupportTickets")"><span class="icon">&#x1F4DE;</span><span data-i18n="admin-sidebar-support">客服工單</span></a>
+        <a href="@Url.Action("ErrorLogs")"><span class="icon">&#x1F6A8;</span><span data-i18n="admin-sidebar-error">錯誤日誌</span></a>
+        <a href="@Url.Action("AIWorkLogs")"><span class="icon">&#x1F916;</span><span data-i18n="admin-sidebar-ai">AI 工作紀錄</span></a>
+        <a href="@Url.Action("Logout")" class="logout"><span class="icon">&#x1F6AA;</span><span data-i18n="admin-sidebar-logout">登出</span></a>
     </nav>
     <div class="main">
-        <div class="page-title">&#x1F4D6; 章節管理</div>
+        <div class="page-title">&#x1F4D6; <span data-i18n="admin-chapters-title">章節管理</span></div>
         <div style="margin-bottom:16px;">
-            <a href="/Admin/CreateChapter" style="display:inline-block;padding:10px 24px;background:#e94560;color:#fff;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;transition:all 0.2s;">&#x2795; 新增章節</a>
+            <a href="/Admin/CreateChapter" style="display:inline-block;padding:10px 24px;background:#e94560;color:#fff;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;transition:all 0.2s;"><span data-i18n="admin-chapters-btn-new">&#x2795; 新增章節</span></a>
         </div>
         <div class="card">
             <div style="overflow-x:auto;">
                 <table class="admin-table">
-                    <thead><tr><th>ID</th><th>標題</th><th>分類</th><th>等級</th><th>排序</th><th>完成率</th><th>狀態</th><th>操作</th></tr></thead>
+                    <thead><tr><th>ID</th><th data-i18n="admin-chapters-col-title">標題</th><th data-i18n="admin-chapters-col-category">分類</th><th data-i18n="admin-chapters-col-level">等級</th><th data-i18n="admin-chapters-col-order">排序</th><th data-i18n="admin-chapters-col-completion">完成率</th><th data-i18n="admin-chapters-col-status">狀態</th><th data-i18n="admin-chapters-col-actions">操作</th></tr></thead>
                     <tbody>
                         @foreach (var ch in chapters)
                         {
@@ -118,9 +119,9 @@
                                 </td>
                                 <td id="chapter-status-@ch.Id">
                                     @if (ch.IsPublished)
-                                    { <span style="color:#4CAF50;font-weight:600;">已發布</span> }
+                                    { <span style="color:#4CAF50;font-weight:600;" data-i18n="admin-chapters-status-published">已發布</span> }
                                     else
-                                    { <span style="color:#FF9800;font-weight:600;">已隱藏</span> }
+                                    { <span style="color:#FF9800;font-weight:600;" data-i18n="admin-chapters-status-hidden">已隱藏</span> }
                                 </td>
                                 <td>
                                     <a href="/Admin/EditChapter/@ch.Id" style="padding:3px 10px;border-radius:6px;border:1px solid rgba(34,153,221,0.4);background:transparent;color:#2299dd;font-size:12px;cursor:pointer;margin-right:4px;text-decoration:none;display:inline-block;">&#x270F;&#xFE0F; 編輯</a>
@@ -140,18 +141,18 @@
     </div>
     <script>
     async function toggleChapter(id, publish) {
-        if (!confirm(publish ? '確定要顯示此章節嗎？' : '確定要隱藏此章節嗎？')) return;
+        if (!confirm(publish ? __t('admin-confirm-show') : __t('admin-confirm-hide'))) return;
         try {
             var res = await fetch('/Admin/UpdateChapter', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({ id: id, isPublished: publish })
             });
             if (res.ok) { location.reload(); }
-            else { alert('操作失敗'); }
-        } catch(e) { alert('操作失敗'); }
+            else { alert(__t('admin-op-failed')); }
+        } catch(e) { alert(__t('admin-op-failed')); }
     }
     async function deleteChapter(id) {
-        if (!confirm('確定要刪除此章節嗎？此操作將同時刪除該章節下的所有題目，且無法復原。')) return;
+        if (!confirm(__t('admin-confirm-delete-chapter'))) return;
         try {
             var res = await fetch('/Admin/DeleteChapter', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
@@ -160,11 +161,12 @@
             if (res.ok) {
                 var row = document.getElementById('chapter-row-' + id);
                 if (row) row.remove();
-            } else { alert('刪除失敗'); }
-        } catch(e) { alert('刪除失敗'); }
+            } else { alert(__t('admin-delete-chapter-failed')); }
+        } catch(e) { alert(__t('admin-delete-chapter-failed')); }
     }
     </script>
 
 <script>document.querySelectorAll('.sidebar a').forEach(a=>{a.addEventListener('click',()=>{if(window.innerWidth<=900){document.querySelector('.sidebar').classList.remove('open');document.querySelector('.mobile-overlay').classList.remove('open');}});});</script>
+    <script src="/js/site.js"></script>
 </body>
 </html>

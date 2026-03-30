@@ -98,7 +98,7 @@
     @await Html.PartialAsync("_Navbar")
     <div class="login-card">
         <div class="login-logo">&#x1F6E1;&#xFE0F;</div>
-        <div class="login-title">管理後台</div>
+        <div class="login-title" data-i18n="admin-sidebar-title">管理後台</div>
         <div class="login-subtitle">DotNet Learning Admin Panel</div>
 
         @if (ViewBag.Error != null)
@@ -108,15 +108,16 @@
 
         <form method="post" asp-action="Login">
             <div class="form-group">
-                <label>帳號</label>
-                <input type="text" name="username" placeholder="請輸入管理帳號" required autofocus />
+                <label data-i18n="admin-login-label-account">帳號</label>
+                <input type="text" name="username" placeholder="請輸入管理帳號" data-i18n-placeholder="admin-login-ph-account" required autofocus />
             </div>
             <div class="form-group">
-                <label>密碼</label>
-                <input type="password" name="password" placeholder="請輸入密碼" required />
+                <label data-i18n="admin-login-label-password">密碼</label>
+                <input type="password" name="password" placeholder="請輸入密碼" data-i18n-placeholder="admin-login-ph-password" required />
             </div>
-            <button type="submit" class="btn-login">登入後台</button>
+            <button type="submit" class="btn-login" data-i18n="admin-login-btn">登入後台</button>
         </form>
     </div>
+    <script src="/js/site.js"></script>
 </body>
 </html>

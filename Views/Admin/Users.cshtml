@@ -93,32 +93,33 @@
     <button class="mobile-menu-btn" style="display:none;position:fixed;top:10px;left:10px;z-index:9997;background:#e94560;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:20px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.3);" onclick="document.querySelector('.sidebar').classList.toggle('open');document.querySelector('.mobile-overlay').classList.toggle('open');">&#9776;</button>
     <div class="mobile-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('open');"></div>
     <nav class="sidebar">
-        <div class="sidebar-brand"><div class="logo">&#x1F6E1;&#xFE0F;</div><div class="title">管理後台</div></div>
-        <a href="/"><span class="icon">&#x1F3E0;</span><span>回首頁</span></a>
-        <a href="@Url.Action("Dashboard")"><span class="icon">&#x1F4CA;</span><span>總覽</span></a>
-        <a href="@Url.Action("Users")" class="active"><span class="icon">&#x1F465;</span><span>使用者管理</span></a>
-        <a href="@Url.Action("Teachers")"><span class="icon">&#x1F468;&#x200D;&#x1F3EB;</span><span>老師管理</span></a>
-        <a href="@Url.Action("Bookings")"><span class="icon">&#x1F4C5;</span><span>預約管理</span></a>
-        <a href="@Url.Action("Chapters")"><span class="icon">&#x1F4D6;</span><span>章節管理</span></a>
-        <a href="@Url.Action("Questions")"><span class="icon">&#x2753;</span><span>題庫管理</span></a>
-        <a href="@Url.Action("Quizzes")"><span class="icon">&#x1F4DD;</span><span>測驗紀錄</span></a>
-        <a href="@Url.Action("Ideas")"><span class="icon">&#x1F4A1;</span><span>想法分享</span></a>
-        <a href="@Url.Action("ChatMessages")"><span class="icon">&#x1F4AC;</span><span>聊天紀錄</span></a>
-        <a href="@Url.Action("BugChallenges")"><span class="icon">&#x1F41B;</span><span>偵探遊戲</span></a>
-        <a href="@Url.Action("SpeedRuns")"><span class="icon">&#x26A1;</span><span>速度挑戰</span></a>
-        <a href="@Url.Action("DailyChallenges")"><span class="icon">&#x1F4C5;</span><span>每日一題</span></a>
-        <a href="@Url.Action("ArenaSubmissions")"><span class="icon">&#x1F3C6;</span><span>擂台管理</span></a>
-        <a href="@Url.Action("StudyBuddies")"><span class="icon">&#x1F91D;</span><span>學習夥伴</span></a>
-        <a href="@Url.Action("AuditLogs")"><span class="icon">&#x1F4CB;</span><span>操作紀錄</span></a>
-        <a href="@Url.Action("SupportTickets")"><span class="icon">&#x1F4DE;</span><span>客服工單</span></a>
-        <a href="@Url.Action("ErrorLogs")"><span class="icon">&#x1F6A8;</span><span>錯誤日誌</span></a>
-        <a href="@Url.Action("AIWorkLogs")"><span class="icon">&#x1F916;</span><span>AI 工作紀錄</span></a>
-        <a href="@Url.Action("Logout")" class="logout"><span class="icon">&#x1F6AA;</span><span>登出</span></a>
+        <div class="sidebar-brand"><div class="logo">&#x1F6E1;&#xFE0F;</div><div class="title" data-i18n="admin-sidebar-title">管理後台</div></div>
+    <div style="padding:8px 16px 4px;"><select id="langSelect" onchange="changeLang(this.value)" style="width:100%;padding:6px 10px;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#eee;font-size:13px;"><option value="zh">中文</option><option value="en">EN</option><option value="ja">日本語</option></select></div>
+        <a href="/"><span class="icon">&#x1F3E0;</span><span data-i18n="admin-sidebar-home">回首頁</span></a>
+        <a href="@Url.Action("Dashboard")"><span class="icon">&#x1F4CA;</span><span data-i18n="admin-sidebar-dashboard">總覽</span></a>
+        <a href="@Url.Action("Users")" class="active"><span class="icon">&#x1F465;</span><span data-i18n="admin-sidebar-users">使用者管理</span></a>
+        <a href="@Url.Action("Teachers")"><span class="icon">&#x1F468;&#x200D;&#x1F3EB;</span><span data-i18n="admin-sidebar-teachers">老師管理</span></a>
+        <a href="@Url.Action("Bookings")"><span class="icon">&#x1F4C5;</span><span data-i18n="admin-sidebar-bookings">預約管理</span></a>
+        <a href="@Url.Action("Chapters")"><span class="icon">&#x1F4D6;</span><span data-i18n="admin-sidebar-chapters">章節管理</span></a>
+        <a href="@Url.Action("Questions")"><span class="icon">&#x2753;</span><span data-i18n="admin-sidebar-questions">題庫管理</span></a>
+        <a href="@Url.Action("Quizzes")"><span class="icon">&#x1F4DD;</span><span data-i18n="admin-sidebar-quizzes">測驗紀錄</span></a>
+        <a href="@Url.Action("Ideas")"><span class="icon">&#x1F4A1;</span><span data-i18n="admin-sidebar-ideas">想法分享</span></a>
+        <a href="@Url.Action("ChatMessages")"><span class="icon">&#x1F4AC;</span><span data-i18n="admin-sidebar-chat">聊天紀錄</span></a>
+        <a href="@Url.Action("BugChallenges")"><span class="icon">&#x1F41B;</span><span data-i18n="admin-sidebar-bug">偵探遊戲</span></a>
+        <a href="@Url.Action("SpeedRuns")"><span class="icon">&#x26A1;</span><span data-i18n="admin-sidebar-speed">速度挑戰</span></a>
+        <a href="@Url.Action("DailyChallenges")"><span class="icon">&#x1F4C5;</span><span data-i18n="admin-sidebar-daily">每日一題</span></a>
+        <a href="@Url.Action("ArenaSubmissions")"><span class="icon">&#x1F3C6;</span><span data-i18n="admin-sidebar-arena">擂台管理</span></a>
+        <a href="@Url.Action("StudyBuddies")"><span class="icon">&#x1F91D;</span><span data-i18n="admin-sidebar-buddy">學習夥伴</span></a>
+        <a href="@Url.Action("AuditLogs")"><span class="icon">&#x1F4CB;</span><span data-i18n="admin-sidebar-audit">操作紀錄</span></a>
+        <a href="@Url.Action("SupportTickets")"><span class="icon">&#x1F4DE;</span><span data-i18n="admin-sidebar-support">客服工單</span></a>
+        <a href="@Url.Action("ErrorLogs")"><span class="icon">&#x1F6A8;</span><span data-i18n="admin-sidebar-error">錯誤日誌</span></a>
+        <a href="@Url.Action("AIWorkLogs")"><span class="icon">&#x1F916;</span><span data-i18n="admin-sidebar-ai">AI 工作紀錄</span></a>
+        <a href="@Url.Action("Logout")" class="logout"><span class="icon">&#x1F6AA;</span><span data-i18n="admin-sidebar-logout">登出</span></a>
     </nav>
     <div class="main">
-        <div class="page-title">&#x1F465; 使用者管理</div>
+        <div class="page-title">&#x1F465; <span data-i18n="admin-users-title">使用者管理</span></div>
         <form class="search-bar" method="get" asp-action="Users">
-            <input type="text" name="search" placeholder="搜尋暱稱..." value="@ViewBag.Search" />
+            <input type="text" name="search" placeholder="搜尋暱稱..." data-i18n-placeholder="admin-users-search-placeholder" value="@ViewBag.Search" />
             <button type="submit">搜尋</button>
         </form>
         <!-- SiteUsers with Role Management -->
@@ -126,7 +127,7 @@
             <h3 style="margin-bottom:12px;color:#F9A825;font-size:16px;">&#x1F6E1;&#xFE0F; &#x7528;&#x6236;&#x89D2;&#x8272;&#x7BA1;&#x7406; (SiteUsers: @siteUsers.Count)</h3>
             <div style="overflow-x:auto;">
                 <table class="admin-table">
-                    <thead><tr><th>ID</th><th>&#x66B1;&#x7A31;</th><th>Email</th><th>&#x89D2;&#x8272;</th><th>&#x72C0;&#x614B;</th><th>&#x8A3B;&#x518A;</th><th>&#x6700;&#x5F8C;&#x6D3B;&#x52D5;</th><th>&#x64CD;&#x4F5C;</th></tr></thead>
+                    <thead><tr><th>ID</th><th>暱稱</th><th>Email</th><th data-i18n="admin-users-col-role">角色</th><th data-i18n="admin-users-col-status">狀態</th><th>註冊</th><th>最後活動</th><th data-i18n="admin-users-col-actions">操作</th></tr></thead>
                     <tbody>
                         @foreach (var u in siteUsers)
                         {
@@ -194,7 +195,7 @@
             <h3 style="margin-bottom:12px;color:#F9A825;font-size:16px;">&#x1F4CA; &#x5B78;&#x7FD2;&#x6D3B;&#x52D5;&#x7D71;&#x8A08; (UserProfiles: @users.Count)</h3>
             <div style="overflow-x:auto;">
                 <table class="admin-table">
-                    <thead><tr><th>ID</th><th>&#x5DE5;&#x4F5C;&#x968E;&#x6BB5;</th><th>&#x66B1;&#x7A31;</th><th>&#x7E3D;&#x5206;</th><th>&#x6E2C;&#x9A57;&#x6578;</th><th>&#x5B8C;&#x6210;&#x7AE0;&#x7BC0;</th><th>&#x7B49;&#x7D1A;</th><th>&#x6700;&#x5F8C;&#x6D3B;&#x52D5;</th><th>&#x64CD;&#x4F5C;</th></tr></thead>
+                    <thead><tr><th>ID</th><th>工作階段</th><th data-i18n="admin-users-col-nickname">暱稱</th><th data-i18n="admin-users-col-points">總分</th><th>測驗數</th><th>完成章節</th><th data-i18n="admin-users-col-level">等級</th><th>最後活動</th><th data-i18n="admin-users-col-actions">操作</th></tr></thead>
                     <tbody>
                         @foreach (var u in users)
                         {
@@ -222,7 +223,7 @@
     </div>
     <script>
     async function deleteUser(id) {
-        if (!confirm('\u78BA\u5B9A\u8981\u522A\u9664\u6B64\u4F7F\u7528\u8005\u55CE\uFF1F\u6B64\u64CD\u4F5C\u7121\u6CD5\u5FA9\u539F\u3002')) return;
+        if (!confirm(__t('admin-confirm-delete'))) return;
         try {
             var res = await fetch('/Admin/DeleteUser', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
@@ -231,12 +232,12 @@
             if (res.ok) {
                 var row = document.getElementById('user-row-' + id);
                 if (row) row.remove();
-            } else { alert('\u522A\u9664\u5931\u6557'); }
-        } catch(e) { alert('\u522A\u9664\u5931\u6557'); }
+            } else { alert(__t('admin-delete-failed')); }
+        } catch(e) { alert(__t('admin-delete-failed')); }
     }
 
     async function changeRole(id, newRole) {
-        if (!confirm('\u78BA\u5B9A\u8981\u5C07\u6B64\u7528\u6236\u89D2\u8272\u8B8A\u66F4\u70BA ' + newRole + ' \u55CE\uFF1F')) {
+        if (!confirm(__t('admin-confirm-change-role') + ' ' + newRole + '?')) {
             // Revert select
             location.reload();
             return;
@@ -248,8 +249,8 @@
             });
             if (res.ok) {
                 location.reload();
-            } else { alert('\u8B8A\u66F4\u89D2\u8272\u5931\u6557'); location.reload(); }
-        } catch(e) { alert('\u8B8A\u66F4\u89D2\u8272\u5931\u6557'); location.reload(); }
+            } else { alert(__t('admin-role-change-failed')); location.reload(); }
+        } catch(e) { alert(__t('admin-role-change-failed')); location.reload(); }
     }
 
     var banTargetId = 0;
@@ -273,11 +274,11 @@
             if (res.ok) {
                 closeBanModal();
                 location.reload();
-            } else { alert('\u5C01\u9396\u5931\u6557'); }
-        } catch(e) { alert('\u5C01\u9396\u5931\u6557'); }
+            } else { alert(__t('admin-ban-failed')); }
+        } catch(e) { alert(__t('admin-ban-failed')); }
     }
     async function unbanUser(id) {
-        if (!confirm('\u78BA\u5B9A\u8981\u89E3\u9664\u6B64\u7528\u6236\u7684\u5C01\u9396\u55CE\uFF1F')) return;
+        if (!confirm(__t('admin-confirm-unban'))) return;
         try {
             var res = await fetch('/Admin/BanUser', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
@@ -285,11 +286,12 @@
             });
             if (res.ok) {
                 location.reload();
-            } else { alert('\u89E3\u5C01\u5931\u6557'); }
-        } catch(e) { alert('\u89E3\u5C01\u5931\u6557'); }
+            } else { alert(__t('admin-unban-failed')); }
+        } catch(e) { alert(__t('admin-unban-failed')); }
     }
     </script>
 
 <script>document.querySelectorAll('.sidebar a').forEach(a=>{a.addEventListener('click',()=>{if(window.innerWidth<=900){document.querySelector('.sidebar').classList.remove('open');document.querySelector('.mobile-overlay').classList.remove('open');}});});</script>
+    <script src="/js/site.js"></script>
 </body>
 </html>

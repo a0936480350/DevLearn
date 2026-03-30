@@ -85,56 +85,57 @@
     <button class="mobile-menu-btn" style="display:none;position:fixed;top:10px;left:10px;z-index:9997;background:#e94560;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:20px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.3);" onclick="document.querySelector('.sidebar').classList.toggle('open');document.querySelector('.mobile-overlay').classList.toggle('open');">&#9776;</button>
     <div class="mobile-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('open');"></div>
     <nav class="sidebar">
-        <div class="sidebar-brand"><div class="logo">&#x1F6E1;&#xFE0F;</div><div class="title">管理後台</div></div>
-        <a href="/"><span class="icon">&#x1F3E0;</span><span>回首頁</span></a>
-        <a href="@Url.Action("Dashboard")"><span class="icon">&#x1F4CA;</span><span>總覽</span></a>
-        <a href="@Url.Action("Users")"><span class="icon">&#x1F465;</span><span>使用者管理</span></a>
-        <a href="@Url.Action("Teachers")"><span class="icon">&#x1F468;&#x200D;&#x1F3EB;</span><span>老師管理</span></a>
-        <a href="@Url.Action("Bookings")"><span class="icon">&#x1F4C5;</span><span>預約管理</span></a>
-        <a href="@Url.Action("Chapters")" class="active"><span class="icon">&#x1F4D6;</span><span>章節管理</span></a>
-        <a href="@Url.Action("Questions")"><span class="icon">&#x2753;</span><span>題庫管理</span></a>
-        <a href="@Url.Action("Quizzes")"><span class="icon">&#x1F4DD;</span><span>測驗紀錄</span></a>
-        <a href="@Url.Action("Ideas")"><span class="icon">&#x1F4A1;</span><span>想法分享</span></a>
-        <a href="@Url.Action("ChatMessages")"><span class="icon">&#x1F4AC;</span><span>聊天紀錄</span></a>
-        <a href="@Url.Action("BugChallenges")"><span class="icon">&#x1F41B;</span><span>偵探遊戲</span></a>
-        <a href="@Url.Action("SpeedRuns")"><span class="icon">&#x26A1;</span><span>速度挑戰</span></a>
-        <a href="@Url.Action("DailyChallenges")"><span class="icon">&#x1F4C5;</span><span>每日一題</span></a>
-        <a href="@Url.Action("ArenaSubmissions")"><span class="icon">&#x1F3C6;</span><span>擂台管理</span></a>
-        <a href="@Url.Action("StudyBuddies")"><span class="icon">&#x1F91D;</span><span>學習夥伴</span></a>
-        <a href="@Url.Action("AuditLogs")"><span class="icon">&#x1F4CB;</span><span>操作紀錄</span></a>
-        <a href="@Url.Action("SupportTickets")"><span class="icon">&#x1F4DE;</span><span>客服工單</span></a>
-        <a href="@Url.Action("ErrorLogs")"><span class="icon">&#x1F6A8;</span><span>錯誤日誌</span></a>
-        <a href="@Url.Action("AIWorkLogs")"><span class="icon">&#x1F916;</span><span>AI 工作紀錄</span></a>
-        <a href="@Url.Action("Logout")" class="logout"><span class="icon">&#x1F6AA;</span><span>登出</span></a>
+        <div class="sidebar-brand"><div class="logo">&#x1F6E1;&#xFE0F;</div><div class="title" data-i18n="admin-sidebar-title">管理後台</div></div>
+    <div style="padding:8px 16px 4px;"><select id="langSelect" onchange="changeLang(this.value)" style="width:100%;padding:6px 10px;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#eee;font-size:13px;"><option value="zh">中文</option><option value="en">EN</option><option value="ja">日本語</option></select></div>
+        <a href="/"><span class="icon">&#x1F3E0;</span><span data-i18n="admin-sidebar-home">回首頁</span></a>
+        <a href="@Url.Action("Dashboard")"><span class="icon">&#x1F4CA;</span><span data-i18n="admin-sidebar-dashboard">總覽</span></a>
+        <a href="@Url.Action("Users")"><span class="icon">&#x1F465;</span><span data-i18n="admin-sidebar-users">使用者管理</span></a>
+        <a href="@Url.Action("Teachers")"><span class="icon">&#x1F468;&#x200D;&#x1F3EB;</span><span data-i18n="admin-sidebar-teachers">老師管理</span></a>
+        <a href="@Url.Action("Bookings")"><span class="icon">&#x1F4C5;</span><span data-i18n="admin-sidebar-bookings">預約管理</span></a>
+        <a href="@Url.Action("Chapters")" class="active"><span class="icon">&#x1F4D6;</span><span data-i18n="admin-sidebar-chapters">章節管理</span></a>
+        <a href="@Url.Action("Questions")"><span class="icon">&#x2753;</span><span data-i18n="admin-sidebar-questions">題庫管理</span></a>
+        <a href="@Url.Action("Quizzes")"><span class="icon">&#x1F4DD;</span><span data-i18n="admin-sidebar-quizzes">測驗紀錄</span></a>
+        <a href="@Url.Action("Ideas")"><span class="icon">&#x1F4A1;</span><span data-i18n="admin-sidebar-ideas">想法分享</span></a>
+        <a href="@Url.Action("ChatMessages")"><span class="icon">&#x1F4AC;</span><span data-i18n="admin-sidebar-chat">聊天紀錄</span></a>
+        <a href="@Url.Action("BugChallenges")"><span class="icon">&#x1F41B;</span><span data-i18n="admin-sidebar-bug">偵探遊戲</span></a>
+        <a href="@Url.Action("SpeedRuns")"><span class="icon">&#x26A1;</span><span data-i18n="admin-sidebar-speed">速度挑戰</span></a>
+        <a href="@Url.Action("DailyChallenges")"><span class="icon">&#x1F4C5;</span><span data-i18n="admin-sidebar-daily">每日一題</span></a>
+        <a href="@Url.Action("ArenaSubmissions")"><span class="icon">&#x1F3C6;</span><span data-i18n="admin-sidebar-arena">擂台管理</span></a>
+        <a href="@Url.Action("StudyBuddies")"><span class="icon">&#x1F91D;</span><span data-i18n="admin-sidebar-buddy">學習夥伴</span></a>
+        <a href="@Url.Action("AuditLogs")"><span class="icon">&#x1F4CB;</span><span data-i18n="admin-sidebar-audit">操作紀錄</span></a>
+        <a href="@Url.Action("SupportTickets")"><span class="icon">&#x1F4DE;</span><span data-i18n="admin-sidebar-support">客服工單</span></a>
+        <a href="@Url.Action("ErrorLogs")"><span class="icon">&#x1F6A8;</span><span data-i18n="admin-sidebar-error">錯誤日誌</span></a>
+        <a href="@Url.Action("AIWorkLogs")"><span class="icon">&#x1F916;</span><span data-i18n="admin-sidebar-ai">AI 工作紀錄</span></a>
+        <a href="@Url.Action("Logout")" class="logout"><span class="icon">&#x1F6AA;</span><span data-i18n="admin-sidebar-logout">登出</span></a>
     </nav>
     <div class="main">
-        <div class="page-title">&#x270F;&#xFE0F; 編輯章節 #@Model.Id</div>
+        <div class="page-title">&#x270F;&#xFE0F; <span data-i18n="admin-chapter-create-title">編輯章節</span> #@Model.Id</div>
         <div class="card">
             <form method="post" action="/Admin/EditChapter/@Model.Id">
                 <input type="hidden" name="id" value="@Model.Id" />
                 <div class="form-group">
-                    <label>標題 *</label>
+                    <label data-i18n="admin-chapter-label-title">標題 *</label>
                     <input type="text" name="title" id="titleInput" required value="@Model.Title" />
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>網址代碼</label>
+                        <label data-i18n="admin-chapter-label-slug">網址代碼</label>
                         <input type="text" name="slug" id="slugInput" value="@Model.Slug" />
                     </div>
                     <div class="form-group">
-                        <label>圖示</label>
+                        <label data-i18n="admin-chapter-label-icon">圖示</label>
                         <input type="text" name="icon" value="@Model.Icon" />
                     </div>
                 </div>
                 <div class="form-row-3">
                     <div class="form-group">
-                        <label>大分類 *（可輸入新分類或選擇現有）</label>
+                        <label data-i18n="admin-chapter-label-category">大分類 *（可輸入新分類或選擇現有）</label>
                         <input type="text" name="category" list="categoryList" value="@Model.Category" required />
                         <datalist id="categoryList"></datalist>
                         <script>fetch('/Home/Categories').then(function(r){return r.json()}).then(function(cats){var dl=document.getElementById('categoryList');cats.forEach(function(c){var o=document.createElemen__t('option');o.value=c;dl.appendChild(o)})}).catch(function(){})</script>
                     </div>
                     <div class="form-group">
-                        <label>等級 *</label>
+                        <label data-i18n="admin-chapter-label-level">等級 *</label>
                         <select name="level" id="levelSelect">
                             @{
                                 var levels = new[] { "beginner", "intermediate", "advanced" };
@@ -153,7 +154,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>排序</label>
+                        <label data-i18n="admin-chapter-label-order">排序</label>
                         <input type="number" name="order" value="@Model.Order" min="0" />
                     </div>
                 </div>
@@ -167,16 +168,16 @@
                     {
                         <input type="checkbox" name="isPublished" value="true" id="isPublished" />
                     }
-                    <label for="isPublished">已發布</label>
+                    <label for="isPublished" data-i18n="admin-chapter-label-published">已發布</label>
                 </div>
                 <div class="form-group">
-                    <label>內容 (Markdown)</label>
+                    <label data-i18n="admin-chapter-label-content">內容 (Markdown)</label>
                     <textarea name="content" id="contentInput">@Model.Content</textarea>
                 </div>
                 <div class="btn-bar">
-                    <button type="submit" class="btn btn-primary">&#x1F4BE; 儲存更新</button>
-                    <button type="button" class="btn btn-secondary" onclick="togglePreview()">&#x1F441; 預覽</button>
-                    <a href="/Admin/Chapters" class="btn btn-secondary" style="text-decoration:none;text-align:center;">返回列表</a>
+                    <button type="submit" class="btn btn-primary" data-i18n="admin-chapter-btn-save-update">&#x1F4BE; 儲存更新</button>
+                    <button type="button" class="btn btn-secondary" onclick="togglePreview()" data-i18n="admin-chapter-btn-preview">&#x1F441; 預覽</button>
+                    <a href="/Admin/Chapters" class="btn btn-secondary" style="text-decoration:none;text-align:center;"><span data-i18n="admin-chapter-btn-back">返回列表</span></a>
                 </div>
             </form>
             <div class="preview-area" id="previewArea"></div>
@@ -208,5 +209,6 @@
     </script>
 
 <script>document.querySelectorAll('.sidebar a').forEach(a=>{a.addEventListener('click',()=>{if(window.innerWidth<=900){document.querySelector('.sidebar').classList.remove('open');document.querySelector('.mobile-overlay').classList.remove('open');}});});</script>
+    <script src="/js/site.js"></script>
 </body>
 </html>
