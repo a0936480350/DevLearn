@@ -2099,7 +2099,7 @@ var translations = {
         'admin-users-status-active': 'Active',
         'admin-users-status-banned': 'Banned',
         'admin-confirm-delete': 'Are you sure you want to delete this user? This action cannot be undone.',
-        'admin-confirm-change-role': 'Are you sure you want to change this user's role to',
+        'admin-confirm-change-role': "Are you sure you want to change this user's role to",
         'admin-delete-failed': 'Delete failed',
         'admin-role-change-failed': 'Role change failed',
         'admin-ban-failed': 'Ban failed',
