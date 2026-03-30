@@ -68,13 +68,13 @@
         <div class="chapter-toolbar">
             <div class="chapter-meta">
                 <span class="chapter-cat">@(categories.GetValueOrDefault(Model.Category, Model.Category))</span>
-                <span class="chapter-level level-@Model.Level">
+                <span class="chapter-level level-@Model.Level" data-i18n="@("ch-level-" + Model.Level)">
                     @(Model.Level switch { "beginner"=>"初學","intermediate"=>"中級","advanced"=>"進階",_=>Model.Level })
                 </span>
                 @if (bestScore >= 0)
                 {
                     <span class="best-score @(bestScore >= 60 ? "passed" : "failed")">
-                        最佳: @bestScore%
+                        <span data-i18n="ch-best-score">最佳: </span>@bestScore%
                     </span>
                 }
             </div>
@@ -103,7 +103,7 @@
         <div class="ideas-section">
             <h3 class="ideas-title"><span data-i18n="ch-ideas-title">💡 大家的想法</span> · <span id="ideaCount">0</span> 則</h3>
             <div id="ideaList" class="idea-list">
-                <div class="idea-loading">載入中...</div>
+                <div class="idea-loading" data-i18n="ch-idea-loading">載入中...</div>
             </div>
         </div>
 
@@ -130,7 +130,7 @@
             <button onclick="closeQuiz()" class="modal-close">✕</button>
         </div>
         <div id="quizContent">
-            <div class="quiz-loading">載入題目中...</div>
+            <div class="quiz-loading" data-i18n="ch-quiz-loading">載入題目中...</div>
         </div>
     </div>
 </div>
@@ -155,18 +155,18 @@
             <p style="color:var(--text-muted);margin-bottom:1rem;">照著範例打一遍，加深記憶！<code>// TODO</code> 的地方需要你填寫。</p>
             <div style="display:flex;gap:1rem;margin-bottom:1rem;">
                 <div style="flex:1;">
-                    <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:.3rem;">📖 範例（參考）</div>
+                    <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:.3rem;" data-i18n="ch-practice-ref-label">📖 範例（參考）</div>
                     <pre id="practiceRef" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;font-size:.82rem;max-height:400px;overflow:auto;white-space:pre-wrap;font-family:var(--font-mono);color:var(--text-muted);"></pre>
                 </div>
                 <div style="flex:1;">
-                    <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:.3rem;">✏️ 你的輸入</div>
-                    <textarea id="practiceInput" style="width:100%;min-height:400px;background:var(--bg);border:1px solid var(--accent);border-radius:8px;padding:1rem;font-size:.82rem;font-family:var(--font-mono);color:var(--text);resize:vertical;" placeholder="在這裡打程式碼..."></textarea>
+                    <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:.3rem;" data-i18n="ch-practice-input-label">✏️ 你的輸入</div>
+                    <textarea id="practiceInput" style="width:100%;min-height:400px;background:var(--bg);border:1px solid var(--accent);border-radius:8px;padding:1rem;font-size:.82rem;font-family:var(--font-mono);color:var(--text);resize:vertical;" data-i18n-placeholder="ch-practice-ph" placeholder="在這裡打程式碼..."></textarea>
                 </div>
             </div>
             <div style="display:flex;gap:.8rem;justify-content:flex-end;">
-                <button onclick="savePractice('txt')" class="btn-tool">💾 存 TXT</button>
-                <button onclick="savePractice('html')" class="btn-tool">📄 存 HTML</button>
-                <button onclick="closePractice()" class="btn-tool">關閉</button>
+                <button onclick="savePractice('txt')" class="btn-tool" data-i18n="ch-save-txt">💾 存 TXT</button>
+                <button onclick="savePractice('html')" class="btn-tool" data-i18n="ch-save-html">📄 存 HTML</button>
+                <button onclick="closePractice()" class="btn-tool" data-i18n="btn-close">關閉</button>
             </div>
         </div>
     </div>
@@ -181,9 +181,9 @@ const SESSION_ID = "@ViewBag.SessionId";
 function shareChapter() {
     var url = window.location.href;
     if (navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(function() { alert('✅ 連結已複製！'); });
+        navigator.clipboard.writeText(url).then(function() { alert(t('ch-share-copied')); });
     } else {
-        prompt('複製此連結分享：', url);
+        prompt(t('ch-share-prompt'), url);
     }
 }
 
@@ -197,7 +197,7 @@ function openPractice() {
         code += block.textContent.trim();
     });
     if (!code) {
-        code = '// 此章節沒有程式碼範例\n// 可以自由練習打字！';
+        code = t('ch-no-code');
     }
     document.getElementById('practiceRef').textContent = code;
     // 預設填入 TODO

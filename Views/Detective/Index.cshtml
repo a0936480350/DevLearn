@@ -407,18 +407,18 @@
 <div class="detective-page">
     <div class="detective-header">
         <h1 data-i18n="game-detective">🔍 程式碼偵探</h1>
-        <p>找出程式碼中的 Bug 並修復它！看看你能多快解決問題</p>
+        <p data-i18n="detective-desc">找出程式碼中的 Bug 並修復它！看看你能多快解決問題</p>
     </div>
 
     <!-- Difficulty Selector -->
     <div class="difficulty-bar">
-        <button class="diff-btn beginner active" data-diff="beginner" onclick="selectDifficulty('beginner', this)">
+        <button class="diff-btn beginner active" data-diff="beginner" onclick="selectDifficulty('beginner', this)" data-i18n="detective-diff-beginner">
             🟢 初級偵探
         </button>
-        <button class="diff-btn intermediate" data-diff="intermediate" onclick="selectDifficulty('intermediate', this)">
+        <button class="diff-btn intermediate" data-diff="intermediate" onclick="selectDifficulty('intermediate', this)" data-i18n="detective-diff-intermediate">
             🟡 中級偵探
         </button>
-        <button class="diff-btn advanced" data-diff="advanced" onclick="selectDifficulty('advanced', this)">
+        <button class="diff-btn advanced" data-diff="advanced" onclick="selectDifficulty('advanced', this)" data-i18n="detective-diff-advanced">
             🔴 高級偵探
         </button>
     </div>
@@ -427,19 +427,19 @@
     <div class="stats-bar">
         <div class="stat-card">
             <div class="stat-value" id="statSolved">0</div>
-            <div class="stat-label">已解決</div>
+            <div class="stat-label" data-i18n="detective-stat-solved">已解決</div>
         </div>
         <div class="stat-card">
             <div class="stat-value" id="statAttempted">0</div>
-            <div class="stat-label">已嘗試</div>
+            <div class="stat-label" data-i18n="detective-stat-attempted">已嘗試</div>
         </div>
         <div class="stat-card">
             <div class="stat-value" id="statAccuracy">0%</div>
-            <div class="stat-label">正確率</div>
+            <div class="stat-label" data-i18n="detective-stat-accuracy">正確率</div>
         </div>
         <div class="stat-card">
             <div class="stat-value" id="statAvgTime">0s</div>
-            <div class="stat-label">平均用時</div>
+            <div class="stat-label" data-i18n="detective-stat-avg-time">平均用時</div>
         </div>
     </div>
 
@@ -448,14 +448,14 @@
         <!-- Loading -->
         <div class="loading-spinner" id="loadingSpinner">
             <div class="spin"></div>
-            <p>正在載入題目...</p>
+            <p data-i18n="detective-loading">正在載入題目...</p>
         </div>
 
         <!-- Empty State -->
         <div class="empty-state" id="emptyState" style="display:none;">
             <div class="icon">🕵️</div>
-            <h3>準備好了嗎？</h3>
-            <p>選擇難度開始你的偵探之旅</p>
+            <h3 data-i18n="detective-empty-title">準備好了嗎？</h3>
+            <p data-i18n="detective-empty-desc">選擇難度開始你的偵探之旅</p>
         </div>
 
         <!-- Challenge Card -->
@@ -473,25 +473,25 @@
 
             <!-- Buggy Code -->
             <div class="code-section">
-                <label>🐛 有 Bug 的程式碼（找出並修復它）：</label>
+                <label data-i18n="detective-code-label">🐛 有 Bug 的程式碼（找出並修復它）：</label>
                 <pre><code class="language-csharp" id="buggyCodeBlock"></code></pre>
             </div>
 
             <!-- Answer Area -->
             <div class="answer-area">
-                <label style="display:block; font-size:0.9rem; color:#8B949E; margin-bottom:8px; font-weight:600;">
+                <label style="display:block; font-size:0.9rem; color:#8B949E; margin-bottom:8px; font-weight:600;" data-i18n="detective-answer-label">
                     ✏️ 你的修復版本：
                 </label>
-                <textarea id="userAnswer" placeholder="在這裡貼上你修復後的完整程式碼..."></textarea>
+                <textarea id="userAnswer" data-i18n-placeholder="detective-answer-ph" placeholder="在這裡貼上你修復後的完整程式碼..."></textarea>
             </div>
 
             <!-- Buttons -->
             <div class="btn-row">
-                <button class="btn-submit" id="btnSubmit" onclick="submitAnswer()">🔎 提交答案</button>
-                <button class="btn-next" id="btnNext" onclick="loadChallenge()" style="display:none;">
+                <button class="btn-submit" id="btnSubmit" onclick="submitAnswer()" data-i18n="detective-submit-btn">🔎 提交答案</button>
+                <button class="btn-next" id="btnNext" onclick="loadChallenge()" style="display:none;" data-i18n="detective-next-btn">
                     下一題 ➜
                 </button>
-                <button class="btn-skip" onclick="loadChallenge()">跳過此題</button>
+                <button class="btn-skip" onclick="loadChallenge()" data-i18n="detective-skip-btn">跳過此題</button>
             </div>
         </div>
 
@@ -501,7 +501,7 @@
             <div class="result-title" id="resultTitle"></div>
             <div class="result-explanation" id="resultExplanation"></div>
             <div class="code-section" id="fixedCodeSection" style="display:none;">
-                <label>✅ 正確的程式碼：</label>
+                <label data-i18n="detective-fixed-code-label">✅ 正確的程式碼：</label>
                 <pre><code class="language-csharp" id="fixedCodeBlock"></code></pre>
             </div>
             <div class="result-time" id="resultTime"></div>
@@ -573,9 +573,9 @@
 
             const diffBadge = document.getElementById('badgeDifficulty');
             const diffMap = {
-                beginner: { text: '🟢 初級', cls: 'badge-beginner' },
-                intermediate: { text: '🟡 中級', cls: 'badge-intermediate' },
-                advanced: { text: '🔴 高級', cls: 'badge-advanced' }
+                beginner: { text: t('detective-badge-beginner'), cls: 'badge-beginner' },
+                intermediate: { text: t('detective-badge-intermediate'), cls: 'badge-intermediate' },
+                advanced: { text: t('detective-badge-advanced'), cls: 'badge-advanced' }
             };
             const dm = diffMap[data.difficulty] || diffMap.beginner;
             diffBadge.textContent = dm.text;
@@ -637,7 +637,7 @@
 
         const userAnswer = document.getElementById('userAnswer').value.trim();
         if (!userAnswer) {
-            alert('請輸入你的修復版本！');
+            alert(t('detective-input-empty'));
             return;
         }
 
@@ -680,14 +680,14 @@
 
         if (data.correct) {
             icon.textContent = '🎉';
-            title.textContent = '答對了！你真是個優秀的偵探！';
+            title.textContent = t('detective-correct-msg');
             showConfetti();
         } else {
             icon.textContent = '🤔';
-            title.textContent = '還差一點點，看看正確答案吧！';
+            title.textContent = t('detective-wrong-msg');
         }
 
-        explanation.innerHTML = `<h4>💡 解說</h4><p>${escapeHtml(data.explanation)}</p>`;
+        explanation.innerHTML = `<h4>${t('detective-explanation-title')}</h4><p>${escapeHtml(data.explanation)}</p>`;
 
         // Show fixed code
         fixedBlock.textContent = data.fixedCode;
@@ -697,7 +697,7 @@
         // Time
         const m = Math.floor(data.timeTaken / 60);
         const s = data.timeTaken % 60;
-        timeEl.textContent = `⏱️ 用時 ${m > 0 ? m + '分' : ''}${s}秒`;
+        timeEl.textContent = t('detective-time-label') + (m > 0 ? m + t('detective-time-min') : '') + s + t('detective-time-sec');
 
         panel.style.display = 'block';
 

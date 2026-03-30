@@ -278,22 +278,22 @@
 <div class="puzzle-container">
     <div class="puzzle-header">
         <h2 data-i18n="game-puzzle">程式碼填字遊戲</h2>
-        <p>閱讀程式碼，填入被挖空的部分，測試你的 C# 知識！</p>
+        <p data-i18n="puzzle-desc">閱讀程式碼，填入被挖空的部分，測試你的 C# 知識！</p>
     </div>
 
     <!-- Stats -->
     <div class="stats-bar" id="statsBar">
-        <div class="stat-card"><div class="stat-val" id="statAttempts">-</div><div class="stat-label">挑戰次數</div></div>
-        <div class="stat-card"><div class="stat-val" id="statAccuracy">-</div><div class="stat-label">正確率</div></div>
-        <div class="stat-card"><div class="stat-val" id="statPerfect">-</div><div class="stat-label">滿分次數</div></div>
-        <div class="stat-card"><div class="stat-val" id="statAvgTime">-</div><div class="stat-label">平均秒數</div></div>
+        <div class="stat-card"><div class="stat-val" id="statAttempts">-</div><div class="stat-label" data-i18n="puzzle-stat-attempts">挑戰次數</div></div>
+        <div class="stat-card"><div class="stat-val" id="statAccuracy">-</div><div class="stat-label" data-i18n="puzzle-stat-accuracy">正確率</div></div>
+        <div class="stat-card"><div class="stat-val" id="statPerfect">-</div><div class="stat-label" data-i18n="puzzle-stat-perfect">滿分次數</div></div>
+        <div class="stat-card"><div class="stat-val" id="statAvgTime">-</div><div class="stat-label" data-i18n="puzzle-stat-avg-time">平均秒數</div></div>
     </div>
 
     <!-- Difficulty Tabs -->
     <div class="diff-tabs">
-        <button class="diff-tab active-beginner" data-diff="beginner" onclick="switchDifficulty('beginner')">初級 🟢</button>
-        <button class="diff-tab" data-diff="intermediate" onclick="switchDifficulty('intermediate')">中級 🟡</button>
-        <button class="diff-tab" data-diff="advanced" onclick="switchDifficulty('advanced')">高級 🔴</button>
+        <button class="diff-tab active-beginner" data-diff="beginner" onclick="switchDifficulty('beginner')" data-i18n="puzzle-diff-beginner">初級 🟢</button>
+        <button class="diff-tab" data-diff="intermediate" onclick="switchDifficulty('intermediate')" data-i18n="puzzle-diff-intermediate">中級 🟡</button>
+        <button class="diff-tab" data-diff="advanced" onclick="switchDifficulty('advanced')" data-i18n="puzzle-diff-advanced">高級 🔴</button>
     </div>
 
     <!-- Puzzle Info -->
@@ -323,9 +323,9 @@
 
     <!-- Buttons -->
     <div class="btn-row" id="btnRow" style="display:none;">
-        <button class="btn-puzzle btn-hint" onclick="toggleHint()">💡 提示</button>
-        <button class="btn-puzzle btn-submit" id="btnSubmit" onclick="submitAnswers()">提交答案</button>
-        <button class="btn-puzzle btn-next" id="btnNext" style="display:none;" onclick="loadPuzzle()">下一題 ➜</button>
+        <button class="btn-puzzle btn-hint" onclick="toggleHint()" data-i18n="puzzle-hint-btn">💡 提示</button>
+        <button class="btn-puzzle btn-submit" id="btnSubmit" onclick="submitAnswers()" data-i18n="puzzle-submit-btn">提交答案</button>
+        <button class="btn-puzzle btn-next" id="btnNext" style="display:none;" onclick="loadPuzzle()" data-i18n="puzzle-next-btn">下一題 ➜</button>
     </div>
 
     <!-- Result -->
@@ -335,7 +335,7 @@
     </div>
 
     <!-- Loading -->
-    <div class="loading-spinner" id="loadingSpinner">載入中...</div>
+    <div class="loading-spinner" id="loadingSpinner" data-i18n="loading">載入中...</div>
 </div>
 
 <script>
@@ -379,7 +379,7 @@
             currentPuzzle = data;
             renderPuzzle(data);
         } catch (e) {
-            document.getElementById('loadingSpinner').textContent = '載入失敗，請重試';
+            document.getElementById('loadingSpinner').textContent = t('puzzle-load-error');
         }
     }
 
@@ -482,7 +482,7 @@
             const result = await res.json();
             showResult(result, inputs);
         } catch (e) {
-            alert('提交失敗，請重試');
+            alert(t('puzzle-submit-error'));
             submitted = false;
             document.getElementById('btnSubmit').disabled = false;
         }
@@ -506,14 +506,14 @@
         // Show score
         const scoreDiv = document.getElementById('resultScore');
         const ratio = result.correctCount / result.totalBlanks;
-        scoreDiv.textContent = `${result.correctCount} / ${result.totalBlanks} 正確`;
+        scoreDiv.textContent = `${result.correctCount} / ${result.totalBlanks} ${t('puzzle-correct-label')}`;
         scoreDiv.className = 'result-score ' + (ratio === 1 ? 'perfect' : ratio >= 0.5 ? 'good' : 'fail');
 
         const m = Math.floor(result.timeTaken / 60);
         const s = result.timeTaken % 60;
         document.getElementById('resultTime').textContent =
-            `用時 ${m > 0 ? m + ' 分 ' : ''}${s} 秒` +
-            (ratio === 1 ? ' — 完美！🎉' : '');
+            t('puzzle-time-used') + ' ' + (m > 0 ? m + ' ' + t('puzzle-min') + ' ' : '') + s + ' ' + t('puzzle-sec') +
+            (ratio === 1 ? ' — ' + t('puzzle-perfect') : '');
 
         document.getElementById('resultBox').classList.add('show');
         document.getElementById('btnNext').style.display = 'inline-block';

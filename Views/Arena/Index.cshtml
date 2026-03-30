@@ -391,10 +391,10 @@
 <div class="arena-container">
     <div class="arena-header">
         <h1 data-i18n="game-arena">⚔️ 程式碼擂台</h1>
-        <p>比誰的解法更優雅</p>
+        <p data-i18n="arena-desc">比誰的解法更優雅</p>
     </div>
 
-    <div id="challenges-loading" class="loading-spinner">載入挑戰中...</div>
+    <div id="challenges-loading" class="loading-spinner" data-i18n="arena-loading">載入挑戰中...</div>
     <div id="challenges-grid" class="challenges-grid"></div>
 </div>
 
@@ -430,16 +430,16 @@
     }
 
     function getDifficultyLabel(d) {
-        const map = { beginner: '入門', intermediate: '中階', advanced: '進階' };
+        const map = { beginner: t('arena-difficulty-beginner'), intermediate: t('arena-difficulty-intermediate'), advanced: t('arena-difficulty-advanced') };
         return map[d] || d;
     }
 
     function getCountdown(endDate) {
         const diff = new Date(endDate) - new Date();
-        if (diff <= 0) return '已結束';
+        if (diff <= 0) return t('arena-countdown-end');
         const days = Math.floor(diff / 86400000);
         const hours = Math.floor((diff % 86400000) / 3600000);
-        return `剩餘 ${days} 天 ${hours} 小時`;
+        return t('arena-countdown-remaining').replace('{d}', days).replace('{h}', hours);
     }
 
     function getRankMedal(i) {
@@ -469,7 +469,7 @@
             document.getElementById('challenges-loading').style.display = 'none';
 
             if (!data.length) {
-                grid.innerHTML = '<p style="color:#888;text-align:center;grid-column:1/-1">目前沒有進行中的挑戰</p>';
+                grid.innerHTML = `<p style="color:#888;text-align:center;grid-column:1/-1">${t('arena-no-challenges')}</p>`;
                 return;
             }
 
@@ -479,13 +479,13 @@
                     <div class="description">${escapeHtml(c.description)}</div>
                     <div class="challenge-meta">
                         <span class="difficulty-badge difficulty-${c.difficulty}">${getDifficultyLabel(c.difficulty)}</span>
-                        <span class="submission-count">📝 ${c.submissionCount} 份提交</span>
+                        <span class="submission-count">📝 ${c.submissionCount} ${t('arena-submissions-count')}</span>
                         <span class="countdown">⏰ ${getCountdown(c.endDate)}</span>
                     </div>
                 </div>
             `).join('');
         } catch (e) {
-            document.getElementById('challenges-loading').textContent = '載入失敗，請重新整理頁面';
+            document.getElementById('challenges-loading').textContent = t('arena-load-failed');
         }
     }
 
@@ -494,7 +494,7 @@
         const modal = document.getElementById('detail-modal');
         const body = document.getElementById('modal-body');
         modal.classList.add('active');
-        body.innerHTML = '<div class="loading-spinner">載入中...</div>';
+        body.innerHTML = `<div class="loading-spinner">${t('arena-loading-detail')}</div>`;
 
         try {
             const res = await fetch(`/Arena/Detail?id=${id}`);
@@ -508,14 +508,14 @@
                 <div class="modal-description">${escapeHtml(c.description)}</div>
 
                 <div class="submit-section">
-                    <h3>📮 提交解法</h3>
+                    <h3>${t('arena-submit-section-title')}</h3>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>暱稱</label>
-                            <input type="text" id="sub-nickname" placeholder="你的暱稱" maxlength="30" />
+                            <label>${t('arena-nickname-label')}</label>
+                            <input type="text" id="sub-nickname" placeholder="${t('arena-nickname-ph')}" maxlength="30" />
                         </div>
                         <div class="form-group">
-                            <label>語言</label>
+                            <label>${t('arena-lang-label')}</label>
                             <select id="sub-language">
                                 <option value="csharp">C#</option>
                                 <option value="javascript">JavaScript</option>
@@ -525,19 +525,19 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>程式碼</label>
-                        <textarea class="code-input" id="sub-code" placeholder="貼上你的程式碼..."></textarea>
+                        <label>${t('arena-code-label')}</label>
+                        <textarea class="code-input" id="sub-code" placeholder="${t('arena-code-ph')}"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>解題思路</label>
-                        <textarea id="sub-explanation" rows="3" placeholder="簡單說明你的解法思路..."></textarea>
+                        <label>${t('arena-explain-label')}</label>
+                        <textarea id="sub-explanation" rows="3" placeholder="${t('arena-explain-ph')}"></textarea>
                     </div>
-                    <button class="btn-submit" id="btn-submit" onclick="submitSolution(${c.id})">⚔️ 提交解法</button>
+                    <button class="btn-submit" id="btn-submit" onclick="submitSolution(${c.id})">${t('arena-submit-btn')}</button>
                 </div>
 
                 <div class="submissions-section">
-                    <h3>🏆 排行榜 (${subs.length} 份提交)</h3>
-                    ${subs.length === 0 ? '<div class="no-submissions">還沒有人提交，成為第一個挑戰者吧！</div>' :
+                    <h3>${t('arena-lb-title')} (${subs.length} ${t('arena-submissions-count')})</h3>
+                    ${subs.length === 0 ? `<div class="no-submissions">${t('arena-no-subs')}</div>` :
                     subs.map((s, i) => `
                         <div class="submission-card">
                             <div class="submission-header">
@@ -563,17 +563,17 @@
 
             Prism.highlightAll();
         } catch (e) {
-            body.innerHTML = '<p style="color:#ff6b6b">載入失敗</p>';
+            body.innerHTML = `<p style="color:#ff6b6b">${t('arena-detail-load-failed')}</p>`;
         }
     }
 
     async function submitSolution(challengeId) {
         const btn = document.getElementById('btn-submit');
         const code = document.getElementById('sub-code').value.trim();
-        if (!code) { showToast('請輸入程式碼', 'error'); return; }
+        if (!code) { showToast(t('arena-no-code'), 'error'); return; }
 
         btn.disabled = true;
-        btn.textContent = '提交中...';
+        btn.textContent = t('arena-submitting');
 
         try {
             const res = await fetch('/Arena/Submit', {
@@ -589,16 +589,16 @@
             });
             const data = await res.json();
             if (data.success) {
-                showToast('提交成功！');
+                showToast(t('arena-submit-success'));
                 openChallenge(challengeId);
             } else {
-                showToast(data.error || '提交失敗', 'error');
+                showToast(data.error || t('arena-submit-failed'), 'error');
             }
         } catch (e) {
-            showToast('網路錯誤', 'error');
+            showToast(t('arena-network-error'), 'error');
         } finally {
             btn.disabled = false;
-            btn.textContent = '⚔️ 提交解法';
+            btn.textContent = t('arena-submit-btn');
         }
     }
 
@@ -618,10 +618,10 @@
                 btn.disabled = true;
                 votedSet.add(submissionId);
                 saveVoted();
-                showToast('已投票！');
+                showToast(t('arena-vote-done'));
             }
         } catch (e) {
-            showToast('投票失敗', 'error');
+            showToast(t('arena-vote-fail'), 'error');
         }
     }
 

@@ -373,13 +373,13 @@
 <div class="lb-page">
     <div class="lb-hero">
         <h1 data-i18n="leaderboard-title">🏆 學習排行榜</h1>
-        <p>與其他學習者一較高下，累積分數晉升等級</p>
+        <p data-i18n="leaderboard-desc">與其他學習者一較高下，累積分數晉升等級</p>
     </div>
 
     <!-- My Profile -->
     <div class="my-profile" id="myProfile">
         <div class="no-profile" id="myProfileLoading">
-            <span style="color:var(--text-muted)">載入中...</span>
+            <span style="color:var(--text-muted)" data-i18n="loading">載入中...</span>
         </div>
     </div>
 
@@ -397,6 +397,7 @@
                 <div class="podium-card @podClass">
                     <div class="podium-rank">@medal</div>
                     <div class="podium-name">@(string.IsNullOrEmpty(user.Nickname) ? "匿名學習者" : user.Nickname)</div>
+                    @* Note: "匿名學習者" rendered server-side - JS version uses t('lb-anonymous') *@
                     <div class="podium-score">@user.TotalScore 分</div>
                     <div class="podium-badge">@badgeIcon @badgeLabel</div>
                 </div>
@@ -411,12 +412,12 @@
             <table class="lb-table">
                 <thead>
                     <tr>
-                        <th>排名</th>
-                        <th>暱稱</th>
-                        <th>分數</th>
-                        <th>等級</th>
-                        <th>測驗數</th>
-                        <th>章節完成</th>
+                        <th data-i18n="lb-th-rank">排名</th>
+                        <th data-i18n="lb-th-nickname">暱稱</th>
+                        <th data-i18n="lb-th-score">分數</th>
+                        <th data-i18n="lb-th-level">等級</th>
+                        <th data-i18n="lb-th-quizzes">測驗數</th>
+                        <th data-i18n="lb-th-chapters">章節完成</th>
                     </tr>
                 </thead>
                 <tbody id="lbBody">
@@ -442,8 +443,8 @@
     {
         <div class="empty-state">
             <div class="empty-icon">🏆</div>
-            <p>目前還沒有排行資料，去做個測驗成為第一名吧！</p>
-            <a href="/" class="btn-nickname" style="display:inline-block;margin-top:1rem;text-decoration:none;">開始學習</a>
+            <p data-i18n="lb-empty">目前還沒有排行資料，去做個測驗成為第一名吧！</p>
+            <a href="/" class="btn-nickname" style="display:inline-block;margin-top:1rem;text-decoration:none;" data-i18n="lb-start-btn">開始學習</a>
         </div>
     }
 </div>
@@ -451,11 +452,11 @@
 <!-- Nickname Modal -->
 <div class="modal-overlay" id="nicknameModal">
     <div class="modal-box">
-        <h2>✏️ 設定暱稱</h2>
-        <input type="text" class="modal-input" id="nicknameInput" placeholder="輸入你的暱稱..." maxlength="20" />
+        <h2 data-i18n="lb-modal-title">✏️ 設定暱稱</h2>
+        <input type="text" class="modal-input" id="nicknameInput" data-i18n-placeholder="lb-modal-ph" placeholder="輸入你的暱稱..." maxlength="20" />
         <div class="modal-actions">
-            <button class="btn-cancel" onclick="closeModal()">取消</button>
-            <button class="btn-save" onclick="saveNickname()">儲存</button>
+            <button class="btn-cancel" onclick="closeModal()" data-i18n="btn-cancel">取消</button>
+            <button class="btn-save" onclick="saveNickname()" data-i18n="btn-save">儲存</button>
         </div>
     </div>
 </div>
@@ -486,7 +487,7 @@
 <script>
 (function() {
     const badgeIcons = { master:'👑', expert:'🔥', advanced:'⚡', intermediate:'💎', beginner:'🌿', newbie:'🌱' };
-    const badgeLabels = { master:'大師', expert:'專家', advanced:'進階', intermediate:'中級', beginner:'初學', newbie:'新手' };
+    const badgeLabels = { master:t('lb-badge-master'), expert:t('lb-badge-expert'), advanced:t('lb-badge-advanced'), intermediate:t('lb-badge-intermediate'), beginner:t('lb-badge-beginner'), newbie:t('lb-badge-newbie') };
 
     async function loadMyProfile() {
         try {
@@ -497,8 +498,8 @@
             if (!data.exists) {
                 el.classList.add('no-profile');
                 el.innerHTML = `
-                    <span style="color:var(--text-muted)">你還沒有建立檔案</span>
-                    <button class="btn-nickname" onclick="openModal()">🎮 設定暱稱加入排行</button>
+                    <span style="color:var(--text-muted)">${t('lb-no-profile')}</span>
+                    <button class="btn-nickname" onclick="openModal()">🎮 ${t('lb-set-nickname')}</button>
                 `;
                 return;
             }
@@ -509,28 +510,28 @@
             el.innerHTML = `
                 <div class="my-badge-icon">${icon}</div>
                 <div class="my-info">
-                    <div class="my-nickname">${data.nickname || '匿名學習者'}</div>
-                    <div class="my-rank-text">第 ${data.rank} 名 / 共 ${data.totalUsers} 人</div>
+                    <div class="my-nickname">${data.nickname || t('lb-anonymous')}</div>
+                    <div class="my-rank-text">${t('lb-rank-text').replace('{rank}', data.rank).replace('{total}', data.totalUsers)}</div>
                 </div>
                 <div class="my-stats">
                     <div class="my-stat">
                         <div class="my-stat-val">${data.totalScore}</div>
-                        <div class="my-stat-label">總分</div>
+                        <div class="my-stat-label">${t('lb-stat-total-score')}</div>
                     </div>
                     <div class="my-stat">
                         <div class="my-stat-val">${data.quizzesTaken}</div>
-                        <div class="my-stat-label">測驗數</div>
+                        <div class="my-stat-label">${t('lb-stat-quizzes')}</div>
                     </div>
                     <div class="my-stat">
                         <div class="my-stat-val">${data.chaptersCompleted}</div>
-                        <div class="my-stat-label">章節完成</div>
+                        <div class="my-stat-label">${t('lb-stat-chapters')}</div>
                     </div>
                     <div class="my-stat">
                         <div class="my-stat-val">${icon} ${label}</div>
-                        <div class="my-stat-label">等級</div>
+                        <div class="my-stat-label">${t('lb-stat-level')}</div>
                     </div>
                 </div>
-                <button class="btn-nickname" onclick="openModal()">✏️ 改暱稱</button>
+                <button class="btn-nickname" onclick="openModal()">✏️ ${t('lb-edit-nickname')}</button>
             `;
 
             // Highlight current user in table
@@ -540,7 +541,7 @@
 
         } catch (e) {
             console.error('Failed to load profile:', e);
-            document.getElementById('myProfile').innerHTML = '<span style="color:var(--text-muted)">無法載入個人資料</span>';
+            document.getElementById('myProfile').innerHTML = `<span style="color:var(--text-muted)">${t('lb-load-error')}</span>`;
         }
     }
 

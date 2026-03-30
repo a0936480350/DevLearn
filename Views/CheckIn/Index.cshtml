@@ -321,15 +321,15 @@
         <div class="streak-display">
             <div class="streak-item">
                 <div class="streak-value" id="streakCount">0</div>
-                <div class="streak-label">🔥 連續天數</div>
+                <div class="streak-label" data-i18n="checkin-streak-label">🔥 連續天數</div>
             </div>
             <div class="streak-item">
                 <div class="streak-value" id="totalCheckIns">0</div>
-                <div class="streak-label">📅 累計簽到</div>
+                <div class="streak-label" data-i18n="checkin-total-label">📅 累計簽到</div>
             </div>
             <div class="streak-item">
                 <div class="streak-value" id="todayPoints">0</div>
-                <div class="streak-label">⭐ 今日積分</div>
+                <div class="streak-label" data-i18n="checkin-points-label">⭐ 今日積分</div>
             </div>
         </div>
     </div>
@@ -339,8 +339,8 @@
         <div class="calendar-header">
             <h2 id="calendarTitle">2026 年 3 月</h2>
             <div class="calendar-nav">
-                <button onclick="changeMonth(-1)">&larr; 上月</button>
-                <button onclick="changeMonth(1)">下月 &rarr;</button>
+                <button onclick="changeMonth(-1)" data-i18n="checkin-prev-month">&larr; 上月</button>
+                <button onclick="changeMonth(1)" data-i18n="checkin-next-month">下月 &rarr;</button>
             </div>
         </div>
         <div class="calendar-grid" id="calendarGrid"></div>
@@ -348,9 +348,9 @@
 
     <!-- 成就 -->
     <div class="achievements-section">
-        <h2>🏆 學習成就</h2>
+        <h2 data-i18n="checkin-achievements-title">🏆 學習成就</h2>
         <div class="achievements-grid" id="achievementsGrid">
-            <div style="color:var(--text-muted)">載入中...</div>
+            <div style="color:var(--text-muted)" data-i18n="loading">載入中...</div>
         </div>
     </div>
 </div>
@@ -399,7 +399,7 @@
             }
 
             if (!d.success) {
-                alert(d.message || '簽到失敗');
+                alert(d.message || t('checkin-failed'));
                 btn.disabled = false;
                 return;
             }
@@ -426,20 +426,20 @@
         btn.classList.add('done');
         btn.disabled = true;
         document.getElementById('checkinIcon').textContent = '✅';
-        document.getElementById('checkinText').textContent = '已簽到';
+        document.getElementById('checkinText').textContent = t('checkin-done');
     }
 
     function showToast(streak, points, achievements) {
         const container = document.getElementById('toastContainer');
         const toast = document.createElement('div');
         toast.className = 'checkin-toast';
-        let html = `<h3>🎉 簽到成功！</h3>
-                     <p>🔥 連續 ${streak} 天</p>
-                     <p>⭐ 獲得 ${points} 積分</p>`;
+        let html = `<h3>${t('checkin-toast-title')}</h3>
+                     <p>🔥 ${t('checkin-toast-streak').replace('{n}', streak)}</p>
+                     <p>⭐ ${t('checkin-toast-points').replace('{n}', points)}</p>`;
         if (achievements.length > 0) {
             html += '<div class="toast-achievements">';
             achievements.forEach(a => {
-                html += `<span>${a.icon} 解鎖成就：${a.title}</span>`;
+                html += `<span>${a.icon} ${t('checkin-toast-unlock')}${a.title}</span>`;
             });
             html += '</div>';
         }
@@ -450,10 +450,10 @@
 
     // ── 月曆 ──
     async function loadCalendar() {
-        document.getElementById('calendarTitle').textContent = `${calYear} 年 ${calMonth} 月`;
+        document.getElementById('calendarTitle').textContent = `${calYear} ${t('checkin-year')} ${calMonth} ${t('checkin-month')}`;
         const grid = document.getElementById('calendarGrid');
 
-        const dayHeaders = ['日', '一', '二', '三', '四', '五', '六'];
+        const dayHeaders = [t('day-sun'), t('day-mon'), t('day-tue'), t('day-wed'), t('day-thu'), t('day-fri'), t('day-sat')];
         let html = dayHeaders.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
 
         const firstDay = new Date(calYear, calMonth - 1, 1).getDay();
@@ -481,7 +481,7 @@
             let cls = 'calendar-day';
             if (isToday) cls += ' today';
             if (isChecked) cls += ' checked-in';
-            html += `<div class="${cls}" title="${isChecked ? '連續 ' + checkedDates[dateStr] + ' 天' : ''}">${day}</div>`;
+            html += `<div class="${cls}" title="${isChecked ? t('checkin-streak-days').replace('{n}', checkedDates[dateStr]) : ''}">${day}</div>`;
         }
 
         grid.innerHTML = html;
@@ -502,7 +502,7 @@
             const list = await res.json();
 
             if (list.length === 0) {
-                grid.innerHTML = '<div style="color:var(--text-muted)">尚無成就資料</div>';
+                grid.innerHTML = `<div style="color:var(--text-muted)">${t('checkin-no-achievements')}</div>`;
                 return;
             }
 
@@ -521,7 +521,7 @@
             }).join('');
         } catch (e) {
             console.error('loadAchievements error', e);
-            grid.innerHTML = '<div style="color:var(--text-muted)">載入失敗</div>';
+            grid.innerHTML = `<div style="color:var(--text-muted)">${t('load-failed')}</div>`;
         }
     }
 </script>

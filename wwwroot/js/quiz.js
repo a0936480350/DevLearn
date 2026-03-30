@@ -4,13 +4,13 @@ let quizQuestions = [];
 async function openQuiz() {
     document.getElementById('quizModal').classList.remove('hidden');
     document.getElementById('modalOverlay').classList.remove('hidden');
-    document.getElementById('quizContent').innerHTML = '<div class="quiz-loading">⏳ 載入題目中...</div>';
+    document.getElementById('quizContent').innerHTML = `<div class="quiz-loading">⏳ ${t('ch-quiz-loading')}</div>`;
 
     // 改用新的 ChapterQuiz API（回傳 JSON）
     const res = await fetch(`/Quiz/ChapterQuiz?chapterId=${CHAPTER_ID}&count=5`);
     const data = await res.json();
     if (!data.questions || data.questions.length === 0) {
-        document.getElementById('quizContent').innerHTML = '<div class="quiz-loading">此章節暫無測驗題目</div>';
+        document.getElementById('quizContent').innerHTML = `<div class="quiz-loading">${t('quiz-load-failed')}</div>`;
         return;
     }
     quizQuestions = data.questions;
@@ -27,7 +27,7 @@ function renderQuiz() {
                     <div class="q-text">${q.questionText}</div>
                     <div class="q-options">
                         ${q.type === 'fillin' ? `
-                            <input type="text" name="q_${q.id}" class="quiz-input" placeholder="輸入答案..." />
+                            <input type="text" name="q_${q.id}" class="quiz-input" placeholder="${t('quiz-fillin-ph')}" />
                         ` : (q.options || []).map(opt => `
                             <label class="q-option">
                                 <input type="radio" name="q_${q.id}" value="${opt.replace(/"/g,'&quot;')}" />
@@ -39,8 +39,8 @@ function renderQuiz() {
             `).join('')}
         </div>
         <div class="quiz-actions">
-            <button class="btn-retry" onclick="closeQuiz()">取消</button>
-            <button class="btn-submit" onclick="submitQuiz()">📝 提交答案</button>
+            <button class="btn-retry" onclick="closeQuiz()">${t('btn-cancel')}</button>
+            <button class="btn-submit" onclick="submitQuiz()">📝 ${t('quiz-submit-btn')}</button>
         </div>`;
 }
 
@@ -83,8 +83,8 @@ function renderResult(data) {
     const passed = data.passed;
     const color = pct >= 80 ? '#7EE787' : pct >= 60 ? '#E3B341' : '#F78166';
     const msg = passed
-        ? (pct >= 80 ? '🎉 太棒了！下一章已解鎖！' : '👍 通過！下一章已解鎖！')
-        : '📚 未通過（需 60% 以上），再看一次章節內容吧！';
+        ? (pct >= 80 ? `🎉 ${t('quiz-grade-excellent')}！` : `👍 ${t('quiz-grade-pass')}！`)
+        : `📚 ${t('quiz-grade-fail')}（需 60% 以上）`;
 
     document.getElementById('quizContent').innerHTML = `
         <div class="quiz-score">
@@ -102,15 +102,15 @@ function renderResult(data) {
                     Q${i+1}: ${r.questionText}
                 </div>
                 <div style="font-size:.82rem;margin-bottom:.3rem;">
-                    你的答案：<strong style="color:${r.isCorrect ? '#7EE787' : '#F78166'}">${r.yourAnswer || '（未作答）'}</strong>
-                    ${!r.isCorrect ? `&nbsp;&nbsp;正確答案：<strong style="color:#7EE787">${r.correctAnswer}</strong>` : ''}
+                    ${t('quiz-your-answer')}<strong style="color:${r.isCorrect ? '#7EE787' : '#F78166'}">${r.yourAnswer || t('quiz-no-answer')}</strong>
+                    ${!r.isCorrect ? `&nbsp;&nbsp;${t('quiz-correct-answer')}<strong style="color:#7EE787">${r.correctAnswer}</strong>` : ''}
                 </div>
                 <div class="explanation">💡 ${r.explanation}</div>
             </div>
         `).join('')}
         <div class="quiz-actions">
             <button class="btn-retry" onclick="openQuiz()">🔄 再試一次</button>
-            ${passed ? '<button class="btn-submit" onclick="location.reload()">✅ 繼續學習</button>' : '<button class="btn-submit" onclick="closeQuiz()">關閉</button>'}
+            ${passed ? `<button class="btn-submit" onclick="location.reload()">✅ ${t('ch-complete')}</button>` : `<button class="btn-submit" onclick="closeQuiz()">${t('quiz-close-btn')}</button>`}
         </div>`;
 }
 

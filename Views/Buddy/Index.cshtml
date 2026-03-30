@@ -448,35 +448,35 @@
     </div>
 
     <!-- 載入中 -->
-    <div id="loadingState" class="loading">載入中...</div>
+    <div id="loadingState" class="loading" data-i18n="buddy-loading">載入中...</div>
 
     <!-- ============ 未註冊：註冊表單 ============ -->
     <div id="registerSection" style="display:none;">
         <div class="reg-card">
-            <h2>加入學習夥伴計畫</h2>
+            <h2 data-i18n="buddy-reg-title">加入學習夥伴計畫</h2>
 
             <div class="form-group">
-                <label>你的暱稱</label>
-                <input type="text" id="regNickname" placeholder="取個喜歡的名字" maxlength="20">
+                <label data-i18n="buddy-reg-nickname-label">你的暱稱</label>
+                <input type="text" id="regNickname" data-i18n-placeholder="buddy-reg-nickname-ph" placeholder="取個喜歡的名字" maxlength="20">
             </div>
 
             <div class="form-group">
-                <label>你的程度</label>
+                <label data-i18n="buddy-reg-level-label">你的程度</label>
                 <div class="level-options">
                     <div class="level-btn" data-level="beginner" onclick="selectLevel(this)">
-                        <span class="level-emoji">🌱</span>初學者
+                        <span class="level-emoji">🌱</span><span data-i18n="buddy-level-beginner">初學者</span>
                     </div>
                     <div class="level-btn" data-level="intermediate" onclick="selectLevel(this)">
-                        <span class="level-emoji">🌿</span>中級者
+                        <span class="level-emoji">🌿</span><span data-i18n="buddy-level-intermediate">中級者</span>
                     </div>
                     <div class="level-btn" data-level="advanced" onclick="selectLevel(this)">
-                        <span class="level-emoji">🌳</span>進階者
+                        <span class="level-emoji">🌳</span><span data-i18n="buddy-level-advanced">進階者</span>
                     </div>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>你有興趣的領域（可複選）</label>
+                <label data-i18n="buddy-reg-interests-label">你有興趣的領域（可複選）</label>
                 <div class="interest-grid">
                     <div class="interest-chip" data-val="csharp" onclick="toggleInterest(this)">C#</div>
                     <div class="interest-chip" data-val="aspnet" onclick="toggleInterest(this)">ASP.NET</div>
@@ -490,16 +490,16 @@
             </div>
 
             <div class="form-group">
-                <label>你的學習目標是什麼？</label>
-                <textarea id="regGoal" placeholder="例如：想在三個月內學會 ASP.NET Core 做出一個完整專案"></textarea>
+                <label data-i18n="buddy-reg-goal-label">你的學習目標是什麼？</label>
+                <textarea id="regGoal" data-i18n-placeholder="buddy-reg-goal-ph" placeholder="例如：想在三個月內學會 ASP.NET Core 做出一個完整專案"></textarea>
             </div>
 
             <div class="form-group">
-                <label>LINE ID 或 Discord（配對成功後才會顯示給對方）</label>
-                <input type="text" id="regContact" placeholder="例如：myline123 或 user#1234">
+                <label data-i18n="buddy-reg-contact-label">LINE ID 或 Discord（配對成功後才會顯示給對方）</label>
+                <input type="text" id="regContact" data-i18n-placeholder="buddy-reg-contact-ph" placeholder="例如：myline123 或 user#1234">
             </div>
 
-            <button class="btn-register" onclick="doRegister()">🚀 開始尋找夥伴</button>
+            <button class="btn-register" onclick="doRegister()" data-i18n="buddy-reg-btn">🚀 開始尋找夥伴</button>
         </div>
     </div>
 
@@ -507,24 +507,24 @@
     <div id="dashboardSection" style="display:none;">
 
         <!-- 我的資料卡 -->
-        <h2 class="section-title">📋 我的資料</h2>
+        <h2 class="section-title" data-i18n="buddy-my-profile-title">📋 我的資料</h2>
         <div class="profile-card" id="myProfileCard"></div>
 
         <!-- 已配對夥伴 -->
-        <h2 class="section-title">💜 你的學習夥伴</h2>
+        <h2 class="section-title" data-i18n="buddy-matched-title">💜 你的學習夥伴</h2>
         <div id="matchedBuddies"></div>
 
         <!-- 推薦夥伴 -->
-        <h2 class="section-title">✨ 推薦夥伴</h2>
+        <h2 class="section-title" data-i18n="buddy-recommended-title">✨ 推薦夥伴</h2>
         <div id="recommendedBuddies"></div>
 
         <!-- 所有夥伴 -->
-        <h2 class="section-title">🌐 所有正在找夥伴的人</h2>
+        <h2 class="section-title" data-i18n="buddy-all-title">🌐 所有正在找夥伴的人</h2>
         <div class="filter-bar" id="filterBar">
-            <button class="filter-btn active" data-level="all" onclick="filterAll(this)">全部</button>
-            <button class="filter-btn" data-level="beginner" onclick="filterAll(this)">🌱 初學者</button>
-            <button class="filter-btn" data-level="intermediate" onclick="filterAll(this)">🌿 中級者</button>
-            <button class="filter-btn" data-level="advanced" onclick="filterAll(this)">🌳 進階者</button>
+            <button class="filter-btn active" data-level="all" onclick="filterAll(this)" data-i18n="buddy-filter-all">全部</button>
+            <button class="filter-btn" data-level="beginner" onclick="filterAll(this)">🌱 <span data-i18n="buddy-level-beginner">初學者</span></button>
+            <button class="filter-btn" data-level="intermediate" onclick="filterAll(this)">🌿 <span data-i18n="buddy-level-intermediate">中級者</span></button>
+            <button class="filter-btn" data-level="advanced" onclick="filterAll(this)">🌳 <span data-i18n="buddy-level-advanced">進階者</span></button>
         </div>
         <div id="allBuddies"></div>
     </div>
@@ -533,18 +533,18 @@
     <div class="match-overlay" id="matchOverlay" onclick="closeMatchAnim()">
         <div class="match-anim">
             <span class="match-emoji">🎉</span>
-            <div class="match-text">配對成功！</div>
+            <div class="match-text" data-i18n="buddy-match-success-title">配對成功！</div>
             <div class="match-names" id="matchNames"></div>
-            <button class="match-close" onclick="closeMatchAnim()">太棒了！</button>
+            <button class="match-close" onclick="closeMatchAnim()" data-i18n="buddy-match-close-btn">太棒了！</button>
         </div>
     </div>
 </div>
 
 <script>
     const LEVEL_MAP = {
-        beginner: { label: '初學者', emoji: '🌱', css: 'level-beginner' },
-        intermediate: { label: '中級者', emoji: '🌿', css: 'level-intermediate' },
-        advanced: { label: '進階者', emoji: '🌳', css: 'level-advanced' }
+        beginner: { get label() { return t('buddy-level-beginner'); }, emoji: '🌱', css: 'level-beginner' },
+        intermediate: { get label() { return t('buddy-level-intermediate'); }, emoji: '🌿', css: 'level-intermediate' },
+        advanced: { get label() { return t('buddy-level-advanced'); }, emoji: '🌳', css: 'level-advanced' }
     };
 
     const INTEREST_MAP = {
@@ -574,7 +574,7 @@
                 document.getElementById('registerSection').style.display = '';
             }
         } catch (e) {
-            document.getElementById('loadingState').textContent = '載入失敗，請重新整理';
+            document.getElementById('loadingState').textContent = t('buddy-load-failed');
         }
     }
 
@@ -600,13 +600,13 @@
     // ── 註冊 ──
     async function doRegister() {
         const nickname = document.getElementById('regNickname').value.trim();
-        if (!nickname) return alert('請輸入暱稱');
-        if (!selectedLevel) return alert('請選擇程度');
-        if (selectedInterests.size === 0) return alert('請至少選擇一個興趣');
+        if (!nickname) return alert(t('buddy-input-nickname'));
+        if (!selectedLevel) return alert(t('buddy-select-level'));
+        if (selectedInterests.size === 0) return alert(t('buddy-select-interest'));
 
         const btn = document.querySelector('.btn-register');
         btn.disabled = true;
-        btn.textContent = '配對中...';
+        btn.textContent = t('buddy-matching');
 
         try {
             const res = await fetch('/Buddy/Register', {
@@ -638,14 +638,14 @@
                 const profileData = await profileRes.json();
                 showDashboard(profileData);
             } else {
-                alert(data.message || '註冊失敗');
+                alert(data.message || t('buddy-register-failed'));
                 btn.disabled = false;
-                btn.textContent = '🚀 開始尋找夥伴';
+                btn.textContent = t('buddy-reg-btn');
             }
         } catch (e) {
-            alert('發生錯誤，請重試');
+            alert(t('buddy-error-retry'));
             btn.disabled = false;
-            btn.textContent = '🚀 開始尋找夥伴';
+            btn.textContent = t('buddy-reg-btn');
         }
     }
 
@@ -685,7 +685,7 @@
     function renderMatchedBuddies(matches) {
         const el = document.getElementById('matchedBuddies');
         if (!matches.length) {
-            el.innerHTML = `<div class="empty-state"><span class="empty-emoji">🔍</span>還沒有配對的夥伴，往下看看推薦吧！</div>`;
+            el.innerHTML = `<div class="empty-state"><span class="empty-emoji">🔍</span>${t('buddy-no-matched')}</div>`;
             return;
         }
         el.innerHTML = `<div class="buddy-grid">${matches.map(b => buddyCard(b, true)).join('')}</div>`;
@@ -697,12 +697,12 @@
             const list = await res.json();
             const el = document.getElementById('recommendedBuddies');
             if (!list.length) {
-                el.innerHTML = `<div class="empty-state"><span class="empty-emoji">😊</span>目前沒有新的推薦，邀請朋友加入吧！</div>`;
+                el.innerHTML = `<div class="empty-state"><span class="empty-emoji">😊</span>${t('buddy-no-recommended')}</div>`;
                 return;
             }
             el.innerHTML = `<div class="buddy-grid">${list.map(b => buddyCard(b, false)).join('')}</div>`;
         } catch (e) {
-            document.getElementById('recommendedBuddies').innerHTML = '<div class="empty-state">載入失敗</div>';
+            document.getElementById('recommendedBuddies').innerHTML = `<div class="empty-state">${t('buddy-load-failed')}</div>`;
         }
     }
 
@@ -712,12 +712,12 @@
             const list = await res.json();
             const el = document.getElementById('allBuddies');
             if (!list.length) {
-                el.innerHTML = `<div class="empty-state"><span class="empty-emoji">🌍</span>還沒有其他人加入，你是先驅者！</div>`;
+                el.innerHTML = `<div class="empty-state"><span class="empty-emoji">🌍</span>${t('buddy-no-all')}</div>`;
                 return;
             }
             el.innerHTML = `<div class="buddy-grid">${list.map(b => buddyCard(b, false)).join('')}</div>`;
         } catch (e) {
-            document.getElementById('allBuddies').innerHTML = '<div class="empty-state">載入失敗</div>';
+            document.getElementById('allBuddies').innerHTML = `<div class="empty-state">${t('buddy-load-failed')}</div>`;
         }
     }
 
@@ -731,9 +731,9 @@
         if (showContact && b.contactInfo) {
             actionHtml = `<div class="contact-info">📱 ${esc(b.contactInfo)}</div>`;
         } else if (!isMatched && myProfile) {
-            actionHtml = `<button class="btn-match" onclick="doMatch(${b.id}, '${esc(b.nickname)}', this)">💜 配對</button>`;
+            actionHtml = `<button class="btn-match" onclick="doMatch(${b.id}, '${esc(b.nickname)}', this)">${t('buddy-match-btn')}</button>`;
         } else if (isMatched && !showContact) {
-            actionHtml = `<span style="color:#50fa7b;font-size:0.85rem;">✓ 已配對</span>`;
+            actionHtml = `<span style="color:#50fa7b;font-size:0.85rem;">${t('buddy-matched-badge')}</span>`;
         }
 
         return `
@@ -755,7 +755,7 @@
     // ── 手動配對 ──
     async function doMatch(buddyId, buddyName, btn) {
         btn.disabled = true;
-        btn.textContent = '配對中...';
+        btn.textContent = t('buddy-matching');
 
         try {
             const res = await fetch('/Buddy/MatchWith', {
@@ -776,14 +776,14 @@
                 await loadRecommended();
                 await loadAllBuddies(getCurrentFilter());
             } else {
-                alert(data.message || '配對失敗');
+                alert(data.message || t('buddy-match-failed'));
                 btn.disabled = false;
-                btn.textContent = '💜 配對';
+                btn.textContent = t('buddy-match-btn');
             }
         } catch (e) {
-            alert('發生錯誤，請重試');
+            alert(t('buddy-error-retry'));
             btn.disabled = false;
-            btn.textContent = '💜 配對';
+            btn.textContent = t('buddy-match-btn');
         }
     }
 

@@ -360,15 +360,15 @@
     <!-- 開始畫面 -->
     <div class="speed-lobby" id="lobby">
         <h1 data-i18n="game-speed">速度挑戰</h1>
-        <p class="subtitle">60 秒內答對越多題，分數越高！</p>
+        <p class="subtitle" data-i18n="speed-subtitle">60 秒內答對越多題，分數越高！</p>
 
         <div class="category-selector" id="categorySelector">
-            <button class="cat-btn active" data-cat="all">全部</button>
+            <button class="cat-btn active" data-cat="all" data-i18n="speed-cat-all">全部</button>
             <button class="cat-btn" data-cat="csharp">C#</button>
             <button class="cat-btn" data-cat="aspnet">ASP.NET</button>
-            <button class="cat-btn" data-cat="database">資料庫</button>
-            <button class="cat-btn" data-cat="network">網路</button>
-            <button class="cat-btn" data-cat="security">資安</button>
+            <button class="cat-btn" data-cat="database" data-i18n="speed-cat-database">資料庫</button>
+            <button class="cat-btn" data-cat="network" data-i18n="speed-cat-network">網路</button>
+            <button class="cat-btn" data-cat="security" data-i18n="speed-cat-security">資安</button>
             <button class="cat-btn" data-cat="docker">Docker</button>
         </div>
 
@@ -376,7 +376,7 @@
 
         <!-- 排行榜（大廳顯示） -->
         <div class="leaderboard-section" id="lobbyLeaderboard">
-            <h2>排行榜</h2>
+            <h2 data-i18n="speed-leaderboard-title">排行榜</h2>
             <div id="lobbyLbContent"></div>
         </div>
     </div>
@@ -391,8 +391,8 @@
         </div>
 
         <div class="score-bar">
-            <span>題目 <span id="qNum">1</span> / <span id="qTotal">30</span></span>
-            <span class="current-score">分數: <span id="liveScore">0</span></span>
+            <span><span data-i18n="speed-question">題目</span> <span id="qNum">1</span> / <span id="qTotal">30</span></span>
+            <span class="current-score"><span data-i18n="speed-score">分數</span>: <span id="liveScore">0</span></span>
         </div>
 
         <div class="question-card" id="questionCard">
@@ -405,34 +405,34 @@
     <!-- 結果畫面 -->
     <div class="speed-result" id="resultScreen">
         <div class="result-score" id="resultScore">0</div>
-        <div class="result-label">分</div>
+        <div class="result-label" data-i18n="speed-result-label">分</div>
 
         <div class="result-stats">
             <div class="stat-box">
                 <div class="stat-value" id="resultCorrect">0</div>
-                <div class="stat-label">答對</div>
+                <div class="stat-label" data-i18n="speed-stat-correct">答對</div>
             </div>
             <div class="stat-box">
                 <div class="stat-value" id="resultTotal">0</div>
-                <div class="stat-label">作答</div>
+                <div class="stat-label" data-i18n="speed-stat-answered">作答</div>
             </div>
             <div class="stat-box">
                 <div class="stat-value" id="resultAccuracy">0%</div>
-                <div class="stat-label">正確率</div>
+                <div class="stat-label" data-i18n="speed-stat-accuracy">正確率</div>
             </div>
         </div>
 
         <div class="percentile-msg" id="percentileMsg"></div>
 
-        <button class="retry-btn" onclick="backToLobby()">再挑戰一次</button>
+        <button class="retry-btn" onclick="backToLobby()" data-i18n="speed-retry-btn">再挑戰一次</button>
 
         <div class="result-details" id="resultDetails">
-            <h3>答題詳情</h3>
+            <h3 data-i18n="speed-detail-title">答題詳情</h3>
             <div id="detailsList"></div>
         </div>
 
         <div class="leaderboard-section">
-            <h2>排行榜</h2>
+            <h2 data-i18n="speed-leaderboard-title">排行榜</h2>
             <div id="resultLbContent"></div>
         </div>
     </div>
@@ -467,10 +467,10 @@
             const data = await res.json();
             const container = document.getElementById(containerId);
             if (!data || data.length === 0) {
-                container.innerHTML = '<div class="lb-empty">還沒有挑戰紀錄，成為第一個！</div>';
+                container.innerHTML = `<div class="lb-empty">${t('speed-lb-empty')}</div>`;
                 return;
             }
-            let html = '<table class="lb-table"><thead><tr><th>#</th><th>挑戰者</th><th>分數</th><th>答對</th><th>時間</th></tr></thead><tbody>';
+            let html = `<table class="lb-table"><thead><tr><th>#</th><th>${t('speed-lb-challenger')}</th><th>${t('speed-lb-score')}</th><th>${t('speed-lb-correct')}</th><th>${t('speed-lb-time')}</th></tr></thead><tbody>`;
             data.forEach((r, i) => {
                 const rankClass = i < 3 ? `rank-${i+1}` : '';
                 const medal = i === 0 ? '\u{1F947}' : i === 1 ? '\u{1F948}' : i === 2 ? '\u{1F949}' : (i+1);
@@ -486,7 +486,7 @@
     // 開始遊戲
     window.startGame = async function() {
         const btn = document.getElementById('startBtn');
-        btn.textContent = '載入中...';
+        btn.textContent = t('loading');
         btn.disabled = true;
 
         try {
@@ -495,8 +495,8 @@
             questions = data.questions;
 
             if (!questions || questions.length === 0) {
-                alert('此分類沒有可用的題目！');
-                btn.textContent = '開始挑戰！';
+                alert(t('speed-no-questions'));
+                btn.textContent = t('game-speed-start');
                 btn.disabled = false;
                 return;
             }
@@ -518,10 +518,10 @@
             showQuestion();
             startTimer();
         } catch(e) {
-            alert('載入題目失敗');
+            alert(t('speed-load-failed'));
             console.error(e);
         } finally {
-            btn.textContent = '開始挑戰！';
+            btn.textContent = t('game-speed-start');
             btn.disabled = false;
         }
     };
@@ -561,7 +561,7 @@
 
         const q = questions[currentIndex];
         document.getElementById('qNum').textContent = currentIndex + 1;
-        document.getElementById('questionNumber').textContent = `第 ${currentIndex + 1} 題`;
+        document.getElementById('questionNumber').textContent = t('speed-question-n').replace('{n}', currentIndex + 1);
         document.getElementById('questionText').textContent = q.questionText;
 
         let options = [];
@@ -651,7 +651,7 @@
             document.getElementById('resultTotal').textContent = data.total;
             const acc = data.total > 0 ? Math.round(data.correct * 100 / data.total) : 0;
             document.getElementById('resultAccuracy').textContent = acc + '%';
-            document.getElementById('percentileMsg').textContent = `你打敗了 ${data.percentile}% 的挑戰者！`;
+            document.getElementById('percentileMsg').textContent = t('speed-percentile').replace('{pct}', data.percentile);
 
             // 答題詳情
             const detailsList = document.getElementById('detailsList');
@@ -666,7 +666,7 @@
                         <span class="detail-icon">${icon}</span>
                         <div class="detail-text">
                             ${escHtml(q ? q.questionText : '')}
-                            <br><strong>正確答案: ${escHtml(d.correctAnswer)}</strong>
+                            <br><strong>${t('speed-correct-answer')}: ${escHtml(d.correctAnswer)}</strong>
                             <div class="explanation">${escHtml(d.explanation || '')}</div>
                         </div>
                     `;

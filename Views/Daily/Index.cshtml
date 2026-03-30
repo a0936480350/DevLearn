@@ -360,11 +360,11 @@
         <div id="streakBadge" class="streak-badge zero" style="display:none;"></div>
     </div>
 
-    <div id="loadingArea" class="loading-spinner">載入中...</div>
+    <div id="loadingArea" class="loading-spinner" data-i18n="loading">載入中...</div>
     <div id="questionArea" style="display:none;"></div>
     <div id="resultArea" style="display:none;"></div>
     <div id="calendarSection" class="calendar-section" style="display:none;">
-        <h3>過去 30 天紀錄</h3>
+        <h3 data-i18n="daily-history-title">過去 30 天紀錄</h3>
         <div class="calendar-grid" id="calendarGrid"></div>
     </div>
     <div id="statsPanel" class="stats-panel" style="display:none;"></div>
@@ -398,7 +398,7 @@
             loadHistory();
             loadStats();
         } catch (e) {
-            document.getElementById('loadingArea').textContent = '載入失敗，請重新整理';
+            document.getElementById('loadingArea').textContent = t('daily-load-error');
         }
     }
 
@@ -407,10 +407,10 @@
         badge.style.display = 'inline-flex';
         if (days > 0) {
             badge.className = 'streak-badge';
-            badge.innerHTML = '\uD83D\uDD25 連續 ' + days + ' 天';
+            badge.innerHTML = '\uD83D\uDD25 ' + t('daily-streak').replace('{n}', days);
         } else {
             badge.className = 'streak-badge zero';
-            badge.innerHTML = '\uD83D\uDD25 連續 0 天';
+            badge.innerHTML = '\uD83D\uDD25 ' + t('daily-streak').replace('{n}', 0);
         }
     }
 
@@ -423,7 +423,7 @@
 
         let optionsHtml = '';
         if (data.type === 'fillin') {
-            optionsHtml = '<input type="text" class="fillin-input" id="fillinAnswer" placeholder="輸入你的答案..." autocomplete="off" />';
+            optionsHtml = '<input type="text" class="fillin-input" id="fillinAnswer" placeholder="' + t('daily-fillin-ph') + '" autocomplete="off" />';
         } else {
             optionsHtml = '<ul class="options-list">';
             options.forEach((opt, i) => {
@@ -441,7 +441,7 @@
                 (data.category ? '<span class="question-category">' + escapeHtml(data.category) + '</span>' : '') +
                 '<div class="question-text">' + escapeHtml(data.questionText) + '</div>' +
                 optionsHtml +
-                '<button class="submit-btn" id="submitBtn" onclick="submitAnswer()">提交答案</button>' +
+                '<button class="submit-btn" id="submitBtn" onclick="submitAnswer()">' + t('daily-submit') + '</button>' +
             '</div>';
     }
 
@@ -477,13 +477,13 @@
             '</div>' +
             '<div class="result-panel ' + (data.wasCorrect ? 'correct' : 'wrong') + '">' +
                 '<div class="result-icon">' + (data.wasCorrect ? '\u2705' : '\u274C') + '</div>' +
-                '<div class="result-text">' + (data.wasCorrect ? '答對了！' : '答錯了') + '</div>' +
-                '<div style="color:#aaa;">正確答案：' + escapeHtml(data.correctAnswer || '') + '</div>' +
+                '<div class="result-text">' + (data.wasCorrect ? t('daily-correct') : t('daily-wrong')) + '</div>' +
+                '<div style="color:#aaa;">' + t('daily-correct-answer') + escapeHtml(data.correctAnswer || '') + '</div>' +
                 (data.explanation ? '<div class="explanation-box"><strong>解析：</strong>' + escapeHtml(data.explanation) + '</div>' : '') +
             '</div>' +
             '<div class="already-done">' +
                 '<span class="big-emoji">\uD83C\uDF1F</span>' +
-                '<div class="tomorrow-msg">明天再來！</div>' +
+                '<div class="tomorrow-msg">' + t('daily-tomorrow') + '</div>' +
             '</div>';
     }
 
@@ -501,15 +501,15 @@
             answer = document.getElementById('fillinAnswer')?.value || '';
         } else {
             const checked = document.querySelector('input[name="answer"]:checked');
-            if (!checked) { alert('請選擇一個答案'); return; }
+            if (!checked) { alert(t('daily-select-answer')); return; }
             answer = checked.value;
         }
 
-        if (!answer.trim()) { alert('請輸入答案'); return; }
+        if (!answer.trim()) { alert(t('daily-enter-answer')); return; }
 
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        btn.textContent = '提交中...';
+        btn.textContent = t('daily-submitting');
 
         try {
             const res = await fetch('/Daily/Submit', {
@@ -518,7 +518,7 @@
                 body: JSON.stringify({ dailyChallengeId: challengeData.challengeId, answer })
             });
             const result = await res.json();
-            if (result.error) { alert(result.error); btn.disabled = false; btn.textContent = '提交答案'; return; }
+            if (result.error) { alert(result.error); btn.disabled = false; btn.textContent = t('daily-submit'); return; }
 
             // Highlight options
             if (challengeData.type !== 'fillin') {
@@ -538,20 +538,20 @@
             resultArea.innerHTML =
                 '<div class="result-panel ' + (result.correct ? 'correct' : 'wrong') + '">' +
                     '<div class="result-icon">' + (result.correct ? '\u2705' : '\u274C') + '</div>' +
-                    '<div class="result-text">' + (result.correct ? '答對了！太棒了！' : '答錯了，沒關係！') + '</div>' +
-                    '<div style="color:#aaa;">正確答案：' + escapeHtml(result.correctAnswer) + '</div>' +
+                    '<div class="result-text">' + (result.correct ? t('daily-correct-great') : t('daily-wrong-ok')) + '</div>' +
+                    '<div style="color:#aaa;">' + t('daily-correct-answer') + escapeHtml(result.correctAnswer) + '</div>' +
                     (result.explanation ? '<div class="explanation-box"><strong>解析：</strong>' + escapeHtml(result.explanation) + '</div>' : '') +
                 '</div>' +
-                (result.isNewRecord ? '<div class="streak-record-banner">\uD83C\uDFC6 新紀錄！連續 ' + result.streak + ' 天答對！</div>' : '') +
-                '<div class="already-done"><span class="big-emoji">\uD83C\uDF1F</span><div class="tomorrow-msg">明天再來！</div></div>';
+                (result.isNewRecord ? '<div class="streak-record-banner">\uD83C\uDFC6 ' + t('daily-new-record').replace('{n}', result.streak) + '</div>' : '') +
+                '<div class="already-done"><span class="big-emoji">\uD83C\uDF1F</span><div class="tomorrow-msg">' + t('daily-tomorrow') + '</div></div>';
 
             showStreak(result.streak);
             loadHistory();
             loadStats();
         } catch (e) {
             btn.disabled = false;
-            btn.textContent = '提交答案';
-            alert('提交失敗，請再試一次');
+            btn.textContent = t('daily-submit');
+            alert(t('daily-submit-error'));
         }
     };
 
@@ -582,7 +582,7 @@
         }
 
         // Day labels
-        const labels = ['日','一','二','三','四','五','六'];
+        const labels = [t('day-sun'), t('day-mon'), t('day-tue'), t('day-wed'), t('day-thu'), t('day-fri'), t('day-sat')];
         // Find the starting day of week for the first day
         const firstDow = days[0].getDay();
 
@@ -620,9 +620,9 @@
             const panel = document.getElementById('statsPanel');
             panel.style.display = 'grid';
             panel.innerHTML =
-                '<div class="stat-card"><div class="stat-value">' + data.currentStreak + '</div><div class="stat-label">目前連續</div></div>' +
-                '<div class="stat-card"><div class="stat-value">' + data.bestStreak + '</div><div class="stat-label">最佳連續</div></div>' +
-                '<div class="stat-card"><div class="stat-value">' + data.accuracy + '%</div><div class="stat-label">正確率 (' + data.totalCorrect + '/' + data.totalAttempted + ')</div></div>';
+                '<div class="stat-card"><div class="stat-value">' + data.currentStreak + '</div><div class="stat-label">' + t('daily-stat-current') + '</div></div>' +
+                '<div class="stat-card"><div class="stat-value">' + data.bestStreak + '</div><div class="stat-label">' + t('daily-stat-best') + '</div></div>' +
+                '<div class="stat-card"><div class="stat-value">' + data.accuracy + '%</div><div class="stat-label">' + t('daily-stat-accuracy') + ' (' + data.totalCorrect + '/' + data.totalAttempted + ')</div></div>';
         } catch(e) {}
     }
 

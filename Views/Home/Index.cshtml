@@ -350,7 +350,7 @@
             <button class="btn-cta-primary" onclick="postGlobalIdea()" style="font-size:.88rem;padding:10px 22px;" data-i18n="section-ideas-btn">分享你的想法</button>
         </div>
         <div id="globalIdeaWall" class="idea-wall-grid">
-            <div class="idea-loading">載入中...</div>
+            <div class="idea-loading" data-i18n="home-idea-loading">載入中...</div>
         </div>
     </section>
 
@@ -361,7 +361,7 @@
             <p class="section-subtitle" data-i18n="section-teacher-posts-desc">來自平台老師的最新免費文章、影片和資源</p>
         </div>
         <div id="teacherPostsGrid" class="idea-wall-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;">
-            <div style="color:var(--text-muted);font-size:13px;">載入中...</div>
+            <div style="color:var(--text-muted);font-size:13px;" data-i18n="home-teachers-loading">載入中...</div>
         </div>
     </section>
 
@@ -400,12 +400,12 @@ function startRandomQuiz(count) {
         .then(r => r.json())
         .then(data => {
             if (!data.questions || data.questions.length === 0) {
-                alert('目前沒有測驗題目');
+                alert(t('quiz-load-failed'));
                 return;
             }
             renderQuizModal(data.questions, count);
         })
-        .catch(e => alert('載入失敗：' + e.message));
+        .catch(e => alert(t('quiz-load-failed')));
 }
 
 function renderQuizModal(questions, total) {
@@ -414,14 +414,14 @@ function renderQuizModal(questions, total) {
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 
-    let html = '<h2 class="quiz-title">⚡ 隨機挑戰 (' + questions.length + ' 題)</h2>';
+    let html = '<h2 class="quiz-title">' + t('quiz-title') + ' (' + questions.length + ' 題)</h2>';
     html += '<form id="random-quiz-form">';
     questions.forEach((q, i) => {
         html += '<div class="quiz-q">';
         html += '<div class="quiz-q-num">Q' + (i+1) + '</div>';
         html += '<div class="quiz-q-text">' + q.questionText + '</div>';
         if (q.type === 'fillin') {
-            html += '<input type="text" name="q_' + q.id + '" class="quiz-input" placeholder="輸入答案..." />';
+            html += '<input type="text" name="q_' + q.id + '" class="quiz-input" placeholder="' + t('quiz-fillin-ph') + '" />';
         } else if (q.options && q.options.length > 0) {
             q.options.forEach((opt, j) => {
                 html += '<label class="quiz-option">';
@@ -432,7 +432,7 @@ function renderQuizModal(questions, total) {
         }
         html += '</div>';
     });
-    html += '<button type="button" class="quiz-submit-btn" onclick="submitRandomQuiz()">提交答案</button>';
+    html += '<button type="button" class="quiz-submit-btn" onclick="submitRandomQuiz()">' + t('quiz-submit-btn') + '</button>';
     html += '</form>';
     content.innerHTML = html;
     window._quizQuestions = questions;
@@ -458,13 +458,13 @@ function submitRandomQuiz() {
     })
     .then(r => r.json())
     .then(result => renderQuizResult(result))
-    .catch(e => alert('提交失敗：' + e.message));
+    .catch(e => alert(t('quiz-submit-failed') + e.message));
 }
 
 function renderQuizResult(result) {
     const content = document.getElementById('quiz-content');
     const pct = Math.round((result.score / result.total) * 100);
-    const grade = pct >= 80 ? '🏆 優秀' : pct >= 60 ? '👍 及格' : '💪 加油';
+    const grade = pct >= 80 ? t('quiz-grade-excellent') : pct >= 60 ? t('quiz-grade-pass') : t('quiz-grade-fail');
 
     let html = '<div class="quiz-result">';
     html += '<div class="result-circle" style="--pct:' + pct + '%"><span>' + result.score + '/' + result.total + '</span></div>';
@@ -476,14 +476,14 @@ function renderQuizResult(result) {
         html += '<div class="quiz-detail ' + (d.isCorrect ? 'correct' : 'wrong') + '">';
         html += '<div class="qd-head">' + icon + ' Q' + (i+1) + ': ' + d.questionText + '</div>';
         if (!d.isCorrect) {
-            html += '<div class="qd-ans">你的答案：<code>' + (d.yourAnswer || '未作答') + '</code></div>';
-            html += '<div class="qd-correct">正確答案：<code>' + d.correctAnswer + '</code></div>';
+            html += '<div class="qd-ans">' + t('quiz-your-answer') + '<code>' + (d.yourAnswer || t('quiz-no-answer')) + '</code></div>';
+            html += '<div class="qd-correct">' + t('quiz-correct-answer') + '<code>' + d.correctAnswer + '</code></div>';
         }
         html += '<div class="qd-explain">💡 ' + d.explanation + '</div>';
         html += '</div>';
     });
 
-    html += '<button class="quiz-submit-btn" onclick="closeQuizModal()">關閉</button>';
+    html += '<button class="quiz-submit-btn" onclick="closeQuizModal()">' + t('quiz-close-btn') + '</button>';
     content.innerHTML = html;
 }
 

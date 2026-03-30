@@ -310,17 +310,17 @@
 <div class="qna-page">
     <div class="qna-hero">
         <h1 data-i18n="qna-title">❓ 問答討論</h1>
-        <p>有問題就問，一起學習成長</p>
+        <p data-i18n="qna-desc">有問題就問，一起學習成長</p>
     </div>
 
     <div class="qna-toolbar">
         <div class="qna-tabs">
-            <button class="qna-tab active" data-filter="all">全部</button>
-            <button class="qna-tab" data-filter="unsolved">未解決</button>
-            <button class="qna-tab" data-filter="solved">已解決</button>
+            <button class="qna-tab active" data-filter="all" data-i18n="qna-filter-all">全部</button>
+            <button class="qna-tab" data-filter="unsolved" data-i18n="qna-filter-unsolved">未解決</button>
+            <button class="qna-tab" data-filter="solved" data-i18n="qna-filter-solved">已解決</button>
         </div>
         <select class="qna-category-select" id="categoryFilter">
-            <option value="">所有分類</option>
+            <option value="" data-i18n="qna-all-categories">所有分類</option>
         </select>
         <button class="btn-ask" onclick="openAskModal()" data-i18n="qna-ask">✏️ 提問</button>
     </div>
@@ -332,24 +332,24 @@
 <!-- Ask Modal -->
 <div class="modal-overlay" id="askModal">
     <div class="modal-box">
-        <h2>✏️ 提出問題</h2>
+        <h2 data-i18n="qna-ask-title">✏️ 提出問題</h2>
         <div class="modal-field">
-            <label>暱稱（選填）</label>
-            <input type="text" id="askNickname" placeholder="匿名" maxlength="20" />
+            <label data-i18n="qna-nickname-label">暱稱（選填）</label>
+            <input type="text" id="askNickname" data-i18n-placeholder="qna-nickname-ph" placeholder="匿名" maxlength="20" />
         </div>
         <div class="modal-field">
-            <label>相關章節（選填）</label>
+            <label data-i18n="qna-chapter-label">相關章節（選填）</label>
             <select id="askChapter">
-                <option value="">不指定</option>
+                <option value="" data-i18n="qna-chapter-no-specific">不指定</option>
             </select>
         </div>
         <div class="modal-field">
-            <label>問題內容 *</label>
-            <textarea id="askQuestion" placeholder="描述你的問題..." maxlength="2000"></textarea>
+            <label data-i18n="qna-question-label">問題內容 *</label>
+            <textarea id="askQuestion" data-i18n-placeholder="qna-question-ph" placeholder="描述你的問題..." maxlength="2000"></textarea>
         </div>
         <div class="modal-actions">
-            <button class="btn-cancel" onclick="closeAskModal()">取消</button>
-            <button class="btn-submit" id="btnSubmitAsk" onclick="submitAsk()">送出</button>
+            <button class="btn-cancel" onclick="closeAskModal()" data-i18n="btn-cancel">取消</button>
+            <button class="btn-submit" id="btnSubmitAsk" onclick="submitAsk()" data-i18n="btn-submit">送出</button>
         </div>
     </div>
 </div>
@@ -393,14 +393,14 @@
         }
 
         if (filteredQuestions.length === 0) {
-            list.innerHTML = '<div class="qna-empty"><div class="empty-icon">🤔</div><p>還沒有問題，來提出第一個問題吧！</p></div>';
+            list.innerHTML = `<div class="qna-empty"><div class="empty-icon">🤔</div><p>${t('qna-empty-msg')}</p></div>`;
         } else {
             list.innerHTML = filteredQuestions.map(q => `
                 <a href="/QnA/Detail/${q.id}" class="qna-card">
                     <div class="qna-card-header">
                         ${q.isSolved
-                            ? '<span class="qna-solved-badge">✅ 已解決</span>'
-                            : '<span class="qna-unsolved-badge">待解決</span>'}
+                            ? `<span class="qna-solved-badge">${t('qna-solved-badge')}</span>`
+                            : `<span class="qna-unsolved-badge">${t('qna-unsolved-badge')}</span>`}
                         ${q.chapterTitle ? `<span class="qna-chapter-tag">${escHtml(q.chapterTitle)}</span>` : ''}
                     </div>
                     <div class="qna-card-question">${escHtml(q.question)}</div>
@@ -408,7 +408,7 @@
                         <span>👤 ${escHtml(q.nickname)}</span>
                         <span>🕐 ${q.timeAgo}</span>
                         <span>👍 ${q.upvotes}</span>
-                        <span>💬 ${q.answerCount} 個回答</span>
+                        <span>💬 ${q.answerCount}</span>
                     </div>
                 </a>
             `).join('');
@@ -483,7 +483,7 @@
     async function submitAsk() {
         const btn = document.getElementById('btnSubmitAsk');
         const question = document.getElementById('askQuestion').value.trim();
-        if (!question) { alert('請輸入問題內容'); return; }
+        if (!question) { alert(t('qna-input-required')); return; }
 
         btn.disabled = true;
         const body = {
@@ -504,10 +504,10 @@
                 document.getElementById('askQuestion').value = '';
                 window.location.href = '/QnA/Detail/' + data.id;
             } else {
-                alert(data.error || '發生錯誤');
+                alert(data.error || t('qna-error'));
             }
         } catch {
-            alert('網路錯誤');
+            alert(t('qna-network-error'));
         } finally {
             btn.disabled = false;
         }

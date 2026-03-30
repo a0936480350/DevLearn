@@ -234,13 +234,13 @@
 </style>
 
 <div class="qna-detail-page">
-    <a href="/QnA" class="qna-back">← 返回問答列表</a>
+    <a href="/QnA" class="qna-back" data-i18n="qna-back">← 返回問答列表</a>
 
     @if (q != null)
     {
         <div class="qna-q-box">
             <div class="qna-q-header">
-                <span class="qna-q-status @(q.IsSolved ? "solved" : "unsolved")">
+                <span class="qna-q-status @(q.IsSolved ? "solved" : "unsolved")" data-i18n="@(q.IsSolved ? "qna-status-solved" : "qna-status-unsolved")">
                     @(q.IsSolved ? "✅ 已解決" : "待解決")
                 </span>
                 @if (!string.IsNullOrEmpty(q.ChapterTitle))
@@ -258,20 +258,20 @@
             </div>
         </div>
 
-        <div class="qna-answers-title" id="answersTitle">💬 回答 (載入中...)</div>
+        <div class="qna-answers-title" id="answersTitle" data-i18n="qna-answers-loading">💬 回答 (載入中...)</div>
         <div id="answersList"></div>
 
         <div class="qna-answer-form">
-            <h3>✍️ 回答這個問題</h3>
+            <h3 data-i18n="qna-answer-form-title">✍️ 回答這個問題</h3>
             <div class="form-field">
-                <label>暱稱（選填）</label>
-                <input type="text" id="answerNickname" placeholder="匿名" maxlength="20" />
+                <label data-i18n="qna-answer-nickname-label">暱稱（選填）</label>
+                <input type="text" id="answerNickname" data-i18n-placeholder="qna-answer-nickname-ph" placeholder="匿名" maxlength="20" />
             </div>
             <div class="form-field">
-                <label>回答內容 *</label>
-                <textarea id="answerContent" placeholder="寫下你的回答..." maxlength="5000"></textarea>
+                <label data-i18n="qna-answer-content-label">回答內容 *</label>
+                <textarea id="answerContent" data-i18n-placeholder="qna-answer-content-ph" placeholder="寫下你的回答..." maxlength="5000"></textarea>
             </div>
-            <button class="btn-answer-submit" id="btnSubmitAnswer" onclick="submitAnswer()">送出回答</button>
+            <button class="btn-answer-submit" id="btnSubmitAnswer" onclick="submitAnswer()" data-i18n="qna-submit-answer">送出回答</button>
         </div>
     }
 </div>
@@ -295,17 +295,17 @@
         const res = await fetch('/QnA/Answers?qnaId=' + QNA_ID);
         const answers = await res.json();
 
-        document.getElementById('answersTitle').textContent = `💬 回答 (${answers.length})`;
+        document.getElementById('answersTitle').textContent = `💬 ${t('qna-answers-title')} (${answers.length})`;
 
         if (answers.length === 0) {
             document.getElementById('answersList').innerHTML =
-                '<div class="qna-no-answers">還沒有回答，成為第一個回答的人吧！</div>';
+                `<div class="qna-no-answers">${t('qna-no-answers')}</div>`;
             return;
         }
 
         document.getElementById('answersList').innerHTML = answers.map(a => `
             <div class="qna-answer-card ${a.isAccepted ? 'accepted' : ''}">
-                ${a.isAccepted ? '<div class="qna-accepted-tag">✅ 最佳答案</div>' : ''}
+                ${a.isAccepted ? `<div class="qna-accepted-tag">${t('qna-accepted-tag')}</div>` : ''}
                 <div class="qna-answer-content">${escHtml(a.content)}</div>
                 <div class="qna-answer-meta">
                     <span>👤 ${escHtml(a.nickname)}</span>
@@ -313,7 +313,7 @@
                     <button class="btn-upvote" onclick="upvoteAnswer(${a.id}, this)">
                         👍 <span>${a.upvotes}</span>
                     </button>
-                    ${!a.isAccepted ? `<button class="btn-accept btn-accept-answer" data-aid="${a.id}" onclick="markAccepted(${a.id})" style="display:none;">採納為最佳答案</button>` : ''}
+                    ${!a.isAccepted ? `<button class="btn-accept btn-accept-answer" data-aid="${a.id}" onclick="markAccepted(${a.id})" style="display:none;">${t('qna-accept-btn')}</button>` : ''}
                 </div>
             </div>
         `).join('');
@@ -362,7 +362,7 @@
     }
 
     async function markAccepted(answerId) {
-        if (!confirm('確定要採納這個回答為最佳答案嗎？')) return;
+        if (!confirm(t('qna-confirm-accept'))) return;
         const res = await fetch('/QnA/MarkSolved', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -372,14 +372,14 @@
         if (data.success) {
             location.reload();
         } else {
-            alert(data.error || '操作失敗，只有發問者可以採納答案');
+            alert(data.error || t('qna-accept-failed'));
         }
     }
 
     async function submitAnswer() {
         const btn = document.getElementById('btnSubmitAnswer');
         const content = document.getElementById('answerContent').value.trim();
-        if (!content) { alert('請輸入回答內容'); return; }
+        if (!content) { alert(t('qna-content-required')); return; }
 
         btn.disabled = true;
         try {
@@ -397,10 +397,10 @@
                 document.getElementById('answerContent').value = '';
                 loadAnswers();
             } else {
-                alert(data.error || '發生錯誤');
+                alert(data.error || t('qna-error'));
             }
         } catch {
-            alert('網路錯誤');
+            alert(t('qna-network-error'));
         } finally {
             btn.disabled = false;
         }

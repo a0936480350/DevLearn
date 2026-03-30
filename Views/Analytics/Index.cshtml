@@ -14,22 +14,22 @@
         <div class="analytics-stat-card">
             <div class="stat-icon">📅</div>
             <div class="stat-val" id="stat-days">--</div>
-            <div class="stat-label">學習天數</div>
+            <div class="stat-label" data-i18n="analytics-stat-days">學習天數</div>
         </div>
         <div class="analytics-stat-card">
             <div class="stat-icon">📖</div>
             <div class="stat-val" id="stat-chapters">--</div>
-            <div class="stat-label">完成章節</div>
+            <div class="stat-label" data-i18n="analytics-stat-chapters">完成章節</div>
         </div>
         <div class="analytics-stat-card">
             <div class="stat-icon">🎯</div>
             <div class="stat-val" id="stat-quizzes">--</div>
-            <div class="stat-label">測驗次數</div>
+            <div class="stat-label" data-i18n="analytics-stat-quizzes">測驗次數</div>
         </div>
         <div class="analytics-stat-card">
             <div class="stat-icon">⭐</div>
             <div class="stat-val" id="stat-avg"><span>--</span><span class="stat-sub">%</span></div>
-            <div class="stat-label">平均分數</div>
+            <div class="stat-label" data-i18n="analytics-stat-avg">平均分數</div>
         </div>
     </div>
 
@@ -38,22 +38,22 @@
         <div class="analytics-section analytics-streak-card">
             <div class="streak-flame">🔥</div>
             <div class="streak-num" id="stat-streak">0</div>
-            <div class="streak-label">天連續學習</div>
+            <div class="streak-label" data-i18n="analytics-streak-label">天連續學習</div>
         </div>
         <div class="analytics-section analytics-week-card">
-            <h3>📆 本週活動</h3>
+            <h3 data-i18n="analytics-week-title">📆 本週活動</h3>
             <div class="week-items">
                 <div class="week-item">
                     <span class="week-icon">⏱️</span>
-                    <span id="week-minutes">0</span> 分鐘
+                    <span id="week-minutes">0</span> <span data-i18n="analytics-week-minutes">分鐘</span>
                 </div>
                 <div class="week-item">
                     <span class="week-icon">📖</span>
-                    <span id="week-chapters">0</span> 章節
+                    <span id="week-chapters">0</span> <span data-i18n="analytics-week-chapters">章節</span>
                 </div>
                 <div class="week-item">
                     <span class="week-icon">🎯</span>
-                    <span id="week-quizzes">0</span> 測驗
+                    <span id="week-quizzes">0</span> <span data-i18n="analytics-week-quizzes">測驗</span>
                 </div>
             </div>
         </div>
@@ -62,7 +62,7 @@
     <!-- Heatmap -->
     <div class="analytics-section">
         <div class="heatmap-header">
-            <h3>🗓️ 學習熱力圖</h3>
+            <h3 data-i18n="analytics-heatmap-title">🗓️ 學習熱力圖</h3>
             <div class="heatmap-year-nav">
                 <button id="heatmap-prev" class="heatmap-nav-btn">&lt;</button>
                 <span id="heatmap-year">@DateTime.Now.Year</span>
@@ -77,21 +77,21 @@
             <div class="heatmap-grid" id="heatmap-grid"></div>
         </div>
         <div class="heatmap-legend">
-            <span>少</span>
+            <span data-i18n="analytics-legend-less">少</span>
             <span class="heatmap-cell" data-level="0"></span>
             <span class="heatmap-cell" data-level="1"></span>
             <span class="heatmap-cell" data-level="2"></span>
             <span class="heatmap-cell" data-level="3"></span>
             <span class="heatmap-cell" data-level="4"></span>
-            <span>多</span>
+            <span data-i18n="analytics-legend-more">多</span>
         </div>
     </div>
 
     <!-- Weak Points -->
     <div class="analytics-section">
-        <h3>🎯 弱點分析</h3>
+        <h3 data-i18n="analytics-weakpoints-title">🎯 弱點分析</h3>
         <div id="weakpoints-container">
-            <div class="loading-text">載入中...</div>
+            <div class="loading-text" data-i18n="loading">載入中...</div>
         </div>
     </div>
 </div>
@@ -447,7 +447,7 @@
         }
 
         // Month labels
-        const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+        const monthNames = [t('month-1'),t('month-2'),t('month-3'),t('month-4'),t('month-5'),t('month-6'),t('month-7'),t('month-8'),t('month-9'),t('month-10'),t('month-11'),t('month-12')];
         let monthPositions = [];
         let weekIndex = 0;
         weeks.forEach((week, wi) => {
@@ -484,7 +484,7 @@
                     cell.setAttribute('data-level', day.level);
                     cell.setAttribute('data-date', day.date);
                     cell.addEventListener('mouseenter', function(e) {
-                        const lvlText = ['無活動','輕度','中度','高度','密集'];
+                        const lvlText = [t('heatmap-level-0'),t('heatmap-level-1'),t('heatmap-level-2'),t('heatmap-level-3'),t('heatmap-level-4')];
                         tooltip.textContent = day.date + ' - ' + lvlText[day.level];
                         tooltip.style.display = 'block';
                         tooltip.style.left = (e.clientX + 10) + 'px';
@@ -510,7 +510,7 @@
             const container = document.getElementById('weakpoints-container');
 
             if (!data || data.length === 0) {
-                container.innerHTML = '<div class="empty-state-analytics"><div class="empty-icon">🎯</div><p>還沒有測驗資料，做幾個測驗來看看弱點分析吧！</p></div>';
+                container.innerHTML = `<div class="empty-state-analytics"><div class="empty-icon">🎯</div><p>${t('analytics-weakpoints-empty')}</p></div>`;
                 return;
             }
 
@@ -526,7 +526,7 @@
                     <div class="weakpoint-bar-bg">
                         <div class="weakpoint-bar-fill" style="width:${acc}%;background:${color}"></div>
                     </div>
-                    <div class="weakpoint-detail">答對 ${item.correctCount} / ${item.totalQuestions} 題</div>
+                    <div class="weakpoint-detail">${t('analytics-weakpoints-detail').replace('{c}', item.correctCount).replace('{t}', item.totalQuestions)}</div>
                 </div>`;
             });
             container.innerHTML = html;

@@ -87,27 +87,27 @@
 </style>
 
 <div class="apply-page">
-    <a href="/" style="color:#2299dd;text-decoration:none;display:block;margin-bottom:20px;font-size:14px;">&#x1F3E0; &#x2190; 回首頁</a>
+    <a href="/" style="color:#2299dd;text-decoration:none;display:block;margin-bottom:20px;font-size:14px;" data-i18n="teacher-back-home">&#x1F3E0; &#x2190; 回首頁</a>
     <!-- Section A: 平台說明 -->
     <div class="platform-intro">
-        <h1>&#x1F393; 成為平台老師</h1>
-        <div class="subtitle">加入我們的教學團隊，分享您的專業知識</div>
+        <h1 data-i18n="teacher-apply-title">&#x1F393; 成為平台老師</h1>
+        <div class="subtitle" data-i18n="teacher-apply-subtitle">加入我們的教學團隊，分享您的專業知識</div>
 
         <div class="info-cards">
             <div class="info-card">
                 <div class="ic-icon">&#x1F4CB;</div>
-                <div class="ic-title">必要文件</div>
-                <div class="ic-desc">需上傳：最高學歷證書、個人照片</div>
+                <div class="ic-title" data-i18n="teacher-apply-card1-title">必要文件</div>
+                <div class="ic-desc" data-i18n="teacher-apply-card1-desc">需上傳：最高學歷證書、個人照片</div>
             </div>
             <div class="info-card">
                 <div class="ic-icon">&#x1F4DA;</div>
-                <div class="ic-title">教學範圍</div>
-                <div class="ic-desc">不限於程式！可教授任何技術領域：程式開發、資料分析、AI、設計、語言等</div>
+                <div class="ic-title" data-i18n="teacher-apply-card2-title">教學範圍</div>
+                <div class="ic-desc" data-i18n="teacher-apply-card2-desc">不限於程式！可教授任何技術領域：程式開發、資料分析、AI、設計、語言等</div>
             </div>
             <div class="info-card">
                 <div class="ic-icon">&#x1F4B0;</div>
-                <div class="ic-title">平台抽成</div>
-                <div class="ic-desc">平台收取 15% 服務費，包含金流處理、學生媒合、平台維護</div>
+                <div class="ic-title" data-i18n="teacher-apply-card3-title">平台抽成</div>
+                <div class="ic-desc" data-i18n="teacher-apply-card3-desc">平台收取 15% 服務費，包含金流處理、學生媒合、平台維護</div>
             </div>
         </div>
     </div>
@@ -123,40 +123,40 @@
 
     <!-- Section B: 申請表單 -->
     <form method="post" class="apply-form" enctype="multipart/form-data" onsubmit="return prepareSubmit()">
-        <div class="form-section-title">&#x1F4DD; 申請資料</div>
+        <div class="form-section-title" data-i18n="teacher-apply-form-title">&#x1F4DD; 申請資料</div>
 
         <div class="form-group">
-            <label>姓名 *</label>
-            <input type="text" name="name" required placeholder="您的真實姓名或暱稱" />
+            <label data-i18n="teacher-apply-name">姓名 *</label>
+            <input type="text" name="name" required data-i18n-placeholder="teacher-apply-name-ph" placeholder="您的真實姓名或暱稱" />
         </div>
 
         <div class="form-group">
-            <label>頭銜 * <small>例如：資深.NET工程師</small></label>
-            <input type="text" name="title" required placeholder="資深.NET工程師" />
+            <label data-i18n="teacher-apply-title-label">頭銜 * <small>例如：資深.NET工程師</small></label>
+            <input type="text" name="title" required data-i18n-placeholder="teacher-apply-title-ph" placeholder="資深.NET工程師" />
         </div>
 
         <div class="form-group">
-            <label>自我介紹 * <small>(最多 500 字)</small></label>
-            <textarea name="bio" required maxlength="500" placeholder="請介紹您的教學經驗、專業背景和教學理念..."></textarea>
+            <label data-i18n="teacher-apply-bio">自我介紹 * <small>(最多 500 字)</small></label>
+            <textarea name="bio" required maxlength="500" data-i18n-placeholder="teacher-apply-bio-ph" placeholder="請介紹您的教學經驗、專業背景和教學理念..."></textarea>
         </div>
 
         <div class="form-group">
-            <label>最高學歷 *</label>
-            <input type="text" name="education" required placeholder="台灣大學資訊工程學系" />
+            <label data-i18n="teacher-apply-edu">最高學歷 *</label>
+            <input type="text" name="education" required data-i18n-placeholder="teacher-apply-edu-ph" placeholder="台灣大學資訊工程學系" />
         </div>
 
         <div class="form-group">
-            <label>教學年資 *</label>
+            <label data-i18n="teacher-apply-exp">教學年資 *</label>
             <input type="number" name="experienceYears" required min="0" max="50" placeholder="3" />
         </div>
 
         <!-- 照片上傳 -->
         <div class="form-group">
-            <label>&#x1F4F7; 個人照片上傳 *</label>
+            <label data-i18n="teacher-apply-photo">&#x1F4F7; 個人照片上傳 *</label>
             <div class="file-upload-area" id="photoUploadArea">
                 <div class="fu-icon">&#x1F4F7;</div>
-                <div class="fu-text">點擊或拖拽上傳個人照片</div>
-                <div class="fu-hint">支援 JPG、PNG 格式</div>
+                <div class="fu-text" data-i18n="teacher-apply-photo-text">點擊或拖拽上傳個人照片</div>
+                <div class="fu-hint" data-i18n="teacher-apply-photo-hint">支援 JPG、PNG 格式</div>
                 <input type="file" name="photo" accept="image/*" required id="photoInput" onchange="previewPhoto(this)" />
             </div>
             <img class="photo-preview" id="photoPreview" />
@@ -164,11 +164,11 @@
 
         <!-- 學歷證書上傳 -->
         <div class="form-group">
-            <label>&#x1F4C4; 學歷證書上傳 *</label>
+            <label data-i18n="teacher-apply-diploma">&#x1F4C4; 學歷證書上傳 *</label>
             <div class="file-upload-area" id="diplomaUploadArea">
                 <div class="fu-icon">&#x1F4C4;</div>
-                <div class="fu-text">點擊或拖拽上傳學歷證書</div>
-                <div class="fu-hint">支援 JPG、PNG、PDF 格式</div>
+                <div class="fu-text" data-i18n="teacher-apply-diploma-text">點擊或拖拽上傳學歷證書</div>
+                <div class="fu-hint" data-i18n="teacher-apply-diploma-hint">支援 JPG、PNG、PDF 格式</div>
                 <input type="file" name="diploma" accept="image/*,.pdf" required id="diplomaInput" onchange="showDiplomaName(this)" />
             </div>
             <div class="diploma-filename" id="diplomaFilename"></div>
@@ -176,7 +176,7 @@
 
         <!-- 專長技能 -->
         <div class="form-group">
-            <label>專長技能 *</label>
+            <label data-i18n="teacher-apply-skills">專長技能 *</label>
             <div class="skill-checkboxes" id="skillCheckboxes">
                 @foreach (var s in new[] { "C#", "ASP.NET Core", "SQL/資料庫", "JavaScript/前端", "Python", "Java", "Docker/DevOps", "AI/ML", "系統架構", "資安", "UI/UX設計", "英文", "日文" })
                 {
@@ -187,27 +187,27 @@
         </div>
 
         <div class="form-group">
-            <label>額外技能 <small>(選填)</small></label>
-            <input type="text" name="customSkills" placeholder="輸入其他專長，用逗號分隔" />
+            <label data-i18n="teacher-apply-extra-skills">額外技能 <small>(選填)</small></label>
+            <input type="text" name="customSkills" data-i18n-placeholder="teacher-apply-extra-skills-ph" placeholder="輸入其他專長，用逗號分隔" />
         </div>
 
         <div class="form-row">
             <div class="form-group">
-                <label>每小時費率 (NTD) *</label>
+                <label data-i18n="teacher-apply-hourly">每小時費率 (NTD) *</label>
                 <input type="number" name="hourlyRate" required min="100" placeholder="800" />
             </div>
             <div class="form-group">
-                <label>體驗課費率 (NTD) *</label>
+                <label data-i18n="teacher-apply-trial">體驗課費率 (NTD) *</label>
                 <input type="number" name="trialPrice" required min="0" placeholder="300" />
             </div>
         </div>
 
         <div class="terms-check">
             <input type="checkbox" id="agreeTerms" required />
-            <label for="agreeTerms">我同意平台服務條款，包含 15% 平台抽成費用</label>
+            <label for="agreeTerms" data-i18n="teacher-apply-terms">我同意平台服務條款，包含 15% 平台抽成費用</label>
         </div>
 
-        <button type="submit" class="submit-btn">提交申請</button>
+        <button type="submit" class="submit-btn" data-i18n="teacher-apply-submit">提交申請</button>
     </form>
 </div>
 
@@ -250,13 +250,13 @@
             checked.push(cb.value);
         });
         if (checked.length === 0) {
-            alert('請至少選擇一個專長技能');
+            alert(t('teacher-apply-skills-required'));
             return false;
         }
         document.getElementById('skillsJsonInput').value = JSON.stringify(checked);
 
         if (!document.getElementById('agreeTerms').checked) {
-            alert('請同意平台服務條款');
+            alert(t('teacher-apply-terms-required'));
             return false;
         }
         return true;
