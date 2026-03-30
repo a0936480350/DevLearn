@@ -117,15 +117,15 @@
         <form method="post" action="/Account/Register" id="registerForm">
             <div class="form-group">
                 <label data-i18n="login-nickname">暱稱</label>
-                <input type="text" name="nickname" placeholder="輸入你的暱稱" required maxlength="30" />
+                <input type="text" name="nickname" placeholder="輸入你的暱稱" required maxlength="30" data-i18n-placeholder="login-ph-nickname" />
             </div>
             <div class="form-group">
                 <label data-i18n="login-email">Email</label>
                 <div style="position:relative;">
-                    <input type="password" name="email" placeholder="輸入您的 Email" required style="padding-right:40px;" />
+                    <input type="password" name="email" placeholder="輸入您的 Email" required style="padding-right:40px;" data-i18n-placeholder="register-ph-email" />
                     <button type="button" onclick="toggleEmail(this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;cursor:pointer;">👁️</button>
                 </div>
-                <div style="font-size:12px;color:#8b949e;margin-top:6px;">💡 Email 不會公開顯示，僅用於登入驗證</div>
+                <div style="font-size:12px;color:#8b949e;margin-top:6px;" data-i18n="register-email-hint">💡 Email 不會公開顯示，僅用於登入驗證</div>
             </div>
             <button type="submit" class="btn-submit" data-i18n="register-btn">註冊</button>
         </form>

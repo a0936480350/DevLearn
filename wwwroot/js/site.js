@@ -324,7 +324,94 @@ var translations = {
 
         // Flashcard / Snippet
         'flashcard-title': '暗記卡片',
+        'flashcard-desc': '用間隔重複法高效記憶重要觀念',
+        'flashcard-manage': '📋 管理',
+        'flashcard-review': '🔄 複習',
+        'flashcard-add': '＋ 新增卡片',
+        'flashcard-total': '卡片總數',
+        'flashcard-due': '待複習',
+        'flashcard-mastery': '掌握率',
+        'flashcard-empty': '還沒有卡片，點右上角新增第一張暗記卡片吧！',
+        'flashcard-flip-hint': '點擊翻面',
+        'flashcard-forgot': '忘了 ❌',
+        'flashcard-remembered': '記得 ✅',
+        'flashcard-done': '太棒了！所有待複習的卡片都完成了！',
+        'flashcard-back-manage': '返回管理',
+        'flashcard-create-title': '🧠 新增暗記卡片',
+        'flashcard-front-label': '正面（問題）',
+        'flashcard-front-ph': '例：什麼是 SOLID 原則中的 S？',
+        'flashcard-back-label': '背面（答案）',
+        'flashcard-back-ph': '例：Single Responsibility Principle — 單一職責原則',
+        'flashcard-category-label': '分類（選填）',
+        'flashcard-category-ph': '例：設計模式、C# 語法、ASP.NET',
+        'flashcard-no-due': '目前沒有需要複習的卡片！',
+        'flashcard-fill-required': '請填入正面和背面內容',
+        'flashcard-confirm-delete': '確定要刪除這張卡片嗎？',
+        'flashcard-review-times': '複習',
+        'flashcard-review-unit': '次',
         'snippet-title': '程式碼收藏',
+        'snippet-desc': '收藏實用的程式碼片段，隨時查閱',
+        'snippet-add': '＋ 新增片段',
+        'snippet-empty': '還沒有收藏，在章節頁面點 📌 收藏程式碼',
+        'snippet-create-title': '📌 新增程式碼片段',
+        'snippet-title-label': '標題',
+        'snippet-title-ph': '例：LINQ GroupBy 範例',
+        'snippet-lang-label': '程式語言',
+        'snippet-code-label': '程式碼',
+        'snippet-code-ph': '貼上你的程式碼...',
+        'snippet-note-label': '備註（選填）',
+        'snippet-note-ph': '任何筆記或說明...',
+        'snippet-fill-required': '請填入標題和程式碼',
+        'snippet-confirm-delete': '確定要刪除這個片段嗎？',
+        'snippet-count': '個片段',
+        'snippet-delete': '🗑 刪除',
+
+        // Account extras
+        'login-ph-nickname': '輸入你的暱稱',
+        'login-ph-email': '輸入您的 Email（已隱藏保護）',
+        'login-email-hint': '💡 Email 作為您的身份驗證，已隱藏保護',
+        'register-ph-email': '輸入您的 Email',
+        'register-email-hint': '💡 Email 不會公開顯示，僅用於登入驗證',
+        'profile-registered': '已註冊會員',
+        'profile-anonymous': '匿名用戶',
+        'profile-total-score': '總分數',
+        'profile-quizzes-taken': '測驗次數',
+        'profile-chapters-done': '完成章節',
+        'profile-account-info': '帳號資訊',
+        'profile-registered-badge': '已註冊 ✅',
+        'profile-anon-id': '匿名 ID',
+        'profile-created-at': '建立時間',
+        'profile-last-active': '最後活動',
+        'profile-edit-title': '✏️ 編輯個人資料',
+        'profile-upload-avatar': '📷 上傳/更換頭像',
+        'profile-nickname-label': '✏️ 暱稱',
+        'profile-email-label': '📧 Email',
+        'profile-save-btn': '💾 儲存修改',
+        'profile-upgrade-title': '🚀 註冊升級',
+        'profile-upgrade-desc': '註冊後可以管理你的想法、問答、聊天紀錄和測驗歷史！',
+        'profile-upgrade-btn': '📝 立即註冊',
+        'profile-fav-teachers': '❤️ 我的收藏',
+        'profile-bookings': '📅 我的預約',
+        'profile-confirm-logout': '確定要登出嗎？登出後將使用新的匿名身份',
+        'profile-sidebar-upgrade': '註冊升級',
+
+        // Error page
+        'error404-title': '404 - 找不到頁面',
+        'error404-msg': '哎呀！這個頁面去冒險了',
+        'error404-desc': '你找的頁面可能已經搬家、改名，或正在學習 .NET 的路上迷路了',
+        'error404-home': '回到首頁 🏠',
+
+        // Layout extras
+        'support-category-bug': '網站問題回報',
+        'support-category-tech': '技術問題',
+        'support-category-payment': '付款問題',
+        'support-category-teacher': '老師相關',
+        'support-category-booking': '預約問題',
+        'support-category-feature': '功能建議',
+        'support-category-other': '其他',
+        'loading-badge': '⏳ 載入中',
+        'theme-toggle': '切換主題',
+        'menu-label': '選單',
     },
     en: {
         // Navbar
@@ -537,7 +624,94 @@ var translations = {
 
         // Flashcard / Snippet
         'flashcard-title': 'Flashcards',
+        'flashcard-desc': 'Efficiently memorize key concepts with spaced repetition',
+        'flashcard-manage': '📋 Manage',
+        'flashcard-review': '🔄 Review',
+        'flashcard-add': '＋ New Card',
+        'flashcard-total': 'Total Cards',
+        'flashcard-due': 'Due Review',
+        'flashcard-mastery': 'Mastery',
+        'flashcard-empty': 'No cards yet. Click the top-right button to add your first flashcard!',
+        'flashcard-flip-hint': 'Click to flip',
+        'flashcard-forgot': 'Forgot ❌',
+        'flashcard-remembered': 'Got it ✅',
+        'flashcard-done': 'Awesome! All review cards are done!',
+        'flashcard-back-manage': 'Back to Manage',
+        'flashcard-create-title': '🧠 New Flashcard',
+        'flashcard-front-label': 'Front (Question)',
+        'flashcard-front-ph': 'e.g. What is the S in SOLID?',
+        'flashcard-back-label': 'Back (Answer)',
+        'flashcard-back-ph': 'e.g. Single Responsibility Principle',
+        'flashcard-category-label': 'Category (optional)',
+        'flashcard-category-ph': 'e.g. Design Patterns, C# Syntax, ASP.NET',
+        'flashcard-no-due': 'No cards due for review!',
+        'flashcard-fill-required': 'Please fill in both front and back',
+        'flashcard-confirm-delete': 'Are you sure you want to delete this card?',
+        'flashcard-review-times': 'Reviewed',
+        'flashcard-review-unit': 'times',
         'snippet-title': 'Code Snippets',
+        'snippet-desc': 'Save useful code snippets for quick reference',
+        'snippet-add': '＋ New Snippet',
+        'snippet-empty': 'No snippets yet. Click 📌 on chapter pages to save code',
+        'snippet-create-title': '📌 New Code Snippet',
+        'snippet-title-label': 'Title',
+        'snippet-title-ph': 'e.g. LINQ GroupBy Example',
+        'snippet-lang-label': 'Language',
+        'snippet-code-label': 'Code',
+        'snippet-code-ph': 'Paste your code here...',
+        'snippet-note-label': 'Notes (optional)',
+        'snippet-note-ph': 'Any notes or description...',
+        'snippet-fill-required': 'Please fill in title and code',
+        'snippet-confirm-delete': 'Are you sure you want to delete this snippet?',
+        'snippet-count': 'snippets',
+        'snippet-delete': '🗑 Delete',
+
+        // Account extras
+        'login-ph-nickname': 'Enter your nickname',
+        'login-ph-email': 'Enter your email (hidden for security)',
+        'login-email-hint': '💡 Email is used for verification, kept hidden',
+        'register-ph-email': 'Enter your email',
+        'register-email-hint': '💡 Email is private, used only for login verification',
+        'profile-registered': 'Registered Member',
+        'profile-anonymous': 'Anonymous User',
+        'profile-total-score': 'Total Score',
+        'profile-quizzes-taken': 'Quizzes Taken',
+        'profile-chapters-done': 'Chapters Done',
+        'profile-account-info': 'Account Info',
+        'profile-registered-badge': 'Registered ✅',
+        'profile-anon-id': 'Anonymous ID',
+        'profile-created-at': 'Created',
+        'profile-last-active': 'Last Active',
+        'profile-edit-title': '✏️ Edit Profile',
+        'profile-upload-avatar': '📷 Upload/Change Avatar',
+        'profile-nickname-label': '✏️ Nickname',
+        'profile-email-label': '📧 Email',
+        'profile-save-btn': '💾 Save Changes',
+        'profile-upgrade-title': '🚀 Upgrade Account',
+        'profile-upgrade-desc': 'Register to manage your ideas, Q&A, chat history and quiz records!',
+        'profile-upgrade-btn': '📝 Register Now',
+        'profile-fav-teachers': '❤️ My Favorites',
+        'profile-bookings': '📅 My Bookings',
+        'profile-confirm-logout': 'Are you sure you want to log out? You will get a new anonymous identity',
+        'profile-sidebar-upgrade': 'Upgrade',
+
+        // Error page
+        'error404-title': '404 - Page Not Found',
+        'error404-msg': 'Oops! This page went on an adventure',
+        'error404-desc': 'The page you are looking for may have moved, been renamed, or got lost on the .NET learning path',
+        'error404-home': 'Back to Home 🏠',
+
+        // Layout extras
+        'support-category-bug': 'Bug Report',
+        'support-category-tech': 'Technical Issue',
+        'support-category-payment': 'Payment Issue',
+        'support-category-teacher': 'Teacher Related',
+        'support-category-booking': 'Booking Issue',
+        'support-category-feature': 'Feature Request',
+        'support-category-other': 'Other',
+        'loading-badge': '⏳ Loading',
+        'theme-toggle': 'Toggle Theme',
+        'menu-label': 'Menu',
     },
     ja: {
         // Navbar
@@ -750,24 +924,118 @@ var translations = {
 
         // Flashcard / Snippet
         'flashcard-title': '暗記カード',
+        'flashcard-desc': '間隔反復法で重要な概念を効率的に記憶',
+        'flashcard-manage': '📋 管理',
+        'flashcard-review': '🔄 復習',
+        'flashcard-add': '＋ 新規カード',
+        'flashcard-total': 'カード総数',
+        'flashcard-due': '復習待ち',
+        'flashcard-mastery': '習得率',
+        'flashcard-empty': 'まだカードがありません。右上のボタンから最初のカードを追加しましょう！',
+        'flashcard-flip-hint': 'クリックで裏返す',
+        'flashcard-forgot': '忘れた ❌',
+        'flashcard-remembered': '覚えた ✅',
+        'flashcard-done': 'すごい！復習待ちのカードをすべて完了しました！',
+        'flashcard-back-manage': '管理に戻る',
+        'flashcard-create-title': '🧠 新規暗記カード',
+        'flashcard-front-label': '表面（質問）',
+        'flashcard-front-ph': '例：SOLIDのSとは？',
+        'flashcard-back-label': '裏面（答え）',
+        'flashcard-back-ph': '例：Single Responsibility Principle — 単一責任の原則',
+        'flashcard-category-label': 'カテゴリ（任意）',
+        'flashcard-category-ph': '例：デザインパターン、C#構文、ASP.NET',
+        'flashcard-no-due': '復習が必要なカードはありません！',
+        'flashcard-fill-required': '表面と裏面の内容を入力してください',
+        'flashcard-confirm-delete': 'このカードを削除してもよろしいですか？',
+        'flashcard-review-times': '復習',
+        'flashcard-review-unit': '回',
         'snippet-title': 'コードスニペット',
+        'snippet-desc': '便利なコードスニペットを保存していつでも参照',
+        'snippet-add': '＋ 新規スニペット',
+        'snippet-empty': 'まだ保存がありません。章のページで📌をクリックしてコードを保存',
+        'snippet-create-title': '📌 新規コードスニペット',
+        'snippet-title-label': 'タイトル',
+        'snippet-title-ph': '例：LINQ GroupBy の例',
+        'snippet-lang-label': 'プログラミング言語',
+        'snippet-code-label': 'コード',
+        'snippet-code-ph': 'コードを貼り付け...',
+        'snippet-note-label': 'メモ（任意）',
+        'snippet-note-ph': 'メモや説明...',
+        'snippet-fill-required': 'タイトルとコードを入力してください',
+        'snippet-confirm-delete': 'このスニペットを削除してもよろしいですか？',
+        'snippet-count': '個のスニペット',
+        'snippet-delete': '🗑 削除',
+
+        // Account extras
+        'login-ph-nickname': 'ニックネームを入力',
+        'login-ph-email': 'メールアドレスを入力（非表示で保護）',
+        'login-email-hint': '💡 メールは本人確認用、非表示で保護されます',
+        'register-ph-email': 'メールアドレスを入力',
+        'register-email-hint': '💡 メールは公開されず、ログイン認証にのみ使用',
+        'profile-registered': '登録済み会員',
+        'profile-anonymous': '匿名ユーザー',
+        'profile-total-score': '合計スコア',
+        'profile-quizzes-taken': 'クイズ回数',
+        'profile-chapters-done': '完了した章',
+        'profile-account-info': 'アカウント情報',
+        'profile-registered-badge': '登録済み ✅',
+        'profile-anon-id': '匿名ID',
+        'profile-created-at': '作成日時',
+        'profile-last-active': '最終アクティブ',
+        'profile-edit-title': '✏️ プロフィール編集',
+        'profile-upload-avatar': '📷 アバターをアップロード/変更',
+        'profile-nickname-label': '✏️ ニックネーム',
+        'profile-email-label': '📧 メール',
+        'profile-save-btn': '💾 変更を保存',
+        'profile-upgrade-title': '🚀 アカウントアップグレード',
+        'profile-upgrade-desc': '登録するとアイデア、Q&A、チャット履歴、クイズ記録を管理できます！',
+        'profile-upgrade-btn': '📝 今すぐ登録',
+        'profile-fav-teachers': '❤️ お気に入り',
+        'profile-bookings': '📅 予約一覧',
+        'profile-confirm-logout': 'ログアウトしますか？新しい匿名IDが割り当てられます',
+        'profile-sidebar-upgrade': 'アップグレード',
+
+        // Error page
+        'error404-title': '404 - ページが見つかりません',
+        'error404-msg': 'おっと！このページは冒険に出かけました',
+        'error404-desc': 'お探しのページは移動、名前変更、または.NET学習の道で迷子になった可能性があります',
+        'error404-home': 'ホームに戻る 🏠',
+
+        // Layout extras
+        'support-category-bug': 'バグ報告',
+        'support-category-tech': '技術的な問題',
+        'support-category-payment': '支払い問題',
+        'support-category-teacher': '先生関連',
+        'support-category-booking': '予約問題',
+        'support-category-feature': '機能リクエスト',
+        'support-category-other': 'その他',
+        'loading-badge': '⏳ 読み込み中',
+        'theme-toggle': 'テーマ切替',
+        'menu-label': 'メニュー',
     }
 };
 
+// Helper: get translated string for JS usage
+function t(key) {
+    var lang = localStorage.getItem('lang') || 'zh';
+    var dict = translations[lang];
+    return (dict && dict[key]) ? dict[key] : (translations.zh[key] || key);
+}
+
 function changeLang(lang) {
     localStorage.setItem('lang', lang);
-    var t = translations[lang];
-    if (!t) return;
+    var tr = translations[lang];
+    if (!tr) return;
 
     document.querySelectorAll('[data-i18n]').forEach(function(el) {
         var key = el.getAttribute('data-i18n');
-        if (t[key]) {
+        if (tr[key]) {
             if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                el.placeholder = t[key];
+                el.placeholder = tr[key];
             } else if (el.tagName === 'OPTION') {
-                // skip options
+                el.textContent = tr[key];
             } else {
-                el.textContent = t[key];
+                el.textContent = tr[key];
             }
         }
     });
@@ -775,7 +1043,7 @@ function changeLang(lang) {
     // Also handle data-i18n-placeholder
     document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
         var key = el.getAttribute('data-i18n-placeholder');
-        if (t[key]) el.placeholder = t[key];
+        if (tr[key]) el.placeholder = tr[key];
     });
 
     var sel = document.getElementById('langSelect');

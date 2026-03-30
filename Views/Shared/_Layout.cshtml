@@ -212,13 +212,13 @@
                     <div onclick="toggleSupportForm()" style="cursor:pointer;padding:8px 12px;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);border-radius:8px;font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px;text-align:center;" data-i18n="chat-support-new">&#x2795; &#x65B0;&#x554F;&#x984C;</div>
                     <div id="supportFormBody" style="display:none;margin-bottom:12px;">
                         <select id="supportCategory" style="width:100%;padding:7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;margin-bottom:8px;font-family:'Noto Sans TC',sans-serif;">
-                            <option value="網站問題回報">🐛 網站問題回報</option>
-                            <option value="技術問題">💻 技術問題</option>
-                            <option value="付款問題">💳 付款問題</option>
-                            <option value="老師相關">👨‍🏫 老師相關</option>
-                            <option value="預約問題">📅 預約問題</option>
-                            <option value="功能建議">💡 功能建議</option>
-                            <option value="其他">&#x2753; &#x5176;&#x4ED6;</option>
+                            <option value="網站問題回報" data-i18n="support-category-bug">🐛 網站問題回報</option>
+                            <option value="技術問題" data-i18n="support-category-tech">💻 技術問題</option>
+                            <option value="付款問題" data-i18n="support-category-payment">💳 付款問題</option>
+                            <option value="老師相關" data-i18n="support-category-teacher">👨‍🏫 老師相關</option>
+                            <option value="預約問題" data-i18n="support-category-booking">📅 預約問題</option>
+                            <option value="功能建議" data-i18n="support-category-feature">💡 功能建議</option>
+                            <option value="其他" data-i18n="support-category-other">&#x2753; &#x5176;&#x4ED6;</option>
                         </select>
                         <textarea id="supportContent" placeholder="&#x8ACB;&#x63CF;&#x8FF0;&#x60A8;&#x7684;&#x554F;&#x984C;..." style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;min-height:70px;resize:vertical;font-family:'Noto Sans TC',sans-serif;margin-bottom:8px;"></textarea>
                         <button id="supportSubmitBtn" onclick="submitSupportTicket()" style="width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans TC',sans-serif;" data-i18n="chat-support-submit">提交回報</button>

@@ -233,30 +233,30 @@
 <div class="snippet-page">
     <div class="snippet-hero">
         <div>
-            <h1>📌 程式碼收藏</h1>
-            <p>收藏實用的程式碼片段，隨時查閱</p>
+            <h1 data-i18n="snippet-title">📌 程式碼收藏</h1>
+            <p data-i18n="snippet-desc">收藏實用的程式碼片段，隨時查閱</p>
         </div>
-        <button class="btn-add-snippet" onclick="openAddModal()">＋ 新增片段</button>
+        <button class="btn-add-snippet" onclick="openAddModal()" data-i18n="snippet-add">＋ 新增片段</button>
     </div>
 
     <div class="snippet-count" id="snippetCount"></div>
     <div class="snippet-grid" id="snippetGrid"></div>
     <div class="empty-state" id="emptyState" style="display:none">
         <div class="empty-icon">📌</div>
-        <p>還沒有收藏，在章節頁面點 📌 收藏程式碼</p>
+        <p data-i18n="snippet-empty">還沒有收藏，在章節頁面點 📌 收藏程式碼</p>
     </div>
 </div>
 
 <!-- Add Modal -->
 <div class="modal-overlay" id="addModal">
     <div class="modal-box">
-        <h2>📌 新增程式碼片段</h2>
+        <h2 data-i18n="snippet-create-title">📌 新增程式碼片段</h2>
         <div class="form-group">
-            <label>標題</label>
-            <input type="text" id="snippetTitle" placeholder="例：LINQ GroupBy 範例" />
+            <label data-i18n="snippet-title-label">標題</label>
+            <input type="text" id="snippetTitle" placeholder="例：LINQ GroupBy 範例" data-i18n-placeholder="snippet-title-ph" />
         </div>
         <div class="form-group">
-            <label>程式語言</label>
+            <label data-i18n="snippet-lang-label">程式語言</label>
             <select id="snippetLang">
                 <option value="csharp">C#</option>
                 <option value="sql">SQL</option>
@@ -271,16 +271,16 @@
             </select>
         </div>
         <div class="form-group">
-            <label>程式碼</label>
-            <textarea id="snippetCode" placeholder="貼上你的程式碼..."></textarea>
+            <label data-i18n="snippet-code-label">程式碼</label>
+            <textarea id="snippetCode" placeholder="貼上你的程式碼..." data-i18n-placeholder="snippet-code-ph"></textarea>
         </div>
         <div class="form-group">
-            <label>備註（選填）</label>
-            <input type="text" id="snippetNote" placeholder="任何筆記或說明..." />
+            <label data-i18n="snippet-note-label">備註（選填）</label>
+            <input type="text" id="snippetNote" placeholder="任何筆記或說明..." data-i18n-placeholder="snippet-note-ph" />
         </div>
         <div class="modal-actions">
-            <button class="btn-cancel" onclick="closeAddModal()">取消</button>
-            <button class="btn-save" onclick="saveSnippet()">儲存</button>
+            <button class="btn-cancel" onclick="closeAddModal()" data-i18n="btn-cancel">取消</button>
+            <button class="btn-save" onclick="saveSnippet()" data-i18n="btn-save">儲存</button>
         </div>
     </div>
 </div>
@@ -302,7 +302,7 @@
                 }
 
                 empty.style.display = 'none';
-                countEl.textContent = `共 ${data.length} 個片段`;
+                countEl.textContent = `${data.length} ${t('snippet-count')}`;
 
                 grid.innerHTML = data.map(s => {
                     const langMap = { csharp: 'C#', sql: 'SQL', bash: 'Bash', yaml: 'YAML', docker: 'Docker', json: 'JSON', xml: 'XML', html: 'HTML', css: 'CSS', javascript: 'JS' };
@@ -310,7 +310,8 @@
                     const escapedCode = escapeHtml(s.code);
                     const chapterHtml = s.chapterTitle ? `<span class="chapter-source">📖 ${escapeHtml(s.chapterTitle)}</span>` : '';
                     const noteHtml = s.note ? `<div class="snippet-note">💬 ${escapeHtml(s.note)}</div>` : '';
-                    const dateStr = new Date(s.createdAt).toLocaleDateString('zh-TW');
+                    var langLocale = {zh:'zh-TW',en:'en-US',ja:'ja-JP'}[localStorage.getItem('lang')||'zh']||'zh-TW';
+                    const dateStr = new Date(s.createdAt).toLocaleDateString(langLocale);
 
                     return `
                         <div class="snippet-card">
@@ -327,7 +328,7 @@
                             ${noteHtml}
                             <div class="snippet-card-footer">
                                 <span class="snippet-date">${dateStr}</span>
-                                <button class="btn-delete-snippet" onclick="deleteSnippet(${s.id})">🗑 刪除</button>
+                                <button class="btn-delete-snippet" onclick="deleteSnippet(${s.id})">${t('snippet-delete')}</button>
                             </div>
                         </div>`;
                 }).join('');
@@ -360,7 +361,7 @@
         const note = document.getElementById('snippetNote').value.trim();
 
         if (!title || !code) {
-            alert('請填入標題和程式碼');
+            alert(t('snippet-fill-required'));
             return;
         }
 
@@ -379,7 +380,7 @@
     }
 
     function deleteSnippet(id) {
-        if (!confirm('確定要刪除這個片段嗎？')) return;
+        if (!confirm(t('snippet-confirm-delete'))) return;
         fetch('/Snippet/Delete', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

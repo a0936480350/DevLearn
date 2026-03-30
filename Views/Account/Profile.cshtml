@@ -205,9 +205,9 @@
             <div class="title">@(user?.Nickname ?? "用戶")</div>
             <div class="subtitle">
                 @if (isRegistered)
-                { <span>已註冊會員</span> }
+                { <span data-i18n="profile-registered">已註冊會員</span> }
                 else
-                { <span>匿名用戶</span> }
+                { <span data-i18n="profile-anonymous">匿名用戶</span> }
             </div>
         </div>
 
@@ -218,19 +218,19 @@
         <a href="#" class="active" data-section="profile" onclick="showSection('profile',this)"><span class="icon">&#x1F4CB;</span><span data-i18n="profile-info">個人資料</span></a>
         @if (isRegistered)
         {
-            <a href="#" data-section="favteachers" onclick="showSection('favteachers',this)"><span class="icon">&#x2764;&#xFE0F;</span><span>我的收藏</span></a>
-            <a href="#" data-section="bookings" onclick="showSection('bookings',this)"><span class="icon">&#x1F4C5;</span><span>我的預約</span></a>
+            <a href="#" data-section="favteachers" onclick="showSection('favteachers',this)"><span class="icon">&#x2764;&#xFE0F;</span><span data-i18n="profile-fav-teachers">我的收藏</span></a>
+            <a href="#" data-section="bookings" onclick="showSection('bookings',this)"><span class="icon">&#x1F4C5;</span><span data-i18n="profile-bookings">我的預約</span></a>
             <a href="#" data-section="ideas" onclick="showSection('ideas',this)"><span class="icon">&#x1F4A1;</span><span data-i18n="profile-ideas">我的想法</span></a>
             <a href="#" data-section="qna" onclick="showSection('qna',this)"><span class="icon">&#x2753;</span><span data-i18n="profile-qna">我的問答</span></a>
             <a href="#" data-section="chat" onclick="showSection('chat',this)"><span class="icon">&#x1F4AC;</span><span data-i18n="profile-chat">我的聊天</span></a>
             <a href="#" data-section="quiz" onclick="showSection('quiz',this)"><span class="icon">&#x1F4DD;</span><span data-i18n="profile-quiz">我的測驗</span></a>
             <div class="sidebar-divider"></div>
-            <a href="/Account/Logout" class="logout" onclick="return confirm('確定要登出嗎？登出後將使用新的匿名身份')"><span class="icon">&#x1F6AA;</span><span data-i18n="profile-logout">登出</span></a>
+            <a href="/Account/Logout" class="logout" onclick="return confirm(t('profile-confirm-logout'))"><span class="icon">&#x1F6AA;</span><span data-i18n="profile-logout">登出</span></a>
         }
         else
         {
             <div class="sidebar-divider"></div>
-            <a href="/Account/Register" style="color:#38bd72;"><span class="icon">&#x1F4DD;</span><span>註冊升級</span></a>
+            <a href="/Account/Register" style="color:#38bd72;"><span class="icon">&#x1F4DD;</span><span data-i18n="profile-sidebar-upgrade">註冊升級</span></a>
         }
     </nav>
 
@@ -244,37 +244,37 @@
                 <div class="stats-row">
                     <div class="stat-card">
                         <div class="value">@user.TotalScore</div>
-                        <div class="label">總分數</div>
+                        <div class="label" data-i18n="profile-total-score">總分數</div>
                     </div>
                     <div class="stat-card">
                         <div class="value">@user.QuizzesTaken</div>
-                        <div class="label">測驗次數</div>
+                        <div class="label" data-i18n="profile-quizzes-taken">測驗次數</div>
                     </div>
                     <div class="stat-card">
                         <div class="value">@user.ChaptersCompleted</div>
-                        <div class="label">完成章節</div>
+                        <div class="label" data-i18n="profile-chapters-done">完成章節</div>
                     </div>
                 </div>
 
                 <div class="card">
-                    <div class="card-title">帳號資訊</div>
+                    <div class="card-title" data-i18n="profile-account-info">帳號資訊</div>
                     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
                         @if (user.IsRegistered)
-                        { <span class="badge badge-registered">已註冊 ✅</span> }
+                        { <span class="badge badge-registered" data-i18n="profile-registered-badge">已註冊 ✅</span> }
                         else
-                        { <span class="badge badge-anonymous">匿名用戶</span> }
+                        { <span class="badge badge-anonymous" data-i18n="profile-anonymous">匿名用戶</span> }
                         <span class="badge badge-level">@badgeEmoji @badgeLabel</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">匿名 ID</span>
+                        <span class="info-label" data-i18n="profile-anon-id">匿名 ID</span>
                         <span class="info-value" style="font-size:12px;font-family:monospace;">@user.AnonymousId[..8]...</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">建立時間</span>
+                        <span class="info-label" data-i18n="profile-created-at">建立時間</span>
                         <span class="info-value">@user.CreatedAt.ToString("yyyy/MM/dd HH:mm")</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">最後活動</span>
+                        <span class="info-label" data-i18n="profile-last-active">最後活動</span>
                         <span class="info-value">@user.LastActiveAt.ToString("yyyy/MM/dd HH:mm")</span>
                     </div>
                     @if (isRegistered && !string.IsNullOrEmpty(user.Email))
@@ -289,7 +289,7 @@
                 @if (isRegistered)
                 {
                     <div class="card">
-                        <div class="card-title">&#x270F;&#xFE0F; 編輯個人資料</div>
+                        <div class="card-title" data-i18n="profile-edit-title">&#x270F;&#xFE0F; 編輯個人資料</div>
                         <form method="post" action="/Account/UpdateProfile" enctype="multipart/form-data" class="profile-form">
                             <div style="text-align:center;margin-bottom:16px;">
                                 @if (!string.IsNullOrEmpty(user.AvatarUrl))
@@ -302,18 +302,18 @@
                                 }
                             </div>
                             <div style="margin-bottom:16px;">
-                                <label>&#x1F4F7; 上傳/更換頭像</label>
+                                <label data-i18n="profile-upload-avatar">&#x1F4F7; 上傳/更換頭像</label>
                                 <input type="file" name="avatar" accept="image/*" onchange="previewAvatar(this)" />
                             </div>
                             <div style="margin-bottom:16px;">
-                                <label>&#x270F;&#xFE0F; 暱稱</label>
+                                <label data-i18n="profile-nickname-label">&#x270F;&#xFE0F; 暱稱</label>
                                 <input type="text" name="nickname" value="@user.Nickname" />
                             </div>
                             <div style="margin-bottom:16px;">
-                                <label>&#x1F4E7; Email</label>
+                                <label data-i18n="profile-email-label">&#x1F4E7; Email</label>
                                 <input type="email" name="email" value="@user.Email" />
                             </div>
-                            <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;font-size:15px;">&#x1F4BE; 儲存修改</button>
+                            <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;font-size:15px;" data-i18n="profile-save-btn">&#x1F4BE; 儲存修改</button>
                         </form>
                     </div>
                 }
@@ -321,9 +321,9 @@
                 @if (!isRegistered)
                 {
                     <div class="guest-cta">
-                        <h3>&#x1F680; 註冊升級</h3>
-                        <p>註冊後可以管理你的想法、問答、聊天紀錄和測驗歷史！</p>
-                        <a href="/Account/Register" class="btn btn-primary">&#x1F4DD; 立即註冊</a>
+                        <h3 data-i18n="profile-upgrade-title">&#x1F680; 註冊升級</h3>
+                        <p data-i18n="profile-upgrade-desc">註冊後可以管理你的想法、問答、聊天紀錄和測驗歷史！</p>
+                        <a href="/Account/Register" class="btn btn-primary" data-i18n="profile-upgrade-btn">&#x1F4DD; 立即註冊</a>
                     </div>
                 }
             </div>
@@ -332,32 +332,32 @@
             {
                 <!-- ===== Section: 我的收藏 ===== -->
                 <div class="content-section" id="section-favteachers">
-                    <div class="page-title">&#x2764;&#xFE0F; 我的收藏</div>
-                    <div id="favTeachersList" class="crud-loading">載入中...</div>
+                    <div class="page-title" data-i18n="profile-fav-teachers">&#x2764;&#xFE0F; 我的收藏</div>
+                    <div id="favTeachersList" class="crud-loading" data-i18n="loading">載入中...</div>
                 </div>
 
                 <!-- ===== Section: 我的預約 ===== -->
                 <div class="content-section" id="section-bookings">
-                    <div class="page-title">&#x1F4C5; 我的預約</div>
-                    <div id="bookingsList" class="crud-loading">載入中...</div>
+                    <div class="page-title" data-i18n="profile-bookings">&#x1F4C5; 我的預約</div>
+                    <div id="bookingsList" class="crud-loading" data-i18n="loading">載入中...</div>
                 </div>
 
                 <!-- ===== Section: 我的想法 ===== -->
                 <div class="content-section" id="section-ideas">
-                    <div class="page-title">&#x1F4A1; 我的想法</div>
-                    <div id="ideasList" class="crud-loading">載入中...</div>
+                    <div class="page-title" data-i18n="profile-ideas">&#x1F4A1; 我的想法</div>
+                    <div id="ideasList" class="crud-loading" data-i18n="loading">載入中...</div>
                 </div>
 
                 <!-- ===== Section: 我的問答 ===== -->
                 <div class="content-section" id="section-qna">
-                    <div class="page-title">&#x2753; 我的問答</div>
-                    <div id="qnaList" class="crud-loading">載入中...</div>
+                    <div class="page-title" data-i18n="profile-qna">&#x2753; 我的問答</div>
+                    <div id="qnaList" class="crud-loading" data-i18n="loading">載入中...</div>
                 </div>
 
                 <!-- ===== Section: 我的聊天 ===== -->
                 <div class="content-section" id="section-chat">
-                    <div class="page-title">&#x1F4AC; 我的聊天</div>
-                    <div id="chatList" class="crud-loading">載入中...</div>
+                    <div class="page-title" data-i18n="profile-chat">&#x1F4AC; 我的聊天</div>
+                    <div id="chatList" class="crud-loading" data-i18n="loading">載入中...</div>
                 </div>
 
                 <!-- ===== Section: 我的測驗 ===== -->

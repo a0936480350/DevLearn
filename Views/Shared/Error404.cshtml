@@ -27,10 +27,11 @@
     <div class="particles" id="particles"></div>
     <div class="container" style="position:relative;z-index:1;">
         <div class="code">404</div>
-        <div class="msg">哎呀！這個頁面去冒險了</div>
-        <div class="desc">你找的頁面可能已經搬家、改名，或正在學習 .NET 的路上迷路了</div>
-        <a href="/" class="btn">回到首頁 🏠</a>
+        <div class="msg" data-i18n="error404-msg">哎呀！這個頁面去冒險了</div>
+        <div class="desc" data-i18n="error404-desc">你找的頁面可能已經搬家、改名，或正在學習 .NET 的路上迷路了</div>
+        <a href="/" class="btn" data-i18n="error404-home">回到首頁 🏠</a>
     </div>
+    <script src="/js/site.js"></script>
     <script>
         var container = document.getElementById('particles');
         for (var i = 0; i < 30; i++) {
