@@ -455,8 +455,8 @@
                     <div class="fc-card-front">${escapeHtml(c.front)}</div>
                     <div class="fc-card-back">${escapeHtml(c.back)}</div>
                     <div class="fc-card-meta">
-                        <div>${catHtml} <span>${t('flashcard-review-times')} ${c.reviewCount} ${t('flashcard-review-unit')}</span></div>
-                        <button class="btn-delete-card" onclick="deleteCard(${c.id})">${t('snippet-delete')}</button>
+                        <div>${catHtml} <span>${__t('flashcard-review-times')} ${c.reviewCount} ${__t('flashcard-review-unit')}</span></div>
+                        <button class="btn-delete-card" onclick="deleteCard(${c.id})">${__t('snippet-delete')}</button>
                     </div>
                 </div>`;
         }).join('');
@@ -487,7 +487,7 @@
                     document.getElementById('flipInner').parentElement.style.display = 'none';
                     document.getElementById('reviewProgress').textContent = '';
                     document.getElementById('reviewDone').style.display = 'block';
-                    document.getElementById('reviewDone').querySelector('p').textContent = t('flashcard-no-due');
+                    document.getElementById('reviewDone').querySelector('p').textContent = __t('flashcard-no-due');
                 } else {
                     document.getElementById('flipInner').parentElement.style.display = 'block';
                     showReviewCard();
@@ -552,7 +552,7 @@
         const category = document.getElementById('cardCategory').value.trim();
 
         if (!front || !back) {
-            alert(t('flashcard-fill-required'));
+            alert(__t('flashcard-fill-required'));
             return;
         }
 
@@ -571,7 +571,7 @@
     }
 
     function deleteCard(id) {
-        if (!confirm(t('flashcard-confirm-delete'))) return;
+        if (!confirm(__t('flashcard-confirm-delete'))) return;
         fetch('/Flashcard/Delete', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

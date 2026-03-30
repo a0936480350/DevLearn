@@ -447,7 +447,7 @@
         }
 
         // Month labels
-        const monthNames = [t('month-1'),t('month-2'),t('month-3'),t('month-4'),t('month-5'),t('month-6'),t('month-7'),t('month-8'),t('month-9'),t('month-10'),t('month-11'),t('month-12')];
+        const monthNames = [__t('month-1'),__t('month-2'),__t('month-3'),__t('month-4'),__t('month-5'),__t('month-6'),__t('month-7'),__t('month-8'),__t('month-9'),__t('month-10'),__t('month-11'),__t('month-12')];
         let monthPositions = [];
         let weekIndex = 0;
         weeks.forEach((week, wi) => {
@@ -465,7 +465,7 @@
         for (let m = 0; m < 12; m++) {
             const pos = monthPositions[m] || 0;
             const nextPos = m < 11 ? (monthPositions[m+1] || totalWeeks) : totalWeeks;
-            const span = document.createElement('span');
+            const span = document.createElemen__t('span');
             span.textContent = monthNames[m];
             span.style.width = ((nextPos - pos) * cellSize) + 'px';
             span.style.flexShrink = '0';
@@ -475,16 +475,16 @@
         // Render grid
         const tooltip = document.getElementById('heatmap-tooltip');
         weeks.forEach(week => {
-            const col = document.createElement('div');
+            const col = document.createElemen__t('div');
             col.className = 'heatmap-week';
             week.forEach(day => {
-                const cell = document.createElement('div');
+                const cell = document.createElemen__t('div');
                 cell.className = 'heatmap-cell';
                 if (day.inYear) {
                     cell.setAttribute('data-level', day.level);
                     cell.setAttribute('data-date', day.date);
                     cell.addEventListener('mouseenter', function(e) {
-                        const lvlText = [t('heatmap-level-0'),t('heatmap-level-1'),t('heatmap-level-2'),t('heatmap-level-3'),t('heatmap-level-4')];
+                        const lvlText = [__t('heatmap-level-0'),__t('heatmap-level-1'),__t('heatmap-level-2'),__t('heatmap-level-3'),__t('heatmap-level-4')];
                         tooltip.textContent = day.date + ' - ' + lvlText[day.level];
                         tooltip.style.display = 'block';
                         tooltip.style.left = (e.clientX + 10) + 'px';
@@ -510,7 +510,7 @@
             const container = document.getElementById('weakpoints-container');
 
             if (!data || data.length === 0) {
-                container.innerHTML = `<div class="empty-state-analytics"><div class="empty-icon">🎯</div><p>${t('analytics-weakpoints-empty')}</p></div>`;
+                container.innerHTML = `<div class="empty-state-analytics"><div class="empty-icon">🎯</div><p>${__t('analytics-weakpoints-empty')}</p></div>`;
                 return;
             }
 
@@ -526,7 +526,7 @@
                     <div class="weakpoint-bar-bg">
                         <div class="weakpoint-bar-fill" style="width:${acc}%;background:${color}"></div>
                     </div>
-                    <div class="weakpoint-detail">${t('analytics-weakpoints-detail').replace('{c}', item.correctCount).replace('{t}', item.totalQuestions)}</div>
+                    <div class="weakpoint-detail">${__t('analytics-weakpoints-detail').replace('{c}', item.correctCount).replace('{t}', item.totalQuestions)}</div>
                 </div>`;
             });
             container.innerHTML = html;

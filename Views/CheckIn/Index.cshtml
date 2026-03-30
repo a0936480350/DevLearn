@@ -399,7 +399,7 @@
             }
 
             if (!d.success) {
-                alert(d.message || t('checkin-failed'));
+                alert(d.message || __t('checkin-failed'));
                 btn.disabled = false;
                 return;
             }
@@ -426,20 +426,20 @@
         btn.classList.add('done');
         btn.disabled = true;
         document.getElementById('checkinIcon').textContent = '✅';
-        document.getElementById('checkinText').textContent = t('checkin-done');
+        document.getElementById('checkinText').textContent = __t('checkin-done');
     }
 
     function showToast(streak, points, achievements) {
         const container = document.getElementById('toastContainer');
-        const toast = document.createElement('div');
+        const toast = document.createElemen__t('div');
         toast.className = 'checkin-toast';
-        let html = `<h3>${t('checkin-toast-title')}</h3>
-                     <p>🔥 ${t('checkin-toast-streak').replace('{n}', streak)}</p>
-                     <p>⭐ ${t('checkin-toast-points').replace('{n}', points)}</p>`;
+        let html = `<h3>${__t('checkin-toast-title')}</h3>
+                     <p>🔥 ${__t('checkin-toast-streak').replace('{n}', streak)}</p>
+                     <p>⭐ ${__t('checkin-toast-points').replace('{n}', points)}</p>`;
         if (achievements.length > 0) {
             html += '<div class="toast-achievements">';
             achievements.forEach(a => {
-                html += `<span>${a.icon} ${t('checkin-toast-unlock')}${a.title}</span>`;
+                html += `<span>${a.icon} ${__t('checkin-toast-unlock')}${a.title}</span>`;
             });
             html += '</div>';
         }
@@ -450,10 +450,10 @@
 
     // ── 月曆 ──
     async function loadCalendar() {
-        document.getElementById('calendarTitle').textContent = `${calYear} ${t('checkin-year')} ${calMonth} ${t('checkin-month')}`;
+        document.getElementById('calendarTitle').textContent = `${calYear} ${__t('checkin-year')} ${calMonth} ${__t('checkin-month')}`;
         const grid = document.getElementById('calendarGrid');
 
-        const dayHeaders = [t('day-sun'), t('day-mon'), t('day-tue'), t('day-wed'), t('day-thu'), t('day-fri'), t('day-sat')];
+        const dayHeaders = [__t('day-sun'), __t('day-mon'), __t('day-tue'), __t('day-wed'), __t('day-thu'), __t('day-fri'), __t('day-sat')];
         let html = dayHeaders.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
 
         const firstDay = new Date(calYear, calMonth - 1, 1).getDay();
@@ -481,7 +481,7 @@
             let cls = 'calendar-day';
             if (isToday) cls += ' today';
             if (isChecked) cls += ' checked-in';
-            html += `<div class="${cls}" title="${isChecked ? t('checkin-streak-days').replace('{n}', checkedDates[dateStr]) : ''}">${day}</div>`;
+            html += `<div class="${cls}" title="${isChecked ? __t('checkin-streak-days').replace('{n}', checkedDates[dateStr]) : ''}">${day}</div>`;
         }
 
         grid.innerHTML = html;
@@ -502,7 +502,7 @@
             const list = await res.json();
 
             if (list.length === 0) {
-                grid.innerHTML = `<div style="color:var(--text-muted)">${t('checkin-no-achievements')}</div>`;
+                grid.innerHTML = `<div style="color:var(--text-muted)">${__t('checkin-no-achievements')}</div>`;
                 return;
             }
 
@@ -521,7 +521,7 @@
             }).join('');
         } catch (e) {
             console.error('loadAchievements error', e);
-            grid.innerHTML = `<div style="color:var(--text-muted)">${t('load-failed')}</div>`;
+            grid.innerHTML = `<div style="color:var(--text-muted)">${__t('load-failed')}</div>`;
         }
     }
 </script>

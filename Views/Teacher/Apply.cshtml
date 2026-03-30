@@ -250,13 +250,13 @@
             checked.push(cb.value);
         });
         if (checked.length === 0) {
-            alert(t('teacher-apply-skills-required'));
+            alert(__t('teacher-apply-skills-required'));
             return false;
         }
         document.getElementById('skillsJsonInput').value = JSON.stringify(checked);
 
         if (!document.getElementById('agreeTerms').checked) {
-            alert(t('teacher-apply-terms-required'));
+            alert(__t('teacher-apply-terms-required'));
             return false;
         }
         return true;

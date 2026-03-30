@@ -379,7 +379,7 @@
             currentPuzzle = data;
             renderPuzzle(data);
         } catch (e) {
-            document.getElementById('loadingSpinner').textContent = t('puzzle-load-error');
+            document.getElementById('loadingSpinner').textContent = __t('puzzle-load-error');
         }
     }
 
@@ -394,33 +394,33 @@
 
         // Parse code lines and insert blank inputs
         const code = puzzle.codeWithBlanks;
-        const lines = code.split('\n');
+        const lines = code.spli__t('\n');
         let blankIdx = 0;
         const container = document.getElementById('codeLines');
         container.innerHTML = '';
 
         lines.forEach((line, li) => {
-            const row = document.createElement('div');
+            const row = document.createElemen__t('div');
             row.className = 'code-line';
-            const numCell = document.createElement('span');
+            const numCell = document.createElemen__t('span');
             numCell.className = 'line-num';
             numCell.textContent = li + 1;
             row.appendChild(numCell);
 
-            const contentCell = document.createElement('span');
+            const contentCell = document.createElemen__t('span');
             contentCell.className = 'line-content';
 
             // Replace ___ with input fields
-            const parts = line.split('___');
+            const parts = line.spli__t('___');
             for (let pi = 0; pi < parts.length; pi++) {
                 contentCell.appendChild(document.createTextNode(parts[pi]));
                 if (pi < parts.length - 1) {
-                    const label = document.createElement('span');
+                    const label = document.createElemen__t('span');
                     label.className = 'blank-label';
                     label.textContent = circledNums[blankIdx] || `[${blankIdx+1}]`;
                     contentCell.appendChild(label);
 
-                    const input = document.createElement('input');
+                    const input = document.createElemen__t('input');
                     input.type = 'text';
                     input.className = 'blank-input';
                     input.dataset.blankIndex = blankIdx;
@@ -482,7 +482,7 @@
             const result = await res.json();
             showResult(result, inputs);
         } catch (e) {
-            alert(t('puzzle-submit-error'));
+            alert(__t('puzzle-submit-error'));
             submitted = false;
             document.getElementById('btnSubmit').disabled = false;
         }
@@ -496,7 +496,7 @@
             input.classList.add(d.isCorrect ? 'correct' : 'wrong');
             input.readOnly = true;
             if (!d.isCorrect) {
-                const tag = document.createElement('span');
+                const tag = document.createElemen__t('span');
                 tag.className = 'correct-answer-tag';
                 tag.textContent = ` ✓ ${d.correctAnswer}`;
                 input.parentNode.insertBefore(tag, input.nextSibling);
@@ -506,14 +506,14 @@
         // Show score
         const scoreDiv = document.getElementById('resultScore');
         const ratio = result.correctCount / result.totalBlanks;
-        scoreDiv.textContent = `${result.correctCount} / ${result.totalBlanks} ${t('puzzle-correct-label')}`;
+        scoreDiv.textContent = `${result.correctCount} / ${result.totalBlanks} ${__t('puzzle-correct-label')}`;
         scoreDiv.className = 'result-score ' + (ratio === 1 ? 'perfect' : ratio >= 0.5 ? 'good' : 'fail');
 
         const m = Math.floor(result.timeTaken / 60);
         const s = result.timeTaken % 60;
         document.getElementById('resultTime').textContent =
-            t('puzzle-time-used') + ' ' + (m > 0 ? m + ' ' + t('puzzle-min') + ' ' : '') + s + ' ' + t('puzzle-sec') +
-            (ratio === 1 ? ' — ' + t('puzzle-perfect') : '');
+            __t('puzzle-time-used') + ' ' + (m > 0 ? m + ' ' + __t('puzzle-min') + ' ' : '') + s + ' ' + __t('puzzle-sec') +
+            (ratio === 1 ? ' — ' + __t('puzzle-perfect') : '');
 
         document.getElementById('resultBox').classList.add('show');
         document.getElementById('btnNext').style.display = 'inline-block';

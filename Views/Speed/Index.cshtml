@@ -467,10 +467,10 @@
             const data = await res.json();
             const container = document.getElementById(containerId);
             if (!data || data.length === 0) {
-                container.innerHTML = `<div class="lb-empty">${t('speed-lb-empty')}</div>`;
+                container.innerHTML = `<div class="lb-empty">${__t('speed-lb-empty')}</div>`;
                 return;
             }
-            let html = `<table class="lb-table"><thead><tr><th>#</th><th>${t('speed-lb-challenger')}</th><th>${t('speed-lb-score')}</th><th>${t('speed-lb-correct')}</th><th>${t('speed-lb-time')}</th></tr></thead><tbody>`;
+            let html = `<table class="lb-table"><thead><tr><th>#</th><th>${__t('speed-lb-challenger')}</th><th>${__t('speed-lb-score')}</th><th>${__t('speed-lb-correct')}</th><th>${__t('speed-lb-time')}</th></tr></thead><tbody>`;
             data.forEach((r, i) => {
                 const rankClass = i < 3 ? `rank-${i+1}` : '';
                 const medal = i === 0 ? '\u{1F947}' : i === 1 ? '\u{1F948}' : i === 2 ? '\u{1F949}' : (i+1);
@@ -486,7 +486,7 @@
     // 開始遊戲
     window.startGame = async function() {
         const btn = document.getElementById('startBtn');
-        btn.textContent = t('loading');
+        btn.textContent = __t('loading');
         btn.disabled = true;
 
         try {
@@ -495,8 +495,8 @@
             questions = data.questions;
 
             if (!questions || questions.length === 0) {
-                alert(t('speed-no-questions'));
-                btn.textContent = t('game-speed-start');
+                alert(__t('speed-no-questions'));
+                btn.textContent = __t('game-speed-start');
                 btn.disabled = false;
                 return;
             }
@@ -518,10 +518,10 @@
             showQuestion();
             startTimer();
         } catch(e) {
-            alert(t('speed-load-failed'));
+            alert(__t('speed-load-failed'));
             console.error(e);
         } finally {
-            btn.textContent = t('game-speed-start');
+            btn.textContent = __t('game-speed-start');
             btn.disabled = false;
         }
     };
@@ -561,7 +561,7 @@
 
         const q = questions[currentIndex];
         document.getElementById('qNum').textContent = currentIndex + 1;
-        document.getElementById('questionNumber').textContent = t('speed-question-n').replace('{n}', currentIndex + 1);
+        document.getElementById('questionNumber').textContent = __t('speed-question-n').replace('{n}', currentIndex + 1);
         document.getElementById('questionText').textContent = q.questionText;
 
         let options = [];
@@ -572,7 +572,7 @@
 
         const shortcuts = ['1', '2', '3', '4'];
         options.forEach((opt, i) => {
-            const btn = document.createElement('button');
+            const btn = document.createElemen__t('button');
             btn.className = 'option-btn';
             btn.innerHTML = `${escHtml(opt)} <span class="shortcut">${shortcuts[i] || ''}</span>`;
             btn.addEventListener('click', () => selectAnswer(opt, btn));
@@ -651,7 +651,7 @@
             document.getElementById('resultTotal').textContent = data.total;
             const acc = data.total > 0 ? Math.round(data.correct * 100 / data.total) : 0;
             document.getElementById('resultAccuracy').textContent = acc + '%';
-            document.getElementById('percentileMsg').textContent = t('speed-percentile').replace('{pct}', data.percentile);
+            document.getElementById('percentileMsg').textContent = __t('speed-percentile').replace('{pct}', data.percentile);
 
             // 答題詳情
             const detailsList = document.getElementById('detailsList');
@@ -660,13 +660,13 @@
                 data.details.forEach((d, i) => {
                     const q = questions[i];
                     const icon = d.correct ? '\u2705' : '\u274C';
-                    const div = document.createElement('div');
+                    const div = document.createElemen__t('div');
                     div.className = 'detail-item';
                     div.innerHTML = `
                         <span class="detail-icon">${icon}</span>
                         <div class="detail-text">
                             ${escHtml(q ? q.questionText : '')}
-                            <br><strong>${t('speed-correct-answer')}: ${escHtml(d.correctAnswer)}</strong>
+                            <br><strong>${__t('speed-correct-answer')}: ${escHtml(d.correctAnswer)}</strong>
                             <div class="explanation">${escHtml(d.explanation || '')}</div>
                         </div>
                     `;
@@ -691,7 +691,7 @@
 
     function escHtml(str) {
         if (!str) return '';
-        const div = document.createElement('div');
+        const div = document.createElemen__t('div');
         div.textContent = str;
         return div.innerHTML;
     }

@@ -398,7 +398,7 @@
             loadHistory();
             loadStats();
         } catch (e) {
-            document.getElementById('loadingArea').textContent = t('daily-load-error');
+            document.getElementById('loadingArea').textContent = __t('daily-load-error');
         }
     }
 
@@ -407,10 +407,10 @@
         badge.style.display = 'inline-flex';
         if (days > 0) {
             badge.className = 'streak-badge';
-            badge.innerHTML = '\uD83D\uDD25 ' + t('daily-streak').replace('{n}', days);
+            badge.innerHTML = '\uD83D\uDD25 ' + __t('daily-streak').replace('{n}', days);
         } else {
             badge.className = 'streak-badge zero';
-            badge.innerHTML = '\uD83D\uDD25 ' + t('daily-streak').replace('{n}', 0);
+            badge.innerHTML = '\uD83D\uDD25 ' + __t('daily-streak').replace('{n}', 0);
         }
     }
 
@@ -423,7 +423,7 @@
 
         let optionsHtml = '';
         if (data.type === 'fillin') {
-            optionsHtml = '<input type="text" class="fillin-input" id="fillinAnswer" placeholder="' + t('daily-fillin-ph') + '" autocomplete="off" />';
+            optionsHtml = '<input type="text" class="fillin-input" id="fillinAnswer" placeholder="' + __t('daily-fillin-ph') + '" autocomplete="off" />';
         } else {
             optionsHtml = '<ul class="options-list">';
             options.forEach((opt, i) => {
@@ -441,7 +441,7 @@
                 (data.category ? '<span class="question-category">' + escapeHtml(data.category) + '</span>' : '') +
                 '<div class="question-text">' + escapeHtml(data.questionText) + '</div>' +
                 optionsHtml +
-                '<button class="submit-btn" id="submitBtn" onclick="submitAnswer()">' + t('daily-submit') + '</button>' +
+                '<button class="submit-btn" id="submitBtn" onclick="submitAnswer()">' + __t('daily-submit') + '</button>' +
             '</div>';
     }
 
@@ -477,13 +477,13 @@
             '</div>' +
             '<div class="result-panel ' + (data.wasCorrect ? 'correct' : 'wrong') + '">' +
                 '<div class="result-icon">' + (data.wasCorrect ? '\u2705' : '\u274C') + '</div>' +
-                '<div class="result-text">' + (data.wasCorrect ? t('daily-correct') : t('daily-wrong')) + '</div>' +
-                '<div style="color:#aaa;">' + t('daily-correct-answer') + escapeHtml(data.correctAnswer || '') + '</div>' +
+                '<div class="result-text">' + (data.wasCorrect ? __t('daily-correct') : __t('daily-wrong')) + '</div>' +
+                '<div style="color:#aaa;">' + __t('daily-correct-answer') + escapeHtml(data.correctAnswer || '') + '</div>' +
                 (data.explanation ? '<div class="explanation-box"><strong>解析：</strong>' + escapeHtml(data.explanation) + '</div>' : '') +
             '</div>' +
             '<div class="already-done">' +
                 '<span class="big-emoji">\uD83C\uDF1F</span>' +
-                '<div class="tomorrow-msg">' + t('daily-tomorrow') + '</div>' +
+                '<div class="tomorrow-msg">' + __t('daily-tomorrow') + '</div>' +
             '</div>';
     }
 
@@ -501,15 +501,15 @@
             answer = document.getElementById('fillinAnswer')?.value || '';
         } else {
             const checked = document.querySelector('input[name="answer"]:checked');
-            if (!checked) { alert(t('daily-select-answer')); return; }
+            if (!checked) { alert(__t('daily-select-answer')); return; }
             answer = checked.value;
         }
 
-        if (!answer.trim()) { alert(t('daily-enter-answer')); return; }
+        if (!answer.trim()) { alert(__t('daily-enter-answer')); return; }
 
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        btn.textContent = t('daily-submitting');
+        btn.textContent = __t('daily-submitting');
 
         try {
             const res = await fetch('/Daily/Submit', {
@@ -518,7 +518,7 @@
                 body: JSON.stringify({ dailyChallengeId: challengeData.challengeId, answer })
             });
             const result = await res.json();
-            if (result.error) { alert(result.error); btn.disabled = false; btn.textContent = t('daily-submit'); return; }
+            if (result.error) { alert(result.error); btn.disabled = false; btn.textContent = __t('daily-submit'); return; }
 
             // Highlight options
             if (challengeData.type !== 'fillin') {
@@ -538,20 +538,20 @@
             resultArea.innerHTML =
                 '<div class="result-panel ' + (result.correct ? 'correct' : 'wrong') + '">' +
                     '<div class="result-icon">' + (result.correct ? '\u2705' : '\u274C') + '</div>' +
-                    '<div class="result-text">' + (result.correct ? t('daily-correct-great') : t('daily-wrong-ok')) + '</div>' +
-                    '<div style="color:#aaa;">' + t('daily-correct-answer') + escapeHtml(result.correctAnswer) + '</div>' +
+                    '<div class="result-text">' + (result.correct ? __t('daily-correct-great') : __t('daily-wrong-ok')) + '</div>' +
+                    '<div style="color:#aaa;">' + __t('daily-correct-answer') + escapeHtml(result.correctAnswer) + '</div>' +
                     (result.explanation ? '<div class="explanation-box"><strong>解析：</strong>' + escapeHtml(result.explanation) + '</div>' : '') +
                 '</div>' +
-                (result.isNewRecord ? '<div class="streak-record-banner">\uD83C\uDFC6 ' + t('daily-new-record').replace('{n}', result.streak) + '</div>' : '') +
-                '<div class="already-done"><span class="big-emoji">\uD83C\uDF1F</span><div class="tomorrow-msg">' + t('daily-tomorrow') + '</div></div>';
+                (result.isNewRecord ? '<div class="streak-record-banner">\uD83C\uDFC6 ' + __t('daily-new-record').replace('{n}', result.streak) + '</div>' : '') +
+                '<div class="already-done"><span class="big-emoji">\uD83C\uDF1F</span><div class="tomorrow-msg">' + __t('daily-tomorrow') + '</div></div>';
 
             showStreak(result.streak);
             loadHistory();
             loadStats();
         } catch (e) {
             btn.disabled = false;
-            btn.textContent = t('daily-submit');
-            alert(t('daily-submit-error'));
+            btn.textContent = __t('daily-submit');
+            alert(__t('daily-submit-error'));
         }
     };
 
@@ -582,7 +582,7 @@
         }
 
         // Day labels
-        const labels = [t('day-sun'), t('day-mon'), t('day-tue'), t('day-wed'), t('day-thu'), t('day-fri'), t('day-sat')];
+        const labels = [__t('day-sun'), __t('day-mon'), __t('day-tue'), __t('day-wed'), __t('day-thu'), __t('day-fri'), __t('day-sat')];
         // Find the starting day of week for the first day
         const firstDow = days[0].getDay();
 
@@ -620,15 +620,15 @@
             const panel = document.getElementById('statsPanel');
             panel.style.display = 'grid';
             panel.innerHTML =
-                '<div class="stat-card"><div class="stat-value">' + data.currentStreak + '</div><div class="stat-label">' + t('daily-stat-current') + '</div></div>' +
-                '<div class="stat-card"><div class="stat-value">' + data.bestStreak + '</div><div class="stat-label">' + t('daily-stat-best') + '</div></div>' +
-                '<div class="stat-card"><div class="stat-value">' + data.accuracy + '%</div><div class="stat-label">' + t('daily-stat-accuracy') + ' (' + data.totalCorrect + '/' + data.totalAttempted + ')</div></div>';
+                '<div class="stat-card"><div class="stat-value">' + data.currentStreak + '</div><div class="stat-label">' + __t('daily-stat-current') + '</div></div>' +
+                '<div class="stat-card"><div class="stat-value">' + data.bestStreak + '</div><div class="stat-label">' + __t('daily-stat-best') + '</div></div>' +
+                '<div class="stat-card"><div class="stat-value">' + data.accuracy + '%</div><div class="stat-label">' + __t('daily-stat-accuracy') + ' (' + data.totalCorrect + '/' + data.totalAttempted + ')</div></div>';
         } catch(e) {}
     }
 
     function escapeHtml(str) {
         if (!str) return '';
-        const div = document.createElement('div');
+        const div = document.createElemen__t('div');
         div.textContent = str;
         return div.innerHTML;
     }

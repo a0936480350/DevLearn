@@ -378,8 +378,8 @@
 
     async function loadQuestions() {
         const params = new URLSearchParams({ page: currentPage });
-        if (currentCategory) params.set('category', currentCategory);
-        if (currentFilter === 'unsolved') params.set('unsolved', 'true');
+        if (currentCategory) params.se__t('category', currentCategory);
+        if (currentFilter === 'unsolved') params.se__t('unsolved', 'true');
 
         const res = await fetch('/QnA/List?' + params);
         const data = await res.json();
@@ -393,14 +393,14 @@
         }
 
         if (filteredQuestions.length === 0) {
-            list.innerHTML = `<div class="qna-empty"><div class="empty-icon">🤔</div><p>${t('qna-empty-msg')}</p></div>`;
+            list.innerHTML = `<div class="qna-empty"><div class="empty-icon">🤔</div><p>${__t('qna-empty-msg')}</p></div>`;
         } else {
             list.innerHTML = filteredQuestions.map(q => `
                 <a href="/QnA/Detail/${q.id}" class="qna-card">
                     <div class="qna-card-header">
                         ${q.isSolved
-                            ? `<span class="qna-solved-badge">${t('qna-solved-badge')}</span>`
-                            : `<span class="qna-unsolved-badge">${t('qna-unsolved-badge')}</span>`}
+                            ? `<span class="qna-solved-badge">${__t('qna-solved-badge')}</span>`
+                            : `<span class="qna-unsolved-badge">${__t('qna-unsolved-badge')}</span>`}
                         ${q.chapterTitle ? `<span class="qna-chapter-tag">${escHtml(q.chapterTitle)}</span>` : ''}
                     </div>
                     <div class="qna-card-question">${escHtml(q.question)}</div>
@@ -445,7 +445,7 @@
         questions.forEach(q => {
             if (q.chapterTitle && !existing.has(q.chapterTitle)) {
                 existing.add(q.chapterTitle);
-                const opt = document.createElement('option');
+                const opt = document.createElemen__t('option');
                 opt.value = q.chapterTitle;
                 opt.textContent = q.chapterTitle;
                 sel.appendChild(opt);
@@ -471,7 +471,7 @@
             const sel = document.getElementById('askChapter');
             if (sel.options.length <= 1) {
                 chapters.forEach(ch => {
-                    const opt = document.createElement('option');
+                    const opt = document.createElemen__t('option');
                     opt.value = ch.id;
                     opt.textContent = ch.title;
                     sel.appendChild(opt);
@@ -483,7 +483,7 @@
     async function submitAsk() {
         const btn = document.getElementById('btnSubmitAsk');
         const question = document.getElementById('askQuestion').value.trim();
-        if (!question) { alert(t('qna-input-required')); return; }
+        if (!question) { alert(__t('qna-input-required')); return; }
 
         btn.disabled = true;
         const body = {
@@ -504,17 +504,17 @@
                 document.getElementById('askQuestion').value = '';
                 window.location.href = '/QnA/Detail/' + data.id;
             } else {
-                alert(data.error || t('qna-error'));
+                alert(data.error || __t('qna-error'));
             }
         } catch {
-            alert(t('qna-network-error'));
+            alert(__t('qna-network-error'));
         } finally {
             btn.disabled = false;
         }
     }
 
     function escHtml(s) {
-        const d = document.createElement('div');
+        const d = document.createElemen__t('div');
         d.textContent = s;
         return d.innerHTML;
     }

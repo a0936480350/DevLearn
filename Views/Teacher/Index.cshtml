@@ -111,9 +111,9 @@
 <div class="teacher-page">
 
     <form method="get" class="filter-bar">
-        <input type="text" name="search" placeholder="&#x641C;&#x5C0B;&#x8001;&#x5E2B;&#x540D;&#x7A31;&#x3001;&#x5C08;&#x9577;..." value="@search" />
-        <input type="number" name="minPrice" placeholder="&#x6700;&#x4F4E;&#x50F9;&#x683C;" value="@ViewBag.MinPrice" style="width:120px;" />
-        <input type="number" name="maxPrice" placeholder="&#x6700;&#x9AD8;&#x50F9;&#x683C;" value="@ViewBag.MaxPrice" style="width:120px;" />
+        <input type="text" name="search" placeholder="&#x641C;&#x5C0B;&#x8001;&#x5E2B;&#x540D;&#x7A31;&#x3001;&#x5C08;&#x9577;..." data-i18n-placeholder="teacher-search-ph" value="@search" />
+        <input type="number" name="minPrice" placeholder="&#x6700;&#x4F4E;&#x50F9;&#x683C;" data-i18n-placeholder="teacher-min-price-ph" value="@ViewBag.MinPrice" style="width:120px;" />
+        <input type="number" name="maxPrice" placeholder="&#x6700;&#x9AD8;&#x50F9;&#x683C;" data-i18n-placeholder="teacher-max-price-ph" value="@ViewBag.MaxPrice" style="width:120px;" />
         <button type="submit" data-i18n="teacher-search-btn">&#x1F50D; &#x641C;&#x5C0B;</button>
     </form>
 
@@ -132,8 +132,8 @@
     {
         <div class="no-result">
             <div class="icon">&#x1F50D;</div>
-            <div>&#x76EE;&#x524D;&#x6C92;&#x6709;&#x7B26;&#x5408;&#x689D;&#x4EF6;&#x7684;&#x8001;&#x5E2B;</div>
-            <div style="margin-top:16px;"><a href="/Teacher/Apply" class="tc-btn" data-i18n="teacher-apply">&#x2728; &#x7533;&#x8ACB;&#x6210;&#x70BA;&#x8001;&#x5E2B;</a></div>
+            <div data-i18n="teacher-no-result">&#x76EE;&#x524D;&#x6C92;&#x6709;&#x7B26;&#x5408;&#x689D;&#x4EF6;&#x7684;&#x8001;&#x5E2B;</div>
+            <div style="margin-top:16px;"><a href="/Teacher/Apply" class="tc-btn" data-i18n="teacher-become-btn2">&#x2728; &#x7533;&#x8ACB;&#x6210;&#x70BA;&#x8001;&#x5E2B;</a></div>
         </div>
     }
     else
@@ -167,14 +167,14 @@
                                 <div class="tc-title">@t.Title</div>
                             </div>
                             <div class="tc-pricing-right">
-                                <div class="trial-price">&#x9AD4;&#x9A57;&#x8AB2; <strong>NT$@t.TrialPrice</strong></div>
-                                <div class="regular-price"><strong>NT$@t.HourlyRate</strong> /50&#x5206;&#x9418;</div>
+                                <div class="trial-price"><span data-i18n="teacher-trial-label">&#x9AD4;&#x9A57;&#x8AB2;</span> <strong>NT$@t.TrialPrice</strong></div>
+                                <div class="regular-price"><strong>NT$@t.HourlyRate</strong> <span data-i18n="teacher-per-50min">/50&#x5206;&#x9418;</span></div>
                             </div>
                         </div>
                         <div class="tc-rating">
                             <span class="stars">@(new string('\u2605', starFull))@(starHalf == 1 ? "\u2BEA" : "")@(new string('\u2606', 5 - starFull - starHalf))</span>
                             <span>@t.AverageRating.ToString("F1")</span>
-                            <span class="count">&middot; @t.TotalStudents &#x4F4D;&#x5B78;&#x751F; &middot; @t.TotalLessons &#x5802;&#x8AB2;</span>
+                            <span class="count">&middot; @t.TotalStudents <span data-i18n="teacher-students">&#x4F4D;&#x5B78;&#x751F;</span> &middot; @t.TotalLessons <span data-i18n="teacher-lessons">&#x5802;&#x8AB2;</span></span>
                         </div>
                         <div class="tc-skills">
                             @foreach (var s in skills.Take(5))
@@ -183,8 +183,8 @@
                             }
                         </div>
                         <div class="tc-footer">
-                            <a href="/Teacher/Detail/@t.Id" class="tc-btn-outline" onclick="event.stopPropagation();">&#x806F;&#x7D61;&#x8001;&#x5E2B;</a>
-                            <a href="/Teacher/Detail/@t.Id" class="tc-btn" onclick="event.stopPropagation();">&#x9810;&#x7D04;&#x9AD4;&#x9A57;</a>
+                            <a href="/Teacher/Detail/@t.Id" class="tc-btn-outline" onclick="event.stopPropagation();" data-i18n="teacher-contact-btn">&#x806F;&#x7D61;&#x8001;&#x5E2B;</a>
+                            <a href="/Teacher/Detail/@t.Id" class="tc-btn" onclick="event.stopPropagation();" data-i18n="teacher-book-btn">&#x9810;&#x7D04;&#x9AD4;&#x9A57;</a>
                         </div>
                     </div>
                 </div>
@@ -193,6 +193,6 @@
     }
 
     <div style="text-align:center;margin-top:40px;padding:20px;">
-        <a href="/Teacher/Apply" class="tc-btn" style="padding:12px 32px;font-size:15px;">&#x2728; &#x6211;&#x4E5F;&#x60F3;&#x7576;&#x8001;&#x5E2B;</a>
+        <a href="/Teacher/Apply" class="tc-btn" style="padding:12px 32px;font-size:15px;" data-i18n="teacher-become-btn">&#x2728; &#x6211;&#x4E5F;&#x60F3;&#x7576;&#x8001;&#x5E2B;</a>
     </div>
 </div>

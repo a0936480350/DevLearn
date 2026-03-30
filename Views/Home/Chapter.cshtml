@@ -181,9 +181,9 @@ const SESSION_ID = "@ViewBag.SessionId";
 function shareChapter() {
     var url = window.location.href;
     if (navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(function() { alert(t('ch-share-copied')); });
+        navigator.clipboard.writeText(url).then(function() { alert(__t('ch-share-copied')); });
     } else {
-        prompt(t('ch-share-prompt'), url);
+        prompt(__t('ch-share-prompt'), url);
     }
 }
 
@@ -197,7 +197,7 @@ function openPractice() {
         code += block.textContent.trim();
     });
     if (!code) {
-        code = t('ch-no-code');
+        code = __t('ch-no-code');
     }
     document.getElementById('practiceRef').textContent = code;
     // 預設填入 TODO
@@ -231,7 +231,7 @@ function savePractice(format) {
 
 function downloadBlob(blob, filename) {
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElemen__t('a');
     a.href = url; a.download = filename;
     document.body.appendChild(a); a.click();
     document.body.removeChild(a); URL.revokeObjectURL(url);

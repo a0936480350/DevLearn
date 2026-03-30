@@ -126,7 +126,7 @@
                         <label>大分類 *（可輸入新分類或選擇現有）</label>
                         <input type="text" name="category" list="categoryList" placeholder="輸入或選擇分類..." required />
                         <datalist id="categoryList"></datalist>
-                        <script>fetch('/Home/Categories').then(function(r){return r.json()}).then(function(cats){var dl=document.getElementById('categoryList');cats.forEach(function(c){var o=document.createElement('option');o.value=c;dl.appendChild(o)})}).catch(function(){})</script>
+                        <script>fetch('/Home/Categories').then(function(r){return r.json()}).then(function(cats){var dl=document.getElementById('categoryList');cats.forEach(function(c){var o=document.createElemen__t('option');o.value=c;dl.appendChild(o)})}).catch(function(){})</script>
                     </div>
                     <div class="form-group">
                         <label>等級 *</label>

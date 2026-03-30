@@ -397,7 +397,7 @@
                 <div class="podium-card @podClass">
                     <div class="podium-rank">@medal</div>
                     <div class="podium-name">@(string.IsNullOrEmpty(user.Nickname) ? "匿名學習者" : user.Nickname)</div>
-                    @* Note: "匿名學習者" rendered server-side - JS version uses t('lb-anonymous') *@
+                    @* Note: "匿名學習者" rendered server-side - JS version uses __t('lb-anonymous') *@
                     <div class="podium-score">@user.TotalScore 分</div>
                     <div class="podium-badge">@badgeIcon @badgeLabel</div>
                 </div>
@@ -487,7 +487,7 @@
 <script>
 (function() {
     const badgeIcons = { master:'👑', expert:'🔥', advanced:'⚡', intermediate:'💎', beginner:'🌿', newbie:'🌱' };
-    const badgeLabels = { master:t('lb-badge-master'), expert:t('lb-badge-expert'), advanced:t('lb-badge-advanced'), intermediate:t('lb-badge-intermediate'), beginner:t('lb-badge-beginner'), newbie:t('lb-badge-newbie') };
+    const badgeLabels = { master:__t('lb-badge-master'), expert:__t('lb-badge-expert'), advanced:__t('lb-badge-advanced'), intermediate:__t('lb-badge-intermediate'), beginner:__t('lb-badge-beginner'), newbie:__t('lb-badge-newbie') };
 
     async function loadMyProfile() {
         try {
@@ -498,8 +498,8 @@
             if (!data.exists) {
                 el.classList.add('no-profile');
                 el.innerHTML = `
-                    <span style="color:var(--text-muted)">${t('lb-no-profile')}</span>
-                    <button class="btn-nickname" onclick="openModal()">🎮 ${t('lb-set-nickname')}</button>
+                    <span style="color:var(--text-muted)">${__t('lb-no-profile')}</span>
+                    <button class="btn-nickname" onclick="openModal()">🎮 ${__t('lb-set-nickname')}</button>
                 `;
                 return;
             }
@@ -510,28 +510,28 @@
             el.innerHTML = `
                 <div class="my-badge-icon">${icon}</div>
                 <div class="my-info">
-                    <div class="my-nickname">${data.nickname || t('lb-anonymous')}</div>
-                    <div class="my-rank-text">${t('lb-rank-text').replace('{rank}', data.rank).replace('{total}', data.totalUsers)}</div>
+                    <div class="my-nickname">${data.nickname || __t('lb-anonymous')}</div>
+                    <div class="my-rank-text">${__t('lb-rank-text').replace('{rank}', data.rank).replace('{total}', data.totalUsers)}</div>
                 </div>
                 <div class="my-stats">
                     <div class="my-stat">
                         <div class="my-stat-val">${data.totalScore}</div>
-                        <div class="my-stat-label">${t('lb-stat-total-score')}</div>
+                        <div class="my-stat-label">${__t('lb-stat-total-score')}</div>
                     </div>
                     <div class="my-stat">
                         <div class="my-stat-val">${data.quizzesTaken}</div>
-                        <div class="my-stat-label">${t('lb-stat-quizzes')}</div>
+                        <div class="my-stat-label">${__t('lb-stat-quizzes')}</div>
                     </div>
                     <div class="my-stat">
                         <div class="my-stat-val">${data.chaptersCompleted}</div>
-                        <div class="my-stat-label">${t('lb-stat-chapters')}</div>
+                        <div class="my-stat-label">${__t('lb-stat-chapters')}</div>
                     </div>
                     <div class="my-stat">
                         <div class="my-stat-val">${icon} ${label}</div>
-                        <div class="my-stat-label">${t('lb-stat-level')}</div>
+                        <div class="my-stat-label">${__t('lb-stat-level')}</div>
                     </div>
                 </div>
-                <button class="btn-nickname" onclick="openModal()">✏️ ${t('lb-edit-nickname')}</button>
+                <button class="btn-nickname" onclick="openModal()">✏️ ${__t('lb-edit-nickname')}</button>
             `;
 
             // Highlight current user in table
@@ -541,7 +541,7 @@
 
         } catch (e) {
             console.error('Failed to load profile:', e);
-            document.getElementById('myProfile').innerHTML = `<span style="color:var(--text-muted)">${t('lb-load-error')}</span>`;
+            document.getElementById('myProfile').innerHTML = `<span style="color:var(--text-muted)">${__t('lb-load-error')}</span>`;
         }
     }
 

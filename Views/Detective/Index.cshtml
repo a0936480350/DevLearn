@@ -573,9 +573,9 @@
 
             const diffBadge = document.getElementById('badgeDifficulty');
             const diffMap = {
-                beginner: { text: t('detective-badge-beginner'), cls: 'badge-beginner' },
-                intermediate: { text: t('detective-badge-intermediate'), cls: 'badge-intermediate' },
-                advanced: { text: t('detective-badge-advanced'), cls: 'badge-advanced' }
+                beginner: { text: __t('detective-badge-beginner'), cls: 'badge-beginner' },
+                intermediate: { text: __t('detective-badge-intermediate'), cls: 'badge-intermediate' },
+                advanced: { text: __t('detective-badge-advanced'), cls: 'badge-advanced' }
             };
             const dm = diffMap[data.difficulty] || diffMap.beginner;
             diffBadge.textContent = dm.text;
@@ -637,7 +637,7 @@
 
         const userAnswer = document.getElementById('userAnswer').value.trim();
         if (!userAnswer) {
-            alert(t('detective-input-empty'));
+            alert(__t('detective-input-empty'));
             return;
         }
 
@@ -680,14 +680,14 @@
 
         if (data.correct) {
             icon.textContent = '🎉';
-            title.textContent = t('detective-correct-msg');
+            title.textContent = __t('detective-correct-msg');
             showConfetti();
         } else {
             icon.textContent = '🤔';
-            title.textContent = t('detective-wrong-msg');
+            title.textContent = __t('detective-wrong-msg');
         }
 
-        explanation.innerHTML = `<h4>${t('detective-explanation-title')}</h4><p>${escapeHtml(data.explanation)}</p>`;
+        explanation.innerHTML = `<h4>${__t('detective-explanation-title')}</h4><p>${escapeHtml(data.explanation)}</p>`;
 
         // Show fixed code
         fixedBlock.textContent = data.fixedCode;
@@ -697,7 +697,7 @@
         // Time
         const m = Math.floor(data.timeTaken / 60);
         const s = data.timeTaken % 60;
-        timeEl.textContent = t('detective-time-label') + (m > 0 ? m + t('detective-time-min') : '') + s + t('detective-time-sec');
+        timeEl.textContent = __t('detective-time-label') + (m > 0 ? m + __t('detective-time-min') : '') + s + __t('detective-time-sec');
 
         panel.style.display = 'block';
 
@@ -710,14 +710,14 @@
     }
 
     function showConfetti() {
-        const container = document.createElement('div');
+        const container = document.createElemen__t('div');
         container.className = 'confetti-container';
         document.body.appendChild(container);
 
         const colors = ['#F9A825', '#3FB950', '#F85149', '#58A6FF', '#D2A8FF', '#FF7B72'];
 
         for (let i = 0; i < 80; i++) {
-            const piece = document.createElement('div');
+            const piece = document.createElemen__t('div');
             piece.className = 'confetti';
             piece.style.left = Math.random() * 100 + '%';
             piece.style.animationDelay = Math.random() * 2 + 's';
@@ -733,7 +733,7 @@
     }
 
     function escapeHtml(text) {
-        const div = document.createElement('div');
+        const div = document.createElemen__t('div');
         div.textContent = text;
         return div.innerHTML;
     }

@@ -430,16 +430,16 @@
     }
 
     function getDifficultyLabel(d) {
-        const map = { beginner: t('arena-difficulty-beginner'), intermediate: t('arena-difficulty-intermediate'), advanced: t('arena-difficulty-advanced') };
+        const map = { beginner: __t('arena-difficulty-beginner'), intermediate: __t('arena-difficulty-intermediate'), advanced: __t('arena-difficulty-advanced') };
         return map[d] || d;
     }
 
     function getCountdown(endDate) {
         const diff = new Date(endDate) - new Date();
-        if (diff <= 0) return t('arena-countdown-end');
+        if (diff <= 0) return __t('arena-countdown-end');
         const days = Math.floor(diff / 86400000);
         const hours = Math.floor((diff % 86400000) / 3600000);
-        return t('arena-countdown-remaining').replace('{d}', days).replace('{h}', hours);
+        return __t('arena-countdown-remaining').replace('{d}', days).replace('{h}', hours);
     }
 
     function getRankMedal(i) {
@@ -455,7 +455,7 @@
     }
 
     function escapeHtml(text) {
-        const d = document.createElement('div');
+        const d = document.createElemen__t('div');
         d.textContent = text;
         return d.innerHTML;
     }
@@ -469,7 +469,7 @@
             document.getElementById('challenges-loading').style.display = 'none';
 
             if (!data.length) {
-                grid.innerHTML = `<p style="color:#888;text-align:center;grid-column:1/-1">${t('arena-no-challenges')}</p>`;
+                grid.innerHTML = `<p style="color:#888;text-align:center;grid-column:1/-1">${__t('arena-no-challenges')}</p>`;
                 return;
             }
 
@@ -479,13 +479,13 @@
                     <div class="description">${escapeHtml(c.description)}</div>
                     <div class="challenge-meta">
                         <span class="difficulty-badge difficulty-${c.difficulty}">${getDifficultyLabel(c.difficulty)}</span>
-                        <span class="submission-count">📝 ${c.submissionCount} ${t('arena-submissions-count')}</span>
+                        <span class="submission-count">📝 ${c.submissionCount} ${__t('arena-submissions-count')}</span>
                         <span class="countdown">⏰ ${getCountdown(c.endDate)}</span>
                     </div>
                 </div>
             `).join('');
         } catch (e) {
-            document.getElementById('challenges-loading').textContent = t('arena-load-failed');
+            document.getElementById('challenges-loading').textContent = __t('arena-load-failed');
         }
     }
 
@@ -494,7 +494,7 @@
         const modal = document.getElementById('detail-modal');
         const body = document.getElementById('modal-body');
         modal.classList.add('active');
-        body.innerHTML = `<div class="loading-spinner">${t('arena-loading-detail')}</div>`;
+        body.innerHTML = `<div class="loading-spinner">${__t('arena-loading-detail')}</div>`;
 
         try {
             const res = await fetch(`/Arena/Detail?id=${id}`);
@@ -508,14 +508,14 @@
                 <div class="modal-description">${escapeHtml(c.description)}</div>
 
                 <div class="submit-section">
-                    <h3>${t('arena-submit-section-title')}</h3>
+                    <h3>${__t('arena-submit-section-title')}</h3>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>${t('arena-nickname-label')}</label>
-                            <input type="text" id="sub-nickname" placeholder="${t('arena-nickname-ph')}" maxlength="30" />
+                            <label>${__t('arena-nickname-label')}</label>
+                            <input type="text" id="sub-nickname" placeholder="${__t('arena-nickname-ph')}" maxlength="30" />
                         </div>
                         <div class="form-group">
-                            <label>${t('arena-lang-label')}</label>
+                            <label>${__t('arena-lang-label')}</label>
                             <select id="sub-language">
                                 <option value="csharp">C#</option>
                                 <option value="javascript">JavaScript</option>
@@ -525,19 +525,19 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>${t('arena-code-label')}</label>
-                        <textarea class="code-input" id="sub-code" placeholder="${t('arena-code-ph')}"></textarea>
+                        <label>${__t('arena-code-label')}</label>
+                        <textarea class="code-input" id="sub-code" placeholder="${__t('arena-code-ph')}"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>${t('arena-explain-label')}</label>
-                        <textarea id="sub-explanation" rows="3" placeholder="${t('arena-explain-ph')}"></textarea>
+                        <label>${__t('arena-explain-label')}</label>
+                        <textarea id="sub-explanation" rows="3" placeholder="${__t('arena-explain-ph')}"></textarea>
                     </div>
-                    <button class="btn-submit" id="btn-submit" onclick="submitSolution(${c.id})">${t('arena-submit-btn')}</button>
+                    <button class="btn-submit" id="btn-submit" onclick="submitSolution(${c.id})">${__t('arena-submit-btn')}</button>
                 </div>
 
                 <div class="submissions-section">
-                    <h3>${t('arena-lb-title')} (${subs.length} ${t('arena-submissions-count')})</h3>
-                    ${subs.length === 0 ? `<div class="no-submissions">${t('arena-no-subs')}</div>` :
+                    <h3>${__t('arena-lb-title')} (${subs.length} ${__t('arena-submissions-count')})</h3>
+                    ${subs.length === 0 ? `<div class="no-submissions">${__t('arena-no-subs')}</div>` :
                     subs.map((s, i) => `
                         <div class="submission-card">
                             <div class="submission-header">
@@ -563,17 +563,17 @@
 
             Prism.highlightAll();
         } catch (e) {
-            body.innerHTML = `<p style="color:#ff6b6b">${t('arena-detail-load-failed')}</p>`;
+            body.innerHTML = `<p style="color:#ff6b6b">${__t('arena-detail-load-failed')}</p>`;
         }
     }
 
     async function submitSolution(challengeId) {
         const btn = document.getElementById('btn-submit');
         const code = document.getElementById('sub-code').value.trim();
-        if (!code) { showToast(t('arena-no-code'), 'error'); return; }
+        if (!code) { showToast(__t('arena-no-code'), 'error'); return; }
 
         btn.disabled = true;
-        btn.textContent = t('arena-submitting');
+        btn.textContent = __t('arena-submitting');
 
         try {
             const res = await fetch('/Arena/Submit', {
@@ -589,16 +589,16 @@
             });
             const data = await res.json();
             if (data.success) {
-                showToast(t('arena-submit-success'));
+                showToast(__t('arena-submit-success'));
                 openChallenge(challengeId);
             } else {
-                showToast(data.error || t('arena-submit-failed'), 'error');
+                showToast(data.error || __t('arena-submit-failed'), 'error');
             }
         } catch (e) {
-            showToast(t('arena-network-error'), 'error');
+            showToast(__t('arena-network-error'), 'error');
         } finally {
             btn.disabled = false;
-            btn.textContent = t('arena-submit-btn');
+            btn.textContent = __t('arena-submit-btn');
         }
     }
 
@@ -618,10 +618,10 @@
                 btn.disabled = true;
                 votedSet.add(submissionId);
                 saveVoted();
-                showToast(t('arena-vote-done'));
+                showToast(__t('arena-vote-done'));
             }
         } catch (e) {
-            showToast(t('arena-vote-fail'), 'error');
+            showToast(__t('arena-vote-fail'), 'error');
         }
     }
 

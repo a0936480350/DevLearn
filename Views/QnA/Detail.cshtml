@@ -295,17 +295,17 @@
         const res = await fetch('/QnA/Answers?qnaId=' + QNA_ID);
         const answers = await res.json();
 
-        document.getElementById('answersTitle').textContent = `💬 ${t('qna-answers-title')} (${answers.length})`;
+        document.getElementById('answersTitle').textContent = `💬 ${__t('qna-answers-title')} (${answers.length})`;
 
         if (answers.length === 0) {
             document.getElementById('answersList').innerHTML =
-                `<div class="qna-no-answers">${t('qna-no-answers')}</div>`;
+                `<div class="qna-no-answers">${__t('qna-no-answers')}</div>`;
             return;
         }
 
         document.getElementById('answersList').innerHTML = answers.map(a => `
             <div class="qna-answer-card ${a.isAccepted ? 'accepted' : ''}">
-                ${a.isAccepted ? `<div class="qna-accepted-tag">${t('qna-accepted-tag')}</div>` : ''}
+                ${a.isAccepted ? `<div class="qna-accepted-tag">${__t('qna-accepted-tag')}</div>` : ''}
                 <div class="qna-answer-content">${escHtml(a.content)}</div>
                 <div class="qna-answer-meta">
                     <span>👤 ${escHtml(a.nickname)}</span>
@@ -313,7 +313,7 @@
                     <button class="btn-upvote" onclick="upvoteAnswer(${a.id}, this)">
                         👍 <span>${a.upvotes}</span>
                     </button>
-                    ${!a.isAccepted ? `<button class="btn-accept btn-accept-answer" data-aid="${a.id}" onclick="markAccepted(${a.id})" style="display:none;">${t('qna-accept-btn')}</button>` : ''}
+                    ${!a.isAccepted ? `<button class="btn-accept btn-accept-answer" data-aid="${a.id}" onclick="markAccepted(${a.id})" style="display:none;">${__t('qna-accept-btn')}</button>` : ''}
                 </div>
             </div>
         `).join('');
@@ -362,7 +362,7 @@
     }
 
     async function markAccepted(answerId) {
-        if (!confirm(t('qna-confirm-accept'))) return;
+        if (!confirm(__t('qna-confirm-accept'))) return;
         const res = await fetch('/QnA/MarkSolved', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -372,14 +372,14 @@
         if (data.success) {
             location.reload();
         } else {
-            alert(data.error || t('qna-accept-failed'));
+            alert(data.error || __t('qna-accept-failed'));
         }
     }
 
     async function submitAnswer() {
         const btn = document.getElementById('btnSubmitAnswer');
         const content = document.getElementById('answerContent').value.trim();
-        if (!content) { alert(t('qna-content-required')); return; }
+        if (!content) { alert(__t('qna-content-required')); return; }
 
         btn.disabled = true;
         try {
@@ -397,17 +397,17 @@
                 document.getElementById('answerContent').value = '';
                 loadAnswers();
             } else {
-                alert(data.error || t('qna-error'));
+                alert(data.error || __t('qna-error'));
             }
         } catch {
-            alert(t('qna-network-error'));
+            alert(__t('qna-network-error'));
         } finally {
             btn.disabled = false;
         }
     }
 
     function escHtml(s) {
-        const d = document.createElement('div');
+        const d = document.createElemen__t('div');
         d.textContent = s;
         return d.innerHTML;
     }

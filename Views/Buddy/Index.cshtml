@@ -542,9 +542,9 @@
 
 <script>
     const LEVEL_MAP = {
-        beginner: { get label() { return t('buddy-level-beginner'); }, emoji: '🌱', css: 'level-beginner' },
-        intermediate: { get label() { return t('buddy-level-intermediate'); }, emoji: '🌿', css: 'level-intermediate' },
-        advanced: { get label() { return t('buddy-level-advanced'); }, emoji: '🌳', css: 'level-advanced' }
+        beginner: { get label() { return __t('buddy-level-beginner'); }, emoji: '🌱', css: 'level-beginner' },
+        intermediate: { get label() { return __t('buddy-level-intermediate'); }, emoji: '🌿', css: 'level-intermediate' },
+        advanced: { get label() { return __t('buddy-level-advanced'); }, emoji: '🌳', css: 'level-advanced' }
     };
 
     const INTEREST_MAP = {
@@ -574,7 +574,7 @@
                 document.getElementById('registerSection').style.display = '';
             }
         } catch (e) {
-            document.getElementById('loadingState').textContent = t('buddy-load-failed');
+            document.getElementById('loadingState').textContent = __t('buddy-load-failed');
         }
     }
 
@@ -600,13 +600,13 @@
     // ── 註冊 ──
     async function doRegister() {
         const nickname = document.getElementById('regNickname').value.trim();
-        if (!nickname) return alert(t('buddy-input-nickname'));
-        if (!selectedLevel) return alert(t('buddy-select-level'));
-        if (selectedInterests.size === 0) return alert(t('buddy-select-interest'));
+        if (!nickname) return alert(__t('buddy-input-nickname'));
+        if (!selectedLevel) return alert(__t('buddy-select-level'));
+        if (selectedInterests.size === 0) return alert(__t('buddy-select-interest'));
 
         const btn = document.querySelector('.btn-register');
         btn.disabled = true;
-        btn.textContent = t('buddy-matching');
+        btn.textContent = __t('buddy-matching');
 
         try {
             const res = await fetch('/Buddy/Register', {
@@ -638,14 +638,14 @@
                 const profileData = await profileRes.json();
                 showDashboard(profileData);
             } else {
-                alert(data.message || t('buddy-register-failed'));
+                alert(data.message || __t('buddy-register-failed'));
                 btn.disabled = false;
-                btn.textContent = t('buddy-reg-btn');
+                btn.textContent = __t('buddy-reg-btn');
             }
         } catch (e) {
-            alert(t('buddy-error-retry'));
+            alert(__t('buddy-error-retry'));
             btn.disabled = false;
-            btn.textContent = t('buddy-reg-btn');
+            btn.textContent = __t('buddy-reg-btn');
         }
     }
 
@@ -685,7 +685,7 @@
     function renderMatchedBuddies(matches) {
         const el = document.getElementById('matchedBuddies');
         if (!matches.length) {
-            el.innerHTML = `<div class="empty-state"><span class="empty-emoji">🔍</span>${t('buddy-no-matched')}</div>`;
+            el.innerHTML = `<div class="empty-state"><span class="empty-emoji">🔍</span>${__t('buddy-no-matched')}</div>`;
             return;
         }
         el.innerHTML = `<div class="buddy-grid">${matches.map(b => buddyCard(b, true)).join('')}</div>`;
@@ -697,12 +697,12 @@
             const list = await res.json();
             const el = document.getElementById('recommendedBuddies');
             if (!list.length) {
-                el.innerHTML = `<div class="empty-state"><span class="empty-emoji">😊</span>${t('buddy-no-recommended')}</div>`;
+                el.innerHTML = `<div class="empty-state"><span class="empty-emoji">😊</span>${__t('buddy-no-recommended')}</div>`;
                 return;
             }
             el.innerHTML = `<div class="buddy-grid">${list.map(b => buddyCard(b, false)).join('')}</div>`;
         } catch (e) {
-            document.getElementById('recommendedBuddies').innerHTML = `<div class="empty-state">${t('buddy-load-failed')}</div>`;
+            document.getElementById('recommendedBuddies').innerHTML = `<div class="empty-state">${__t('buddy-load-failed')}</div>`;
         }
     }
 
@@ -712,12 +712,12 @@
             const list = await res.json();
             const el = document.getElementById('allBuddies');
             if (!list.length) {
-                el.innerHTML = `<div class="empty-state"><span class="empty-emoji">🌍</span>${t('buddy-no-all')}</div>`;
+                el.innerHTML = `<div class="empty-state"><span class="empty-emoji">🌍</span>${__t('buddy-no-all')}</div>`;
                 return;
             }
             el.innerHTML = `<div class="buddy-grid">${list.map(b => buddyCard(b, false)).join('')}</div>`;
         } catch (e) {
-            document.getElementById('allBuddies').innerHTML = `<div class="empty-state">${t('buddy-load-failed')}</div>`;
+            document.getElementById('allBuddies').innerHTML = `<div class="empty-state">${__t('buddy-load-failed')}</div>`;
         }
     }
 
@@ -731,9 +731,9 @@
         if (showContact && b.contactInfo) {
             actionHtml = `<div class="contact-info">📱 ${esc(b.contactInfo)}</div>`;
         } else if (!isMatched && myProfile) {
-            actionHtml = `<button class="btn-match" onclick="doMatch(${b.id}, '${esc(b.nickname)}', this)">${t('buddy-match-btn')}</button>`;
+            actionHtml = `<button class="btn-match" onclick="doMatch(${b.id}, '${esc(b.nickname)}', this)">${__t('buddy-match-btn')}</button>`;
         } else if (isMatched && !showContact) {
-            actionHtml = `<span style="color:#50fa7b;font-size:0.85rem;">${t('buddy-matched-badge')}</span>`;
+            actionHtml = `<span style="color:#50fa7b;font-size:0.85rem;">${__t('buddy-matched-badge')}</span>`;
         }
 
         return `
@@ -755,7 +755,7 @@
     // ── 手動配對 ──
     async function doMatch(buddyId, buddyName, btn) {
         btn.disabled = true;
-        btn.textContent = t('buddy-matching');
+        btn.textContent = __t('buddy-matching');
 
         try {
             const res = await fetch('/Buddy/MatchWith', {
@@ -776,14 +776,14 @@
                 await loadRecommended();
                 await loadAllBuddies(getCurrentFilter());
             } else {
-                alert(data.message || t('buddy-match-failed'));
+                alert(data.message || __t('buddy-match-failed'));
                 btn.disabled = false;
-                btn.textContent = t('buddy-match-btn');
+                btn.textContent = __t('buddy-match-btn');
             }
         } catch (e) {
-            alert(t('buddy-error-retry'));
+            alert(__t('buddy-error-retry'));
             btn.disabled = false;
-            btn.textContent = t('buddy-match-btn');
+            btn.textContent = __t('buddy-match-btn');
         }
     }
 
@@ -812,7 +812,7 @@
     // ── 工具 ──
     function esc(str) {
         if (!str) return '';
-        const d = document.createElement('div');
+        const d = document.createElemen__t('div');
         d.textContent = str;
         return d.innerHTML;
     }

@@ -346,7 +346,7 @@
             var pmChatView = document.getElementById('pmChatView');
             if(!d.isRegistered){
                 if(!pmGate){
-                    pmGate = document.createElement('div');
+                    pmGate = document.createElemen__t('div');
                     pmGate.id = 'pmRegistrationGate';
                     pmGate.style.cssText = 'padding:40px 20px;text-align:center;';
                     pmGate.innerHTML = '<div style="font-size:28px;margin-bottom:12px;">\u{1F4DD}</div><div style="color:var(--text-muted);font-size:14px;line-height:1.8;">\u8ACB\u5148\u8A3B\u518A\u624D\u80FD\u4F7F\u7528\u6B64\u529F\u80FD</div><a href="/Account/Register" style="display:inline-block;margin-top:12px;padding:8px 20px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">\u524D\u5F80\u8A3B\u518A</a>';
@@ -363,7 +363,7 @@
             var supContent = document.getElementById('supportTabContent').children[0];
             if(!d.isRegistered){
                 if(!supGate){
-                    supGate = document.createElement('div');
+                    supGate = document.createElemen__t('div');
                     supGate.id = 'supportRegistrationGate';
                     supGate.style.cssText = 'padding:40px 20px;text-align:center;';
                     supGate.innerHTML = '<div style="font-size:28px;margin-bottom:12px;">\u{1F4DD}</div><div style="color:var(--text-muted);font-size:14px;line-height:1.8;">\u8ACB\u5148\u8A3B\u518A\u624D\u80FD\u4F7F\u7528\u6B64\u529F\u80FD</div><a href="/Account/Register" style="display:inline-block;margin-top:12px;padding:8px 20px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">\u524D\u5F80\u8A3B\u518A</a>';
@@ -458,7 +458,7 @@
 
         function appendMsg(nick, msg, emoji, time, isHistory){
             var isMine = nick === chatNick;
-            var div = document.createElement('div');
+            var div = document.createElemen__t('div');
             div.className = 'chat-msg' + (isMine ? ' mine' : '');
             div.innerHTML =
                 '<span class="chat-msg-avatar">' + escHtml(emoji) + '</span>' +
@@ -478,7 +478,7 @@
         }
 
         function escHtml(s){
-            var d = document.createElement('div');
+            var d = document.createElemen__t('div');
             d.textContent = s;
             return d.innerHTML;
         }
@@ -629,7 +629,7 @@
 
         function escPmHtml(s) {
             if (!s) return '';
-            var d = document.createElement('div');
+            var d = document.createElemen__t('div');
             d.textContent = s;
             return d.innerHTML;
         }
@@ -647,7 +647,7 @@
         window.submitSupportTicket = function() {
             var category = document.getElementById('supportCategory').value;
             var content = document.getElementById('supportContent').value.trim();
-            if (!content) { alert('\u8ACB\u8F38\u5165\u554F\u984C\u5167\u5BB9'); return; }
+            if (!content) { aler__t('\u8ACB\u8F38\u5165\u554F\u984C\u5167\u5BB9'); return; }
             var submitBtn = document.getElementById('supportSubmitBtn');
             submitBtn.disabled = true;
             submitBtn.textContent = '\u63D0\u4EA4\u4E2D...';
@@ -668,12 +668,12 @@
                     document.getElementById('supportFormBody').style.display = 'none';
                     loadSupportTickets();
                 } else {
-                    alert('\u63D0\u4EA4\u5931\u6557');
+                    aler__t('\u63D0\u4EA4\u5931\u6557');
                 }
             }).catch(function(){
                 submitBtn.disabled = false;
                 submitBtn.textContent = '\u63D0\u4EA4\u56DE\u5831';
-                alert('\u63D0\u4EA4\u5931\u6557');
+                aler__t('\u63D0\u4EA4\u5931\u6557');
             });
         };
 
@@ -735,7 +735,7 @@
 
         function escSupportHtml(s) {
             if (!s) return '';
-            var d = document.createElement('div');
+            var d = document.createElemen__t('div');
             d.textContent = s;
             return d.innerHTML;
         }
@@ -850,12 +850,12 @@
         if (isMobile) {
             // 7a. 觸控無反應偵測（點按鈕 3 秒沒反應）
             document.addEventListener('touchstart', function(e) {
-                var target = e.target.closest('button, a, [onclick]');
+                var target = e.target.closes__t('button, a, [onclick]');
                 if (!target) return;
                 target._touchStart = Date.now();
             }, {passive: true});
             document.addEventListener('touchend', function(e) {
-                var target = e.target.closest('button, a, [onclick]');
+                var target = e.target.closes__t('button, a, [onclick]');
                 if (!target || !target._touchStart) return;
                 var elapsed = Date.now() - target._touchStart;
                 if (elapsed > 3000) {
@@ -903,7 +903,7 @@
 
             // Auto-fill nickname fields
             document.querySelectorAll('input[name="nickname"], input[name="Nickname"], input[name="userName"], input[name="UserName"], input[name="name"], input[name="studentName"]').forEach(function(input){
-                if(input.type === 'hidden' || input.closest('.search-box') || input.closest('.filter') || input.closest('.nav-search')) return;
+                if(input.type === 'hidden' || input.closes__t('.search-box') || input.closes__t('.filter') || input.closes__t('.nav-search')) return;
                 input.value = d.nickname;
                 input.readOnly = true;
                 input.style.opacity = '0.7';
@@ -925,7 +925,7 @@
             // Auto-fill email fields
             if(d.email){
                 document.querySelectorAll('input[name="email"], input[name="Email"], input[name="userEmail"], input[name="studentEmail"]').forEach(function(input){
-                    if(input.type === 'hidden' || input.type === 'password' || input.closest('.search-box')) return;
+                    if(input.type === 'hidden' || input.type === 'password' || input.closes__t('.search-box')) return;
                     input.value = d.email;
                 });
             }
@@ -1113,7 +1113,7 @@ function toggleGesture() {
 
     var video = document.getElementById('gestureVideo');
     var canvas = document.getElementById('gestureCanvas');
-    var ctx = canvas.getContext('2d');
+    var ctx = canvas.getContex__t('2d');
     var statusEl = document.getElementById('gestureStatus');
     var actionEl = document.getElementById('gestureAction');
 
@@ -1316,7 +1316,7 @@ function toggleGesture() {
 
                     // 可點擊元素變橘色
                     if (hoveredEl) {
-                        var link = hoveredEl.closest('a, button, [onclick]');
+                        var link = hoveredEl.closes__t('a, button, [onclick]');
                         if (link) {
                             cursorEl.style.borderColor = '#f59e0b';
                             cursorEl.style.background = 'rgba(245,158,11,0.3)';
@@ -1352,7 +1352,7 @@ function toggleGesture() {
                             clickEl.style.transition = 'outline 0.3s';
                             setTimeout(function(){ clickEl.style.outline = ''; }, 600);
                             clickEl.click();
-                            var aLink = clickEl.closest('a');
+                            var aLink = clickEl.closes__t('a');
                             if (aLink) window.location.href = aLink.href;
                         }
                         executeGesture('click', actionEl);
@@ -1604,7 +1604,7 @@ function toggleVoice() {
 
     var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        alert('你的瀏覽器不支援語音辨識，請使用 Chrome 或 Safari');
+        aler__t('你的瀏覽器不支援語音辨識，請使用 Chrome 或 Safari');
         return;
     }
 
@@ -1633,7 +1633,7 @@ function toggleVoice() {
     recognition.onerror = function(e) {
         document.getElementById('voiceText').textContent = '❌ ' + e.error;
         if (e.error === 'not-allowed') {
-            alert('請允許麥克風權限');
+            aler__t('請允許麥克風權限');
             toggleVoice();
         }
     };
@@ -1684,7 +1684,7 @@ function processVoiceCommand(text) {
             var searchInput = document.querySelector('.search-input, input[type="search"], #globalSearch');
             if (searchInput) {
                 searchInput.value = keyword;
-                searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                searchInput.dispatchEvent(new Even__t('input', { bubbles: true }));
                 msg = '🔍 搜尋: ' + keyword;
             } else {
                 window.location.href = '/?q=' + encodeURIComponent(keyword);

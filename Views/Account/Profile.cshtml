@@ -225,7 +225,7 @@
             <a href="#" data-section="chat" onclick="showSection('chat',this)"><span class="icon">&#x1F4AC;</span><span data-i18n="profile-chat">我的聊天</span></a>
             <a href="#" data-section="quiz" onclick="showSection('quiz',this)"><span class="icon">&#x1F4DD;</span><span data-i18n="profile-quiz">我的測驗</span></a>
             <div class="sidebar-divider"></div>
-            <a href="/Account/Logout" class="logout" onclick="return confirm(t('profile-confirm-logout'))"><span class="icon">&#x1F6AA;</span><span data-i18n="profile-logout">登出</span></a>
+            <a href="/Account/Logout" class="logout" onclick="return confirm(__t('profile-confirm-logout'))"><span class="icon">&#x1F6AA;</span><span data-i18n="profile-logout">登出</span></a>
         }
         else
         {
@@ -403,7 +403,7 @@
         return false;
     }
 
-    function esc(s){ var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+    function esc(s){ var d=document.createElemen__t('div'); d.textContent=s||''; return d.innerHTML; }
     function fmtDate(s){ var d=new Date(s); return d.toLocaleDateString('zh-TW') + ' ' + d.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}); }
 
     // ── 我的收藏老師 ──
@@ -453,7 +453,7 @@
                 var list = document.getElementById('favTeachersList');
                 if(!list.querySelector('.crud-item')) list.innerHTML = '<div class="crud-empty">還沒有收藏老師</div>';
             }
-        } catch(e){ alert('取消收藏失敗'); }
+        } catch(e){ aler__t('取消收藏失敗'); }
     }
 
     // ── 我的預約 ──
@@ -506,7 +506,7 @@
                 var d = await res.json().catch(function(){return {};});
                 alert(d.error || '取消失敗');
             }
-        } catch(e){ alert('取消失敗'); }
+        } catch(e){ aler__t('取消失敗'); }
     }
 
     // ── 我的想法 ──
@@ -538,11 +538,11 @@
         var current = contentEl.textContent;
         var item = document.getElementById('idea-' + id);
         if(item.querySelector('.crud-edit-area')) return;
-        var ta = document.createElement('textarea');
+        var ta = document.createElemen__t('textarea');
         ta.className = 'crud-edit-area';
         ta.value = current;
         ta.id = 'idea-edit-' + id;
-        var btnDiv = document.createElement('div');
+        var btnDiv = document.createElemen__t('div');
         btnDiv.style.cssText = 'display:flex;gap:6px;margin-top:6px;';
         btnDiv.innerHTML = '<button class="crud-btn" onclick="saveIdea(' + id + ')" style="border-color:#38bd72;color:#38bd72;">💾 儲存</button>' +
             '<button class="crud-btn" onclick="cancelEditIdea(' + id + ')">取消</button>';
@@ -570,8 +570,8 @@
             if(res.ok){
                 loadedSections['ideas'] = false;
                 loadMyIdeas();
-            } else { alert('更新失敗'); }
-        } catch(e){ alert('更新失敗'); }
+            } else { aler__t('更新失敗'); }
+        } catch(e){ aler__t('更新失敗'); }
     }
 
     // ── 我的問答 ──
@@ -651,7 +651,7 @@
                 if (preview.tagName === 'IMG') {
                     preview.src = e.target.result;
                 } else {
-                    var img = document.createElement('img');
+                    var img = document.createElemen__t('img');
                     img.id = 'avatarPreview';
                     img.src = e.target.result;
                     img.style.cssText = 'width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid #2299dd;';
@@ -664,7 +664,7 @@
 
     // ── 刪除確認 ──
     function confirmDelete(type, id){
-        var overlay = document.createElement('div');
+        var overlay = document.createElemen__t('div');
         overlay.className = 'confirm-overlay';
         overlay.innerHTML = '<div class="confirm-box">' +
             '<p>\u78BA\u5B9A\u8981\u522A\u9664\u55CE\uFF1F\u6B64\u64CD\u4F5C\u7121\u6CD5\u5FA9\u539F\u3002</p>' +
@@ -688,8 +688,8 @@
                 if(res.ok){
                     var el = document.getElementById(type + '-' + id);
                     if(el) el.remove();
-                } else { alert('\u522A\u9664\u5931\u6557'); }
-            } catch(e){ alert('\u522A\u9664\u5931\u6557'); }
+                } else { aler__t('\u522A\u9664\u5931\u6557'); }
+            } catch(e){ aler__t('\u522A\u9664\u5931\u6557'); }
         };
     }
     </script>
