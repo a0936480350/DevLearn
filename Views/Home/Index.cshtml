@@ -224,8 +224,8 @@
                 <div class="path-node" style="--node-color: @cp.Color">
                     <div class="path-step-num">STEP @(i + 1)</div>
                     <div class="path-icon">@cp.Icon</div>
-                    <h3>@cp.Name</h3>
-                    <p class="path-desc">@cp.Desc</p>
+                    <h3 data-i18n="@("path-" + cp.Key + "-name")">@cp.Name</h3>
+                    <p class="path-desc" data-i18n="@("path-" + cp.Key + "-desc")">@cp.Desc</p>
                     <div class="path-meta">@chapters.Count <span data-i18n="home-chapters-unit">個章節</span></div>
                     <a href="/Home/Chapter/@(chapters.FirstOrDefault()?.Slug ?? "#")" class="path-start-btn" data-i18n="home-start-btn">開始 →</a>
                 </div>
@@ -249,7 +249,7 @@
                     <div class="category-header">
                         <div class="cat-icon-wrap">@cp.Icon</div>
                         <div>
-                            <h2>@cp.Name</h2>
+                            <h2 data-i18n="@("path-" + cp.Key + "-name")">@cp.Name</h2>
                             <small>@chapters.Count <span data-i18n="home-chapters-unit">個章節</span> · STEP @(i + 1)</small>
                         </div>
                         <a href="/Note/DownloadAll/@cp.Key" class="dl-all-btn">📥 <span data-i18n="home-note-btn">筆記</span></a>
@@ -263,7 +263,7 @@
                             <li>
                                 <a href="/Home/Chapter/@ch.Slug" class="chapter-link">
                                     <span class="ch-icon">@ch.Icon</span>
-                                    <span class="ch-title">@ch.Title</span>
+                                    <span class="ch-title" data-i18n="@("ch-" + ch.Slug)">@ch.Title</span>
                                     <span class="badge @cls" data-i18n="@i18nLevel">@label</span>
                                     <span class="ch-arrow">›</span>
                                 </a>
@@ -291,7 +291,7 @@
                     <div class="category-header">
                         <div class="cat-icon-wrap">@mod.Value.Icon</div>
                         <div>
-                            <h2>@mod.Value.Name</h2>
+                            <h2 data-i18n="@("path-" + mod.Key + "-name")">@mod.Value.Name</h2>
                             <small>@chapters.Count <span data-i18n="home-chapters-unit">個章節</span></small>
                         </div>
                         <a href="/Note/DownloadAll/@mod.Key" class="dl-all-btn">📥 <span data-i18n="home-note-btn">筆記</span></a>
@@ -305,7 +305,7 @@
                             <li>
                                 <a href="/Home/Chapter/@ch.Slug" class="chapter-link">
                                     <span class="ch-icon">@ch.Icon</span>
-                                    <span class="ch-title">@ch.Title</span>
+                                    <span class="ch-title" data-i18n="@("ch-" + ch.Slug)">@ch.Title</span>
                                     <span class="badge @cls" data-i18n="@i18nLevel">@label</span>
                                     <span class="ch-arrow">›</span>
                                 </a>

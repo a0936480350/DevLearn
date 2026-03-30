@@ -412,7 +412,7 @@
         try {
             var res = await fetch('/Account/MyFavoriteTeachers');
             var items = await res.json();
-            if(!items.length){ el.innerHTML = '<div class="crud-empty">還沒有收藏老師</div>'; return; }
+            if(!items.length){ el.innerHTML = '<div class="crud-empty">' + __t('profile-no-fav-teachers') + '</div>'; return; }
             el.innerHTML = items.map(function(t){
                 var stars = '';
                 for(var i=0;i<5;i++) stars += i < Math.floor(t.averageRating) ? '\u2605' : '\u2606';
@@ -432,13 +432,13 @@
                         '</div>' +
                     '</div>' +
                     '<div class="crud-item-actions">' +
-                        '<a href="/Teacher/Detail/' + t.id + '" class="crud-btn" style="text-decoration:none;">查看詳情</a>' +
-                        '<a href="/Teacher/Detail/' + t.id + '" class="crud-btn" style="text-decoration:none;border-color:#2299dd;color:#2299dd;">預約課程</a>' +
-                        '<button class="crud-btn crud-btn-danger" onclick="unfavoriteTeacher(' + t.favId + ')">取消收藏</button>' +
+                        '<a href="/Teacher/Detail/' + t.id + '" class="crud-btn" style="text-decoration:none;">' + __t('profile-view-detail') + '</a>' +
+                        '<a href="/Teacher/Detail/' + t.id + '" class="crud-btn" style="text-decoration:none;border-color:#2299dd;color:#2299dd;">' + __t('profile-book-lesson') + '</a>' +
+                        '<button class="crud-btn crud-btn-danger" onclick="unfavoriteTeacher(' + t.favId + ')">' + __t('profile-unfav') + '</button>' +
                     '</div>' +
                 '</div>';
             }).join('');
-        } catch(e){ el.innerHTML = '<div class="crud-empty">載入失敗</div>'; }
+        } catch(e){ el.innerHTML = '<div class="crud-empty">' + __t('profile-load-failed') + '</div>'; }
     }
 
     async function unfavoriteTeacher(favId){
@@ -451,9 +451,9 @@
                 var el = document.getElementById('fav-' + favId);
                 if(el) el.remove();
                 var list = document.getElementById('favTeachersList');
-                if(!list.querySelector('.crud-item')) list.innerHTML = '<div class="crud-empty">還沒有收藏老師</div>';
+                if(!list.querySelector('.crud-item')) list.innerHTML = '<div class="crud-empty">' + __t('profile-no-fav-teachers') + '</div>';
             }
-        } catch(e){ aler__t('取消收藏失敗'); }
+        } catch(e){ aler__t(__t('profile-unfav-failed')); }
     }
 
     // ── 我的預約 ──
@@ -462,9 +462,9 @@
         try {
             var res = await fetch('/Account/MyBookings');
             var items = await res.json();
-            if(!items.length){ el.innerHTML = '<div class="crud-empty">還沒有預約紀錄</div>'; return; }
+            if(!items.length){ el.innerHTML = '<div class="crud-empty">' + __t('profile-no-bookings') + '</div>'; return; }
             el.innerHTML = items.map(function(b){
-                var statusMap = {pending:'待確認',confirmed:'已確認',completed:'已完成',cancelled:'已取消'};
+                var statusMap = {pending:__t('booking-status-pending'),confirmed:__t('booking-status-confirmed'),completed:__t('booking-status-completed'),cancelled:__t('booking-status-cancelled')};
                 var colorMap = {pending:'crud-badge-yellow',confirmed:'crud-badge-green',completed:'crud-badge-blue',cancelled:'crud-badge-danger'};
                 var statusText = statusMap[b.status] || b.status;
                 var badgeClass = colorMap[b.status] || 'crud-badge-yellow';
@@ -472,10 +472,10 @@
                 var badgeStyle = b.status === 'cancelled' ? 'background:rgba(220,53,69,.15);color:#f85149;' : '';
                 var actions = '';
                 if(b.status === 'pending'){
-                    actions = '<button class="crud-btn crud-btn-danger" onclick="cancelBooking(' + b.id + ')">取消預約</button>';
+                    actions = '<button class="crud-btn crud-btn-danger" onclick="cancelBooking(' + b.id + ')">' + __t('profile-cancel-booking') + '</button>';
                 }
                 if(b.status === 'completed' && !b.hasReview){
-                    actions = '<a href="/Teacher/Detail/' + b.teacherId + '" class="crud-btn" style="text-decoration:none;border-color:#F9A825;color:#F9A825;">寫評價</a>';
+                    actions = '<a href="/Teacher/Detail/' + b.teacherId + '" class="crud-btn" style="text-decoration:none;border-color:#F9A825;color:#F9A825;">' + __t('profile-write-review') + '</a>';
                 }
                 return '<div class="crud-item" id="booking-' + b.id + '">' +
                     '<div class="crud-item-content" style="margin-bottom:2px;">' +
@@ -489,11 +489,11 @@
                     (actions ? '<div class="crud-item-actions">' + actions + '</div>' : '') +
                 '</div>';
             }).join('');
-        } catch(e){ el.innerHTML = '<div class="crud-empty">載入失敗</div>'; }
+        } catch(e){ el.innerHTML = '<div class="crud-empty">' + __t('profile-load-failed') + '</div>'; }
     }
 
     async function cancelBooking(bookingId){
-        if(!confirm('確定要取消此預約嗎？')) return;
+        if(!confirm(__t('profile-confirm-cancel-booking'))) return;
         try {
             var res = await fetch('/Account/CancelBooking', {
                 method: 'POST', headers: {'Content-Type':'application/json'},
@@ -504,9 +504,9 @@
                 loadMyBookings();
             } else {
                 var d = await res.json().catch(function(){return {};});
-                alert(d.error || '取消失敗');
+                alert(d.error || __t('profile-cancel-failed'));
             }
-        } catch(e){ aler__t('取消失敗'); }
+        } catch(e){ aler__t(__t('profile-cancel-failed')); }
     }
 
     // ── 我的想法 ──
@@ -515,22 +515,22 @@
         try {
             var res = await fetch('/Account/MyIdeas');
             var items = await res.json();
-            if(!items.length){ el.innerHTML = '<div class="crud-empty">還沒有發過想法</div>'; return; }
+            if(!items.length){ el.innerHTML = '<div class="crud-empty">' + __t('profile-no-ideas') + '</div>'; return; }
             el.innerHTML = items.map(function(i){
                 return '<div class="crud-item" id="idea-' + i.id + '">' +
                     '<div class="crud-item-content" id="idea-content-' + i.id + '">' + esc(i.content) + '</div>' +
                     '<div class="crud-item-meta">' +
                         (i.chapterTitle ? '<span>\u{1F4D6} ' + esc(i.chapterTitle) + '</span>' : '') +
-                        '<span>\u{1F4AC} ' + i.replyCount + ' \u5247\u56DE\u8986</span>' +
+                        '<span>\u{1F4AC} ' + i.replyCount + ' ' + __t('profile-reply-count') + '</span>' +
                         '<span>' + fmtDate(i.createdAt) + '</span>' +
                     '</div>' +
                     '<div class="crud-item-actions">' +
-                        '<button class="crud-btn" onclick="editIdea(' + i.id + ')">✏️ 編輯</button>' +
-                        '<button class="crud-btn crud-btn-danger" onclick="confirmDelete(\'idea\',' + i.id + ')">🗑️ 刪除</button>' +
+                        '<button class="crud-btn" onclick="editIdea(' + i.id + ')">✏️ ' + __t('profile-edit-btn') + '</button>' +
+                        '<button class="crud-btn crud-btn-danger" onclick="confirmDelete(\'idea\',' + i.id + ')">🗑️ ' + __t('profile-delete-btn') + '</button>' +
                     '</div>' +
                 '</div>';
             }).join('');
-        } catch(e){ el.innerHTML = '<div class="crud-empty">載入失敗</div>'; }
+        } catch(e){ el.innerHTML = '<div class="crud-empty">' + __t('profile-load-failed') + '</div>'; }
     }
 
     function editIdea(id){
@@ -544,8 +544,8 @@
         ta.id = 'idea-edit-' + id;
         var btnDiv = document.createElemen__t('div');
         btnDiv.style.cssText = 'display:flex;gap:6px;margin-top:6px;';
-        btnDiv.innerHTML = '<button class="crud-btn" onclick="saveIdea(' + id + ')" style="border-color:#38bd72;color:#38bd72;">💾 儲存</button>' +
-            '<button class="crud-btn" onclick="cancelEditIdea(' + id + ')">取消</button>';
+        btnDiv.innerHTML = '<button class="crud-btn" onclick="saveIdea(' + id + ')" style="border-color:#38bd72;color:#38bd72;">💾 ' + __t('profile-save-btn') + '</button>' +
+            '<button class="crud-btn" onclick="cancelEditIdea(' + id + ')">' + __t('profile-cancel-btn') + '</button>';
         contentEl.style.display = 'none';
         contentEl.after(ta, btnDiv);
     }
@@ -570,8 +570,8 @@
             if(res.ok){
                 loadedSections['ideas'] = false;
                 loadMyIdeas();
-            } else { aler__t('更新失敗'); }
-        } catch(e){ aler__t('更新失敗'); }
+            } else { aler__t(__t('profile-update-failed')); }
+        } catch(e){ aler__t(__t('profile-update-failed')); }
     }
 
     // ── 我的問答 ──
@@ -580,7 +580,7 @@
         try {
             var res = await fetch('/Account/MyQuestions');
             var items = await res.json();
-            if(!items.length){ el.innerHTML = '<div class="crud-empty">還沒有發過問題</div>'; return; }
+            if(!items.length){ el.innerHTML = '<div class="crud-empty">' + __t('profile-no-questions') + '</div>'; return; }
             el.innerHTML = items.map(function(q){
                 var statusBadge = q.isSolved
                     ? '<span class="crud-badge crud-badge-green">\u2705 \u5DF2\u89E3\u6C7A</span>'
@@ -597,7 +597,7 @@
                     '</div>' +
                 '</div>';
             }).join('');
-        } catch(e){ el.innerHTML = '<div class="crud-empty">載入失敗</div>'; }
+        } catch(e){ el.innerHTML = '<div class="crud-empty">' + __t('profile-load-failed') + '</div>'; }
     }
 
     // ── 我的聊天 ──
@@ -606,7 +606,7 @@
         try {
             var res = await fetch('/Account/MyChats');
             var items = await res.json();
-            if(!items.length){ el.innerHTML = '<div class="crud-empty">還沒有聊天紀錄</div>'; return; }
+            if(!items.length){ el.innerHTML = '<div class="crud-empty">' + __t('profile-no-chats') + '</div>'; return; }
             el.innerHTML = items.map(function(c){
                 return '<div class="crud-item" id="chat-' + c.id + '">' +
                     '<div class="crud-item-content">' + esc(c.message) + '</div>' +
@@ -618,7 +618,7 @@
                     '</div>' +
                 '</div>';
             }).join('');
-        } catch(e){ el.innerHTML = '<div class="crud-empty">載入失敗</div>'; }
+        } catch(e){ el.innerHTML = '<div class="crud-empty">' + __t('profile-load-failed') + '</div>'; }
     }
 
     // ── 我的測驗 ──
@@ -627,7 +627,7 @@
         try {
             var res = await fetch('/Account/MyQuizzes');
             var items = await res.json();
-            if(!items.length){ el.innerHTML = '<div class="crud-empty">還沒有測驗紀錄</div>'; return; }
+            if(!items.length){ el.innerHTML = '<div class="crud-empty">' + __t('profile-no-quizzes') + '</div>'; return; }
             el.innerHTML = items.map(function(q){
                 var pct = q.total > 0 ? Math.round(q.score / q.total * 100) : 0;
                 var color = pct >= 60 ? 'crud-badge-green' : 'crud-badge-yellow';
@@ -639,7 +639,7 @@
                     '</div>' +
                 '</div>';
             }).join('');
-        } catch(e){ el.innerHTML = '<div class="crud-empty">載入失敗</div>'; }
+        } catch(e){ el.innerHTML = '<div class="crud-empty">' + __t('profile-load-failed') + '</div>'; }
     }
 
     // ── 頭像預覽 ──
@@ -667,10 +667,10 @@
         var overlay = document.createElemen__t('div');
         overlay.className = 'confirm-overlay';
         overlay.innerHTML = '<div class="confirm-box">' +
-            '<p>\u78BA\u5B9A\u8981\u522A\u9664\u55CE\uFF1F\u6B64\u64CD\u4F5C\u7121\u6CD5\u5FA9\u539F\u3002</p>' +
+            '<p>' + __t('profile-confirm-delete') + '</p>' +
             '<div class="confirm-btns">' +
-                '<button class="btn btn-primary" style="background:#f85149;padding:8px 20px;font-size:13px;" id="confirmYes">\u{1F5D1}\uFE0F \u522A\u9664</button>' +
-                '<button class="btn btn-outline" style="padding:8px 20px;font-size:13px;" id="confirmNo">\u53D6\u6D88</button>' +
+                '<button class="btn btn-primary" style="background:#f85149;padding:8px 20px;font-size:13px;" id="confirmYes">\u{1F5D1}\uFE0F ' + __t('profile-delete-btn') + '</button>' +
+                '<button class="btn btn-outline" style="padding:8px 20px;font-size:13px;" id="confirmNo">' + __t('profile-cancel-btn') + '</button>' +
             '</div>' +
         '</div>';
         document.body.appendChild(overlay);
@@ -688,8 +688,8 @@
                 if(res.ok){
                     var el = document.getElementById(type + '-' + id);
                     if(el) el.remove();
-                } else { aler__t('\u522A\u9664\u5931\u6557'); }
-            } catch(e){ aler__t('\u522A\u9664\u5931\u6557'); }
+                } else { aler__t(__t('profile-delete-failed')); }
+            } catch(e){ aler__t(__t('profile-delete-failed')); }
         };
     }
     </script>

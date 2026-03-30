@@ -40,7 +40,7 @@
                 var isActive = catChapters.Any(c => c.Id == Model.Id);
                 <div class="nav-group @(isActive ? "open" : "")">
                     <button class="nav-group-toggle" onclick="toggleGroup(this)">
-                        <span>@cat.Value</span>
+                        <span data-i18n="@("cat-" + cat.Key)">@cat.Value</span>
                         <span class="toggle-icon">▼</span>
                     </button>
                     <ul class="nav-group-items">
@@ -52,7 +52,7 @@
                                 <a href="/Home/Chapter/@ch.Slug"
                                    class="nav-item @(isCurrent ? "active" : "") @(isDone ? "done" : "")">
                                     <span class="nav-check">@(isDone ? "✅" : "○")</span>
-                                    <span class="nav-title">@ch.Title</span>
+                                    <span class="nav-title" data-i18n="@("ch-" + ch.Slug)">@ch.Title</span>
                                 </a>
                             </li>
                         }
@@ -67,7 +67,7 @@
         <!-- 章節標題列 -->
         <div class="chapter-toolbar">
             <div class="chapter-meta">
-                <span class="chapter-cat">@(categories.GetValueOrDefault(Model.Category, Model.Category))</span>
+                <span class="chapter-cat" data-i18n="@("cat-" + Model.Category)">@(categories.GetValueOrDefault(Model.Category, Model.Category))</span>
                 <span class="chapter-level level-@Model.Level" data-i18n="@("ch-level-" + Model.Level)">
                     @(Model.Level switch { "beginner"=>"初學","intermediate"=>"中級","advanced"=>"進階",_=>Model.Level })
                 </span>
@@ -111,12 +111,12 @@
         <div class="chapter-nav-footer">
             @if (prevCh != null)
             {
-                <a href="/Home/Chapter/@prevCh.Slug" class="nav-prev">← @prevCh.Title</a>
+                <a href="/Home/Chapter/@prevCh.Slug" class="nav-prev">← <span data-i18n="@("ch-" + prevCh.Slug)">@prevCh.Title</span></a>
             }
             else { <span></span> }
             @if (nextCh != null)
             {
-                <a href="/Home/Chapter/@nextCh.Slug" class="nav-next">@nextCh.Title →</a>
+                <a href="/Home/Chapter/@nextCh.Slug" class="nav-next"><span data-i18n="@("ch-" + nextCh.Slug)">@nextCh.Title</span> →</a>
             }
         </div>
     </main>
@@ -126,7 +126,7 @@
 <div id="quizModal" class="modal hidden">
     <div class="modal-box">
         <div class="modal-header">
-            <h2>🎯 @Model.Title — 測驗</h2>
+            <h2>🎯 <span class="chapter-title-display" data-i18n="@("ch-" + Model.Slug)">@Model.Title</span> — <span data-i18n="ch-quiz-modal-title">測驗</span></h2>
             <button onclick="closeQuiz()" class="modal-close">✕</button>
         </div>
         <div id="quizContent">
@@ -148,11 +148,11 @@
 <div id="practiceModal" class="modal hidden">
     <div class="modal-box" style="max-width:900px;">
         <div class="modal-header">
-            <h2>⌨️ 程式碼練習</h2>
+            <h2>⌨️ <span data-i18n="ch-practice-modal-title">程式碼練習</span></h2>
             <button onclick="closePractice()" class="modal-close">✕</button>
         </div>
         <div id="practiceContent">
-            <p style="color:var(--text-muted);margin-bottom:1rem;">照著範例打一遍，加深記憶！<code>// TODO</code> 的地方需要你填寫。</p>
+            <p style="color:var(--text-muted);margin-bottom:1rem;" data-i18n="ch-practice-intro">照著範例打一遍，加深記憶！<code>// TODO</code> 的地方需要你填寫。</p>
             <div style="display:flex;gap:1rem;margin-bottom:1rem;">
                 <div style="flex:1;">
                     <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:.3rem;" data-i18n="ch-practice-ref-label">📖 範例（參考）</div>
@@ -221,11 +221,11 @@ function savePractice(format) {
     const title = '@Model.Title'.replace(/[<>]/g, '');
     if (format === 'txt') {
         const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-        downloadBlob(blob, title + '_練習.txt');
+        downloadBlob(blob, title + '_' + __t('ch-practice-suffix') + '.txt');
     } else if (format === 'html') {
-        const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + title + ' 練習</title><style>body{font-family:monospace;background:#1a1b1f;color:#e4e2de;padding:2rem;white-space:pre-wrap;}</style></head><body><h1>' + title + ' — 程式碼練習</h1><pre>' + content.replace(/</g,'&lt;') + '</pre><p style="color:#888;margin-top:2rem;">練習時間：' + new Date().toLocaleString() + '</p></body></html>';
+        const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + title + ' ' + __t('ch-practice-suffix') + '</title><style>body{font-family:monospace;background:#1a1b1f;color:#e4e2de;padding:2rem;white-space:pre-wrap;}</style></head><body><h1>' + title + ' — ' + __t('ch-practice-modal-title') + '</h1><pre>' + content.replace(/</g,'&lt;') + '</pre><p style="color:#888;margin-top:2rem;">' + __t('ch-practice-time') + ': ' + new Date().toLocaleString() + '</p></body></html>';
         const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-        downloadBlob(blob, title + '_練習.html');
+        downloadBlob(blob, title + '_' + __t('ch-practice-suffix') + '.html');
     }
 }
 
