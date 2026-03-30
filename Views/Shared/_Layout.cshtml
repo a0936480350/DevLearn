@@ -24,10 +24,16 @@
             <div id="searchResults" class="search-dropdown"></div>
         </div>
         <div class="nav-right" id="navRight">
-            <a href="/CheckIn" class="nav-scores-link">📅 簽到</a>
-            <a href="/Daily" class="nav-scores-link">🔥 每日</a>
+            <button id="themeToggle" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);border-radius:20px;padding:4px 12px;cursor:pointer;font-size:14px;color:var(--text);margin-right:8px;" title="切換主題">🌙</button>
+            <select id="langSelect" onchange="changeLang(this.value)" style="background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:20px;padding:4px 10px;cursor:pointer;font-size:12px;margin-right:8px;">
+                <option value="zh">🇹🇼 中文</option>
+                <option value="en">🇺🇸 English</option>
+                <option value="ja">🇯🇵 日本語</option>
+            </select>
+            <a href="/CheckIn" class="nav-scores-link" data-i18n="nav-checkin">📅 簽到</a>
+            <a href="/Daily" class="nav-scores-link" data-i18n="nav-daily">🔥 每日</a>
             <div class="nav-dropdown">
-                <button class="nav-scores-link nav-dropdown-btn">🎮 遊戲 ▾</button>
+                <button class="nav-scores-link nav-dropdown-btn" data-i18n="nav-games">🎮 遊戲 ▾</button>
                 <div class="nav-dropdown-menu">
                     <a href="/Detective">🔍 程式碼偵探</a>
                     <a href="/Speed">⏱️ 速度挑戰</a>
@@ -36,7 +42,7 @@
                 </div>
             </div>
             <div class="nav-dropdown">
-                <button class="nav-scores-link nav-dropdown-btn">📚 工具 ▾</button>
+                <button class="nav-scores-link nav-dropdown-btn" data-i18n="nav-tools">📚 工具 ▾</button>
                 <div class="nav-dropdown-menu">
                     <a href="/Analytics">📊 學習分析</a>
                     <a href="/Flashcard">🃏 暗記卡片</a>
@@ -46,7 +52,7 @@
                     <a href="/Leaderboard">🏆 排行榜</a>
                 </div>
             </div>
-            <a href="/Teacher" class="nav-scores-link">&#x1F468;&#x200D;&#x1F3EB; &#x627E;&#x8001;&#x5E2B;</a>
+            <a href="/Teacher" class="nav-scores-link" data-i18n="nav-teacher">&#x1F468;&#x200D;&#x1F3EB; &#x627E;&#x8001;&#x5E2B;</a>
             <a href="/Account/Profile" class="nav-scores-link" id="navUserLink">&#x1F464; &#x6211;&#x7684;</a>
             <span id="totalProgress" class="progress-badge">⏳ 載入中</span>
         </div>

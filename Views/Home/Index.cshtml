@@ -35,21 +35,21 @@
     <section class="hero" style="background:linear-gradient(135deg, rgba(0,184,148,0.8), rgba(9,132,227,0.7)), url('/images/hero-coding.jpg') center/cover no-repeat;">
         <div class="hero-bg" style="background:none;"></div>
         <div class="hero-content">
-            <div class="hero-badge">完整 .NET 學習路徑</div>
+            <div class="hero-badge" data-i18n="hero-badge">完整 .NET 學習路徑</div>
             <h1>從零開始，<br><span class="highlight">完整學會 .NET</span></h1>
-            <p class="hero-desc">
+            <p class="hero-desc" data-i18n="hero-desc">
                 C# / ASP.NET Core / 資料庫 / 設計模式 / Docker / AI<br>
                 每章附詳細說明、程式碼範例、常見錯誤分析與隨機測驗
             </p>
             <div class="hero-cta">
-                <a href="/Home/Chapter/csharp-intro" class="btn-cta-primary">開始學習</a>
-                <a href="#quick-challenge" class="btn-cta-secondary">隨機挑戰</a>
-                <a href="/Scores" class="btn-cta-ghost">成績總覽</a>
+                <a href="/Home/Chapter/csharp-intro" class="btn-cta-primary" data-i18n="hero-start">開始學習</a>
+                <a href="#quick-challenge" class="btn-cta-secondary" data-i18n="hero-challenge">隨機挑戰</a>
+                <a href="/Scores" class="btn-cta-ghost" data-i18n="hero-scores">成績總覽</a>
             </div>
             <div class="hero-stats">
-                <div class="stat"><span class="stat-num clr-1">@Model.Count</span><small>章節內容</small></div>
-                <div class="stat"><span class="stat-num clr-2">@(corePath.Length + advancedModules.Count)</span><small>主題分類</small></div>
-                <div class="stat"><span class="stat-num clr-3">Free</span><small>完全免費</small></div>
+                <div class="stat"><span class="stat-num clr-1">@Model.Count</span><small data-i18n="stat-chapters">章節內容</small></div>
+                <div class="stat"><span class="stat-num clr-2">@(corePath.Length + advancedModules.Count)</span><small data-i18n="stat-categories">主題分類</small></div>
+                <div class="stat"><span class="stat-num clr-3">Free</span><small data-i18n="stat-free">完全免費</small></div>
             </div>
         </div>
     </section>
@@ -61,7 +61,7 @@
             <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;">
                 <div style="flex-shrink:0;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#00b894,#6366f1);display:flex;align-items:center;justify-content:center;font-size:24px;">👋</div>
                 <div style="flex:1;min-width:280px;">
-                    <h2 style="font-size:1.3rem;font-weight:700;margin:0 0 12px 0;color:var(--text);">嗨！我是 Mike，歡迎來到 DevLearn</h2>
+                    <h2 style="font-size:1.3rem;font-weight:700;margin:0 0 12px 0;color:var(--text);" data-i18n="dev-title">嗨！我是 Mike，歡迎來到 DevLearn</h2>
                     <p style="color:var(--text-muted);line-height:1.8;margin:0 0 16px 0;font-size:0.92rem;">
                         這個平台是我的 Side Project，起因很簡單——<strong style="color:var(--accent);">學程式不應該無聊</strong>。
                         傳統的教學網站通常只有文字和程式碼，缺少互動和樂趣。所以我想做一個結合
@@ -90,7 +90,7 @@
                     <p style="color:var(--text);font-size:0.95rem;margin:0;font-weight:600;">
                         沒有壓力，按自己的節奏學習就好。希望大家在這裡開心學程式，一起成長！🚀
                     </p>
-                    <p style="color:var(--text-muted);font-size:0.82rem;margin:12px 0 0 0;text-align:right;">
+                    <p style="color:var(--text-muted);font-size:0.82rem;margin:12px 0 0 0;text-align:right;" data-i18n="dev-signature">
                         —— Mike（邱瀚賢）｜DevLearn 開發者
                     </p>
                 </div>
@@ -100,8 +100,8 @@
 
     <!-- ══════════ 網站功能導覽 ══════════ -->
     <section style="padding:50px 24px;max-width:1100px;margin:0 auto;">
-        <h2 style="text-align:center;font-size:1.6rem;font-weight:800;margin-bottom:8px;">平台功能導覽</h2>
-        <p style="text-align:center;color:var(--text-muted);margin-bottom:32px;">一站式學習 + 互動 + 媒合，所有功能免費使用</p>
+        <h2 style="text-align:center;font-size:1.6rem;font-weight:800;margin-bottom:8px;" data-i18n="section-features">平台功能導覽</h2>
+        <p style="text-align:center;color:var(--text-muted);margin-bottom:32px;" data-i18n="section-features-desc">一站式學習 + 互動 + 媒合，所有功能免費使用</p>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;">
             <a href="#core-path" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;text-decoration:none;color:var(--text);transition:border-color .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
                 <div style="font-size:1.5rem;margin-bottom:8px;">📚</div>
@@ -212,7 +212,7 @@
     <!-- ══════════ 核心學習路線 ══════════ -->
     <section class="section-block" id="core-path">
         <div class="section-header">
-            <h2 class="section-title">核心學習路線</h2>
+            <h2 class="section-title" data-i18n="section-core">核心學習路線</h2>
             <p class="section-subtitle">按順序學習這三個主題，打好 .NET 開發基礎</p>
         </div>
 
@@ -278,7 +278,7 @@
     <!-- ══════════ 進階擴充模組 ══════════ -->
     <section class="section-block" id="advanced-modules">
         <div class="section-header">
-            <h2 class="section-title">進階擴充模組</h2>
+            <h2 class="section-title" data-i18n="section-advanced">進階擴充模組</h2>
             <p class="section-subtitle">核心路線學完後，依需求選擇深入的方向</p>
         </div>
 
