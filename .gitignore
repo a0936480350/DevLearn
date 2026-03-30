@@ -1,6 +1,11 @@
 publish/
 publish-azure/
+publish-out/
+publish-linux/
 deploy.zip
+deploy-linux.zip
+deploy-latest.zip
+deploy-v*.zip
 *.db
 azure-pub/
 azure-publish/
