@@ -1636,13 +1636,24 @@ function toggleVoice() {
     };
 
     recognition.onerror = function(e) {
-        if (e.error === 'no-speech') return;
-        document.getElementById('voiceText').textContent = '❌ ' + e.error;
-        if (e.error === 'not-allowed') { alert('請允許麥克風權限'); toggleVoice(); }
+        if (e.error === 'no-speech' || e.error === 'aborted') return;
+        var status = document.getElementById('voiceText');
+        if (e.error === 'not-allowed') {
+            status.textContent = '❌ 請允許麥克風權限';
+            toggleVoice();
+        } else if (e.error === 'network') {
+            status.textContent = '⚠️ 網路問題，重試中...';
+        } else {
+            status.textContent = '❌ ' + e.error;
+        }
     };
 
     recognition.onend = function() {
-        if (voiceActive) { try { recognition.start(); } catch(e) {} }
+        if (voiceActive) {
+            setTimeout(function() {
+                try { recognition.start(); } catch(e) {}
+            }, 100);
+        }
     };
 
     recognition.start();
