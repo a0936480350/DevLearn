@@ -1046,8 +1046,9 @@
     border:1px solid rgba(239,68,68,0.3);border-radius:12px;
     padding:10px 16px;display:none;font-size:13px;color:#e2e8f0;
     max-width:250px;">
-    <div id="voiceText" style="margin-bottom:6px;">🎤 聆聽中...</div>
-    <div id="voiceResult" style="color:#00b894;font-weight:600;"></div>
+    <div id="voiceText" style="margin-bottom:6px;color:#94a3b8;">🎤 聆聽中...</div>
+    <div id="voiceResult" style="color:#00b894;font-weight:600;min-height:18px;"></div>
+    <div style="font-size:10px;color:#4b5563;margin-top:4px;">說「說明」查看指令</div>
 </div>
 
 <style>
@@ -1587,6 +1588,8 @@ function executeGesture(gesture, actionEl) {
 
 var voiceActive = false;
 var recognition = null;
+var voiceInputMode = false;   // 語音打字模式
+var voiceInputTarget = null;  // 目前要填入的 input
 
 function toggleVoice() {
     var btn = document.getElementById('voiceToggleBtn');
@@ -1594,6 +1597,7 @@ function toggleVoice() {
 
     if (voiceActive) {
         voiceActive = false;
+        voiceInputMode = false;
         localStorage.setItem('voiceOn', 'false');
         if (recognition) recognition.stop();
         btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
@@ -1620,141 +1624,295 @@ function toggleVoice() {
     recognition.lang = 'zh-TW';
 
     recognition.onresult = function(event) {
-        var text = '';
+        var interim = '', final = '';
         for (var i = event.resultIndex; i < event.results.length; i++) {
-            text += event.results[i][0].transcript;
+            var t = event.results[i][0].transcript;
+            if (event.results[i].isFinal) final += t;
+            else interim += t;
         }
-        document.getElementById('voiceText').textContent = '🎤 ' + text;
-        if (event.results[event.resultIndex].isFinal) {
-            processVoiceCommand(text.trim().toLowerCase());
-        }
+        var display = final || interim;
+        document.getElementById('voiceText').textContent = '🎤 ' + display;
+        if (final) processVoiceCommand(final.trim());
     };
 
     recognition.onerror = function(e) {
+        if (e.error === 'no-speech') return;
         document.getElementById('voiceText').textContent = '❌ ' + e.error;
-        if (e.error === 'not-allowed') {
-            alert('請允許麥克風權限');
-            toggleVoice();
-        }
+        if (e.error === 'not-allowed') { alert('請允許麥克風權限'); toggleVoice(); }
     };
 
     recognition.onend = function() {
-        if (voiceActive) {
-            try { recognition.start(); } catch(e) {}
-        }
+        if (voiceActive) { try { recognition.start(); } catch(e) {} }
     };
 
     recognition.start();
 }
 
-function processVoiceCommand(text) {
-    var resultEl = document.getElementById('voiceResult');
-    var msg = '';
+// ── 工具函數 ──────────────────────────────────────────
+function voiceMsg(msg, color) {
+    var el = document.getElementById('voiceResult');
+    el.style.color = color || '#00b894';
+    el.textContent = msg;
+    clearTimeout(el._t);
+    el._t = setTimeout(function(){ el.textContent = ''; }, 4000);
+}
 
-    if (text.includes('回首頁') || text.includes('首頁') || text.includes('回家')) {
-        window.location.href = '/';
-        msg = '🏠 回首頁';
+// 正規化文字：去空白、全轉簡體常見替換、統一
+function voiceNorm(s) {
+    return s.replace(/\s+/g, '').toLowerCase()
+        .replace(/登录/g,'登入').replace(/搜索/g,'搜尋')
+        .replace(/帮我/g,'幫我').replace(/请/g,'請')
+        .replace(/我想要/g,'我要').replace(/我想/g,'我要');
+}
+
+// 計算兩字串相似度（含字元覆蓋率）
+function voiceSim(a, b) {
+    a = voiceNorm(a); b = voiceNorm(b);
+    if (b.includes(a) || a.includes(b)) return 1;
+    var match = 0;
+    for (var i = 0; i < a.length; i++) {
+        if (b.includes(a[i])) match++;
     }
-    else if (text.includes('下一章') || text.includes('下一頁') || text.includes('繼續')) {
-        var nextBtn = document.querySelector('.next-link, a[href*="Chapter"]:last-of-type');
-        if (nextBtn) nextBtn.click();
-        msg = '➡️ 下一章';
+    return match / Math.max(a.length, 1);
+}
+
+// 找頁面上最相符的可點擊元素
+function findBestClickable(keyword) {
+    keyword = voiceNorm(keyword);
+    var candidates = Array.from(document.querySelectorAll(
+        'button:not([disabled]), a[href], input[type="submit"], input[type="button"], [role="button"]'
+    )).filter(function(el) {
+        var rect = el.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0 &&
+               !el.closest('#voiceStatus') && !el.closest('#voiceToggleBtn');
+    });
+
+    var best = null, bestScore = 0;
+    candidates.forEach(function(el) {
+        var label = voiceNorm(el.textContent || el.value || el.title || el.getAttribute('aria-label') || '');
+        if (!label) return;
+        var score = voiceSim(keyword, label);
+        // 完全包含加分
+        if (label.includes(keyword) || keyword.includes(label)) score = Math.max(score, 0.9);
+        if (score > bestScore && score >= 0.4) { bestScore = score; best = el; }
+    });
+    return best;
+}
+
+// 找頁面上最相符的連結（文章/章節）
+function findBestLink(keyword) {
+    keyword = voiceNorm(keyword);
+    var links = Array.from(document.querySelectorAll('a[href]')).filter(function(a) {
+        return a.href && !a.href.startsWith('javascript') &&
+               a.textContent.trim().length > 1;
+    });
+    var best = null, bestScore = 0;
+    links.forEach(function(a) {
+        var label = voiceNorm(a.textContent);
+        var score = voiceSim(keyword, label);
+        if (label.includes(keyword)) score = Math.max(score, 0.85);
+        if (score > bestScore && score >= 0.4) { bestScore = score; best = a; }
+    });
+    return best;
+}
+
+// 填入當前焦點的 input，或指定 selector
+function voiceFillInput(selector, value) {
+    var el = selector
+        ? (typeof selector === 'string' ? document.querySelector(selector) : selector)
+        : (voiceInputTarget || document.activeElement);
+    if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
+        el.value = value;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        return true;
     }
-    else if (text.includes('上一章') || text.includes('上一頁') || text.includes('回去')) {
-        var prevBtn = document.querySelector('.prev-link');
-        if (prevBtn) prevBtn.click();
-        else history.back();
-        msg = '⬅️ 上一章';
+    return false;
+}
+
+// ── 主要命令處理 ────────────────────────────────────────
+function processVoiceCommand(rawText) {
+    var text = voiceNorm(rawText);
+    console.log('[Voice]', rawText, '→', text);
+
+    // ── 語音打字模式：任何話都填入目標框 ──
+    if (voiceInputMode && voiceInputTarget) {
+        voiceInputTarget.value = rawText.trim();
+        voiceInputTarget.dispatchEvent(new Event('input', { bubbles: true }));
+        voiceMsg('✏️ 已填入: ' + rawText.trim());
+        // 說「確定」「送出」「完成」退出打字模式
+        if (/確定|送出|完成|好了|ok|OK/.test(rawText)) {
+            voiceInputMode = false;
+            voiceInputTarget = null;
+            voiceMsg('✅ 完成輸入');
+        }
+        return;
     }
-    else if (text.includes('往上') || text.includes('上捲') || text.includes('上面')) {
-        window.scrollBy({ top: -500, behavior: 'smooth' });
-        msg = '⬆️ 上捲';
+
+    // ── 語音填入帳號/密碼 (pattern: 帳號是XXX / 密碼是XXX / 輸入帳號XXX) ──
+    var accountMatch = rawText.match(/帳號(?:是|為|輸入|打)?[：:\s]*(.+)/);
+    var passwordMatch = rawText.match(/密碼(?:是|為|輸入|打)?[：:\s]*(.+)/);
+    if (accountMatch) {
+        var val = accountMatch[1].trim();
+        var inp = document.querySelector('input[name="username"],input[name="Username"],input[type="text"]#username,input#Username');
+        if (!inp) inp = document.querySelector('input[type="text"]:not([readonly])');
+        if (inp) { inp.value = val; inp.dispatchEvent(new Event('input',{bubbles:true})); voiceMsg('👤 帳號: ' + val); }
+        else voiceMsg('❓ 找不到帳號欄位');
+        return;
     }
-    else if (text.includes('往下') || text.includes('下捲') || text.includes('下面') || text.includes('繼續看')) {
-        window.scrollBy({ top: 500, behavior: 'smooth' });
-        msg = '⬇️ 下捲';
+    if (passwordMatch) {
+        var val2 = passwordMatch[1].trim();
+        var inp2 = document.querySelector('input[type="password"]');
+        if (inp2) { inp2.value = val2; inp2.dispatchEvent(new Event('input',{bubbles:true})); voiceMsg('🔒 密碼已填入'); }
+        else voiceMsg('❓ 找不到密碼欄位');
+        return;
     }
-    else if (text.includes('回頂部') || text.includes('最上面') || text.includes('回到頂部')) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        msg = '⬆️ 回頂部';
-    }
-    else if (text.includes('找') || text.includes('搜尋') || text.includes('搜索')) {
-        var keyword = text.replace(/找|搜尋|搜索|我要|幫我/g, '').trim();
-        if (keyword) {
-            var searchInput = document.querySelector('.search-input, input[type="search"], #globalSearch');
-            if (searchInput) {
-                searchInput.value = keyword;
-                searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-                msg = '🔍 搜尋: ' + keyword;
+
+    // ── 語音打字模式觸發 ──
+    if (/語音輸入|語音打字|用說的輸入|聲音輸入/.test(text)) {
+        var focused = document.activeElement;
+        if (focused && (focused.tagName === 'INPUT' || focused.tagName === 'TEXTAREA')) {
+            voiceInputTarget = focused;
+            voiceInputMode = true;
+            voiceMsg('✏️ 語音打字模式：請說內容，說「確定」結束');
+        } else {
+            // 找第一個可見 input
+            var inp3 = document.querySelector('input[type="text"]:not([readonly]),textarea');
+            if (inp3) {
+                inp3.focus();
+                voiceInputTarget = inp3;
+                voiceInputMode = true;
+                voiceMsg('✏️ 語音打字模式：請說內容，說「確定」結束');
             } else {
-                window.location.href = '/?q=' + encodeURIComponent(keyword);
-                msg = '🔍 搜尋: ' + keyword;
+                voiceMsg('❓ 找不到可輸入的欄位');
             }
         }
-    }
-    else if (text.includes('簽到')) {
-        window.location.href = '/CheckIn';
-        msg = '📅 簽到頁';
-    }
-    else if (text.includes('排行') || text.includes('排名')) {
-        window.location.href = '/Leaderboard';
-        msg = '🏆 排行榜';
-    }
-    else if (text.includes('找老師') || text.includes('老師')) {
-        window.location.href = '/Teacher';
-        msg = '👨‍🏫 找老師';
-    }
-    else if (text.includes('每日') || text.includes('今日')) {
-        window.location.href = '/Daily';
-        msg = '📅 每日一題';
-    }
-    else if (text.includes('速度') || text.includes('挑戰')) {
-        window.location.href = '/Speed';
-        msg = '⏱️ 速度挑戰';
-    }
-    else if (text.includes('偵探') || text.includes('找錯')) {
-        window.location.href = '/Detective';
-        msg = '🔍 程式偵探';
-    }
-    else if (text.includes('分析') || text.includes('統計')) {
-        window.location.href = '/Analytics';
-        msg = '📊 學習分析';
-    }
-    else if (text.includes('問答')) {
-        window.location.href = '/QnA';
-        msg = '❓ 問答區';
-    }
-    else if (text.includes('擂台') || text.includes('比賽')) {
-        window.location.href = '/Arena';
-        msg = '⚔️ 擂台';
-    }
-    else if (text.includes('卡片') || text.includes('暗記')) {
-        window.location.href = '/Flashcard';
-        msg = '🃏 暗記卡片';
-    }
-    else if (text.includes('完成') || text.includes('標記')) {
-        var completeBtn = document.querySelector('.btn-complete, [onclick*="markComplete"]');
-        if (completeBtn) completeBtn.click();
-        msg = '✅ 標記完成';
-    }
-    else if (text.includes('登入') || text.includes('登錄')) {
-        window.location.href = '/Account/Login';
-        msg = '🔑 登入頁';
-    }
-    else if (text.includes('註冊')) {
-        window.location.href = '/Account/Register';
-        msg = '📝 註冊頁';
-    }
-    else if (text.includes('登出')) {
-        window.location.href = '/Account/Logout';
-        msg = '🚪 登出';
-    }
-    else {
-        msg = '🤔 不認識: ' + text;
+        return;
     }
 
-    resultEl.textContent = msg;
-    setTimeout(function(){ resultEl.textContent = ''; }, 3000);
+    // ── 搜尋/找章節 ──
+    var searchMatch = rawText.match(/(?:找|搜尋|搜索|幫我找|我要找|找一下|讀|打開|看)\s*(.+)/);
+    if (searchMatch || /找|搜尋/.test(text)) {
+        var keyword = searchMatch ? voiceNorm(searchMatch[1]) : text.replace(/找|搜尋|搜索|幫我|我要/g,'').trim();
+        if (keyword.length > 0) {
+            // 先找頁面連結
+            var link = findBestLink(keyword);
+            if (link) {
+                voiceMsg('📖 前往: ' + link.textContent.trim().substring(0,20));
+                setTimeout(function(){ link.click(); }, 500);
+                return;
+            }
+            // 再找搜尋框
+            var si = document.querySelector('#globalSearch,#sidebarSearch,.search-input,input[type="search"]');
+            if (si) {
+                si.value = searchMatch ? searchMatch[1].trim() : keyword;
+                si.dispatchEvent(new Event('input',{bubbles:true}));
+                si.focus();
+                voiceMsg('🔍 搜尋: ' + keyword);
+            } else {
+                window.location.href = '/?q=' + encodeURIComponent(searchMatch ? searchMatch[1].trim() : keyword);
+                voiceMsg('🔍 搜尋: ' + keyword);
+            }
+            return;
+        }
+    }
+
+    // ── 點擊按鈕（說「點XXX」/「按XXX」/「點擊XXX」） ──
+    var clickMatch = rawText.match(/(?:點|按|點擊|點一下|按下|按一下)\s*(.+)/);
+    if (clickMatch) {
+        var btnKeyword = clickMatch[1].trim();
+        var el = findBestClickable(btnKeyword);
+        if (el) {
+            voiceMsg('👆 點擊: ' + (el.textContent||el.value||'').trim().substring(0,15));
+            setTimeout(function(){ el.click(); }, 300);
+        } else {
+            voiceMsg('❓ 找不到按鈕: ' + btnKeyword);
+        }
+        return;
+    }
+
+    // ── 頁面導航 ──
+    var nav = {
+        '首頁|回首頁|回家|home':         ['/','🏠 首頁'],
+        '登入|登錄|login|sign in':        ['/Account/Login','🔑 登入'],
+        '註冊|register|sign up':          ['/Account/Register','📝 註冊'],
+        '登出|logout|sign out':           ['/Account/Logout','🚪 登出'],
+        '個人資料|個人頁|我的頁面|profile': ['/Account/Profile','👤 個人頁'],
+        '老師|找老師|teacher':            ['/Teacher','👨‍🏫 找老師'],
+        '簽到|check in|打卡':             ['/CheckIn','📅 簽到'],
+        '排行|排名|leaderboard':          ['/Leaderboard','🏆 排行榜'],
+        '每日|今日一題|daily':            ['/Daily','📅 每日一題'],
+        '速度|speed|挑戰':               ['/Speed','⏱️ 速度挑戰'],
+        '偵探|detective|找錯':           ['/Detective','🔍 偵探'],
+        '分析|analytics|統計':           ['/Analytics','📊 分析'],
+        '問答|qna|問題':                  ['/QnA','❓ 問答'],
+        '擂台|arena|比賽':               ['/Arena','⚔️ 擂台'],
+        '卡片|flashcard|暗記':           ['/Flashcard','🃏 卡片'],
+        '片段|snippet|程式碼收藏':        ['/Snippet','📋 片段'],
+        '謎題|puzzle|填字':              ['/Puzzle','🧩 謎題'],
+        '好友|buddy|夥伴':               ['/Buddy','👫 好友'],
+        '成績|scores|分數':              ['/Scores','📊 成績'],
+    };
+    for (var pattern in nav) {
+        var re = new RegExp(pattern);
+        if (re.test(text) || re.test(rawText)) {
+            window.location.href = nav[pattern][0];
+            voiceMsg(nav[pattern][1]);
+            return;
+        }
+    }
+
+    // ── 頁面操作 ──
+    if (/往下|下捲|下面|繼續看|scroll down/.test(text)) { window.scrollBy({top:500,behavior:'smooth'}); voiceMsg('⬇️ 往下捲'); return; }
+    if (/往上|上捲|上面|scroll up/.test(text)) { window.scrollBy({top:-500,behavior:'smooth'}); voiceMsg('⬆️ 往上捲'); return; }
+    if (/頂部|最上面|回到頂部|top/.test(text)) { window.scrollTo({top:0,behavior:'smooth'}); voiceMsg('⬆️ 回頂部'); return; }
+    if (/最下面|底部|bottom/.test(text)) { window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); voiceMsg('⬇️ 到底部'); return; }
+    if (/下一章|下一頁|next/.test(text)) {
+        var n = document.querySelector('.nav-next, a[class*="next"]');
+        if (n) { voiceMsg('➡️ 下一章'); setTimeout(function(){ n.click(); },300); } else voiceMsg('❓ 沒有下一章');
+        return;
+    }
+    if (/上一章|上一頁|prev|previous/.test(text)) {
+        var p = document.querySelector('.nav-prev, a[class*="prev"]');
+        if (p) { voiceMsg('⬅️ 上一章'); setTimeout(function(){ p.click(); },300); } else { history.back(); voiceMsg('⬅️ 上一頁'); }
+        return;
+    }
+    if (/測驗|quiz|考試/.test(text)) {
+        var qBtn = document.querySelector('[onclick*="openQuiz"],.btn-quiz');
+        if (qBtn) { qBtn.click(); voiceMsg('🎯 開始測驗'); } else voiceMsg('❓ 目前頁面沒有測驗');
+        return;
+    }
+    if (/練習|practice/.test(text)) {
+        var pBtn = document.querySelector('[onclick*="openPractice"]');
+        if (pBtn) { pBtn.click(); voiceMsg('⌨️ 開始練習'); } else voiceMsg('❓ 目前頁面沒有練習');
+        return;
+    }
+    if (/標記完成|已完成|complete|完成/.test(text)) {
+        var dBtn = document.querySelector('[onclick*="markComplete"],.btn-done');
+        if (dBtn) { dBtn.click(); voiceMsg('✅ 標記完成'); } else voiceMsg('❓ 找不到完成按鈕');
+        return;
+    }
+    if (/說明|幫助|help|指令|有什麼功能/.test(text)) {
+        voiceMsg('📖 可說：找LINQ、點登入、帳號是xxx、下一章、往下、首頁...', '#F9A825');
+        return;
+    }
+
+    // ── 最後嘗試：在頁面按鈕/連結中找最相符的 ──
+    var anyEl = findBestClickable(rawText);
+    if (anyEl) {
+        var label = (anyEl.textContent || anyEl.value || '').trim().substring(0,20);
+        voiceMsg('👆 ' + label);
+        setTimeout(function(){ anyEl.click(); }, 400);
+        return;
+    }
+    var anyLink = findBestLink(rawText);
+    if (anyLink) {
+        voiceMsg('📖 ' + anyLink.textContent.trim().substring(0,20));
+        setTimeout(function(){ anyLink.click(); }, 400);
+        return;
+    }
+
+    voiceMsg('🤔 沒聽懂，試試說「說明」看指令', '#F9A825');
 }
 </script>
 
