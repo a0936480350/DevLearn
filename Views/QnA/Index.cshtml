@@ -378,8 +378,8 @@
 
     async function loadQuestions() {
         const params = new URLSearchParams({ page: currentPage });
-        if (currentCategory) params.se__t('category', currentCategory);
-        if (currentFilter === 'unsolved') params.se__t('unsolved', 'true');
+        if (currentCategory) params.set('category', currentCategory);
+        if (currentFilter === 'unsolved') params.set('unsolved', 'true');
 
         const res = await fetch('/QnA/List?' + params);
         const data = await res.json();
@@ -445,7 +445,7 @@
         questions.forEach(q => {
             if (q.chapterTitle && !existing.has(q.chapterTitle)) {
                 existing.add(q.chapterTitle);
-                const opt = document.createElemen__t('option');
+                const opt = document.createElement('option');
                 opt.value = q.chapterTitle;
                 opt.textContent = q.chapterTitle;
                 sel.appendChild(opt);
@@ -471,7 +471,7 @@
             const sel = document.getElementById('askChapter');
             if (sel.options.length <= 1) {
                 chapters.forEach(ch => {
-                    const opt = document.createElemen__t('option');
+                    const opt = document.createElement('option');
                     opt.value = ch.id;
                     opt.textContent = ch.title;
                     sel.appendChild(opt);
@@ -514,7 +514,7 @@
     }
 
     function escHtml(s) {
-        const d = document.createElemen__t('div');
+        const d = document.createElement('div');
         d.textContent = s;
         return d.innerHTML;
     }

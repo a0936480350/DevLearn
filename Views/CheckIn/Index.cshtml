@@ -431,7 +431,7 @@
 
     function showToast(streak, points, achievements) {
         const container = document.getElementById('toastContainer');
-        const toast = document.createElemen__t('div');
+        const toast = document.createElement('div');
         toast.className = 'checkin-toast';
         let html = `<h3>${__t('checkin-toast-title')}</h3>
                      <p>🔥 ${__t('checkin-toast-streak').replace('{n}', streak)}</p>

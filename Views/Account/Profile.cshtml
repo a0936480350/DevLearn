@@ -403,7 +403,7 @@
         return false;
     }
 
-    function esc(s){ var d=document.createElemen__t('div'); d.textContent=s||''; return d.innerHTML; }
+    function esc(s){ var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
     function fmtDate(s){ var d=new Date(s); return d.toLocaleDateString('zh-TW') + ' ' + d.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}); }
 
     // ── 我的收藏老師 ──
@@ -453,7 +453,7 @@
                 var list = document.getElementById('favTeachersList');
                 if(!list.querySelector('.crud-item')) list.innerHTML = '<div class="crud-empty">' + __t('profile-no-fav-teachers') + '</div>';
             }
-        } catch(e){ aler__t(__t('profile-unfav-failed')); }
+        } catch(e){ alert(__t('profile-unfav-failed')); }
     }
 
     // ── 我的預約 ──
@@ -506,7 +506,7 @@
                 var d = await res.json().catch(function(){return {};});
                 alert(d.error || __t('profile-cancel-failed'));
             }
-        } catch(e){ aler__t(__t('profile-cancel-failed')); }
+        } catch(e){ alert(__t('profile-cancel-failed')); }
     }
 
     // ── 我的想法 ──
@@ -538,11 +538,11 @@
         var current = contentEl.textContent;
         var item = document.getElementById('idea-' + id);
         if(item.querySelector('.crud-edit-area')) return;
-        var ta = document.createElemen__t('textarea');
+        var ta = document.createElement('textarea');
         ta.className = 'crud-edit-area';
         ta.value = current;
         ta.id = 'idea-edit-' + id;
-        var btnDiv = document.createElemen__t('div');
+        var btnDiv = document.createElement('div');
         btnDiv.style.cssText = 'display:flex;gap:6px;margin-top:6px;';
         btnDiv.innerHTML = '<button class="crud-btn" onclick="saveIdea(' + id + ')" style="border-color:#38bd72;color:#38bd72;">💾 ' + __t('profile-save-btn') + '</button>' +
             '<button class="crud-btn" onclick="cancelEditIdea(' + id + ')">' + __t('profile-cancel-btn') + '</button>';
@@ -570,8 +570,8 @@
             if(res.ok){
                 loadedSections['ideas'] = false;
                 loadMyIdeas();
-            } else { aler__t(__t('profile-update-failed')); }
-        } catch(e){ aler__t(__t('profile-update-failed')); }
+            } else { alert(__t('profile-update-failed')); }
+        } catch(e){ alert(__t('profile-update-failed')); }
     }
 
     // ── 我的問答 ──
@@ -651,7 +651,7 @@
                 if (preview.tagName === 'IMG') {
                     preview.src = e.target.result;
                 } else {
-                    var img = document.createElemen__t('img');
+                    var img = document.createElement('img');
                     img.id = 'avatarPreview';
                     img.src = e.target.result;
                     img.style.cssText = 'width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid #2299dd;';
@@ -664,7 +664,7 @@
 
     // ── 刪除確認 ──
     function confirmDelete(type, id){
-        var overlay = document.createElemen__t('div');
+        var overlay = document.createElement('div');
         overlay.className = 'confirm-overlay';
         overlay.innerHTML = '<div class="confirm-box">' +
             '<p>' + __t('profile-confirm-delete') + '</p>' +
@@ -688,8 +688,8 @@
                 if(res.ok){
                     var el = document.getElementById(type + '-' + id);
                     if(el) el.remove();
-                } else { aler__t(__t('profile-delete-failed')); }
-            } catch(e){ aler__t(__t('profile-delete-failed')); }
+                } else { alert(__t('profile-delete-failed')); }
+            } catch(e){ alert(__t('profile-delete-failed')); }
         };
     }
     </script>

@@ -628,7 +628,7 @@
 
     function escapeHtml(str) {
         if (!str) return '';
-        const div = document.createElemen__t('div');
+        const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
     }

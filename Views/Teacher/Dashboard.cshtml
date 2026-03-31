@@ -584,7 +584,7 @@
                 var bookedByDate = {};
                 if (availData.bookedSlots) {
                     availData.bookedSlots.forEach(function(b) {
-                        var timePart = b.timeSlot.spli__t('-')[0];
+                        var timePart = b.timeSlot.split('-')[0];
                         var bDate = new Date(b.bookingDate);
                         var bIso = bDate.getFullYear() + '-' + ('0'+(bDate.getMonth()+1)).slice(-2) + '-' + ('0'+bDate.getDate()).slice(-2);
                         bookedByDate[bIso + '-' + timePart] = true;
@@ -711,7 +711,7 @@
                         html += '<td>' + typeName + '</td>';
                         html += '<td>' + p.likes + '</td>';
                         html += '<td>' + (p.createdAt ? new Date(p.createdAt).toLocaleDateString() : '') + '</td>';
-                        html += '<td><button class="btn btn-danger btn-sm" onclick="deletePos__t(' + p.id + ')">\u522A\u9664</button></td>';
+                        html += '<td><button class="btn btn-danger btn-sm" onclick="deletePost(' + p.id + ')">\u522A\u9664</button></td>';
                         html += '</tr>';
                     });
                     html += '</tbody></table>';

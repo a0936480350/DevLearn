@@ -572,7 +572,7 @@
 
         const shortcuts = ['1', '2', '3', '4'];
         options.forEach((opt, i) => {
-            const btn = document.createElemen__t('button');
+            const btn = document.createElement('button');
             btn.className = 'option-btn';
             btn.innerHTML = `${escHtml(opt)} <span class="shortcut">${shortcuts[i] || ''}</span>`;
             btn.addEventListener('click', () => selectAnswer(opt, btn));
@@ -660,7 +660,7 @@
                 data.details.forEach((d, i) => {
                     const q = questions[i];
                     const icon = d.correct ? '\u2705' : '\u274C';
-                    const div = document.createElemen__t('div');
+                    const div = document.createElement('div');
                     div.className = 'detail-item';
                     div.innerHTML = `
                         <span class="detail-icon">${icon}</span>
@@ -691,7 +691,7 @@
 
     function escHtml(str) {
         if (!str) return '';
-        const div = document.createElemen__t('div');
+        const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
     }

@@ -394,33 +394,33 @@
 
         // Parse code lines and insert blank inputs
         const code = puzzle.codeWithBlanks;
-        const lines = code.spli__t('\n');
+        const lines = code.split('\n');
         let blankIdx = 0;
         const container = document.getElementById('codeLines');
         container.innerHTML = '';
 
         lines.forEach((line, li) => {
-            const row = document.createElemen__t('div');
+            const row = document.createElement('div');
             row.className = 'code-line';
-            const numCell = document.createElemen__t('span');
+            const numCell = document.createElement('span');
             numCell.className = 'line-num';
             numCell.textContent = li + 1;
             row.appendChild(numCell);
 
-            const contentCell = document.createElemen__t('span');
+            const contentCell = document.createElement('span');
             contentCell.className = 'line-content';
 
             // Replace ___ with input fields
-            const parts = line.spli__t('___');
+            const parts = line.split('___');
             for (let pi = 0; pi < parts.length; pi++) {
                 contentCell.appendChild(document.createTextNode(parts[pi]));
                 if (pi < parts.length - 1) {
-                    const label = document.createElemen__t('span');
+                    const label = document.createElement('span');
                     label.className = 'blank-label';
                     label.textContent = circledNums[blankIdx] || `[${blankIdx+1}]`;
                     contentCell.appendChild(label);
 
-                    const input = document.createElemen__t('input');
+                    const input = document.createElement('input');
                     input.type = 'text';
                     input.className = 'blank-input';
                     input.dataset.blankIndex = blankIdx;
@@ -496,7 +496,7 @@
             input.classList.add(d.isCorrect ? 'correct' : 'wrong');
             input.readOnly = true;
             if (!d.isCorrect) {
-                const tag = document.createElemen__t('span');
+                const tag = document.createElement('span');
                 tag.className = 'correct-answer-tag';
                 tag.textContent = ` ✓ ${d.correctAnswer}`;
                 input.parentNode.insertBefore(tag, input.nextSibling);

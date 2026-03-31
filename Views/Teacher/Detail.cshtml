@@ -504,7 +504,7 @@
     }
 
     function quickDetailBook(isoDate, dateLabel, hour) {
-        var timeSlot = hour + '-' + hour.spli__t(':')[0] + ':50';
+        var timeSlot = hour + '-' + hour.split(':')[0] + ':50';
         if (!confirm('\u78BA\u8A8D\u9810\u7D04 ' + dateLabel + ' ' + timeSlot + '\uFF1F')) return;
         fetch('/Account/Me')
             .then(function(r) { if (r.ok) return r.json(); throw new Error('not logged in'); })
@@ -514,7 +514,7 @@
                 var email = me.Email || me.email || '';
 
                 if (!me.exists || !isRegistered) {
-                    aler__t('\u8ACB\u5148\u8A3B\u518A\u624D\u80FD\u9810\u7D04');
+                    alert('\u8ACB\u5148\u8A3B\u518A\u624D\u80FD\u9810\u7D04');
                     location.href = '/Account/Register';
                     return;
                 }
@@ -535,17 +535,17 @@
                         alert(result.message);
                         location.href = '/Account/Register';
                     } else if (result.success) {
-                        aler__t('\u2705 \u9810\u7D04\u6210\u529F\uFF01\u7B49\u5F85\u8001\u5E2B\u78BA\u8A8D');
+                        alert('\u2705 \u9810\u7D04\u6210\u529F\uFF01\u7B49\u5F85\u8001\u5E2B\u78BA\u8A8D');
                         renderDetailCalendar();
                     } else {
-                        aler__t('\u274C ' + (result.message || '\u9810\u7D04\u5931\u6557'));
+                        alert('\u274C ' + (result.message || '\u9810\u7D04\u5931\u6557'));
                     }
                 });
             })
             .catch(function() {
                 // Not logged in, fall back to booking modal
                 document.getElementById('bkDate').value = isoDate;
-                var slotStr = hour + '-' + hour.spli__t(':')[0] + ':50';
+                var slotStr = hour + '-' + hour.split(':')[0] + ':50';
                 var slotSelect = document.getElementById('bkSlot');
                 for (var i = 0; i < slotSelect.options.length; i++) {
                     if (slotSelect.options[i].value === slotStr) { slotSelect.selectedIndex = i; break; }
@@ -571,11 +571,11 @@
                     var typeName = p.type === 'video' ? '影片' : p.type === 'resource' ? '資源' : '文章';
                     var preview = p.content.length > 100 ? p.content.substring(0, 100) + '...' : p.content;
                     html += '<div class="post-card" id="post-' + p.id + '">';
-                    html += '  <div class="post-header" onclick="togglePos__t(' + p.id + ')">';
+                    html += '  <div class="post-header" onclick="togglePost(' + p.id + ')">';
                     html += '    <span class="post-title">' + escapeHtml(p.title) + '</span>';
                     html += '    <span class="post-badge ' + p.type + '">' + typeName + '</span>';
                     html += '  </div>';
-                    html += '  <div class="post-preview" onclick="togglePos__t(' + p.id + ')">' + escapeHtml(preview) + '</div>';
+                    html += '  <div class="post-preview" onclick="togglePost(' + p.id + ')">' + escapeHtml(preview) + '</div>';
                     html += '  <div class="post-meta">';
                     html += '    <span>&#x2764;&#xFE0F; <span id="likes-' + p.id + '">' + p.likes + '</span> 讚</span>';
                     html += '    <span>&#x1F4AC; <span id="comments-count-' + p.id + '">0</span> 留言</span>';
@@ -590,13 +590,13 @@
                         html += '    <a class="post-resource-link" href="' + escapeHtml(p.resourceUrl) + '" target="_blank">&#x1F4E5; 下載資源</a>';
                     }
                     html += '    <div class="post-actions">';
-                    html += '      <button onclick="likePos__t(' + p.id + ')">&#x2764;&#xFE0F; 按讚</button>';
+                    html += '      <button onclick="likePost(' + p.id + ')">&#x2764;&#xFE0F; 按讚</button>';
                     html += '    </div>';
                     html += '    <div class="comment-section">';
                     html += '      <div class="comment-form">';
                     html += '        <input type="text" id="cmNick-' + p.id + '" placeholder="暱稱" />';
                     html += '        <textarea id="cmContent-' + p.id + '" placeholder="寫下你的留言..."></textarea>';
-                    html += '        <button onclick="submitCommen__t(' + p.id + ')">送出</button>';
+                    html += '        <button onclick="submitComment(' + p.id + ')">送出</button>';
                     html += '      </div>';
                     html += '      <div id="comments-' + p.id + '"></div>';
                     html += '    </div>';
@@ -629,7 +629,7 @@
     function submitComment(postId) {
         var nick = document.getElementById('cmNick-' + postId).value.trim();
         var content = document.getElementById('cmContent-' + postId).value.trim();
-        if (!content) { aler__t('請輸入留言內容'); return; }
+        if (!content) { alert('請輸入留言內容'); return; }
         fetch('/Teacher/CommentPost', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -790,7 +790,7 @@
             } else if (d.message) {
                 alert(d.message);
             }
-        }).catch(function() { aler__t('&#x7DB2;&#x8DEF;&#x932F;&#x8AA4;'); });
+        }).catch(function() { alert('&#x7DB2;&#x8DEF;&#x932F;&#x8AA4;'); });
     }
 
     document.getElementById('dmInput').addEventListener('keydown', function(e) {

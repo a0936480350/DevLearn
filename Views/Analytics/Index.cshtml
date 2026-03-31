@@ -465,7 +465,7 @@
         for (let m = 0; m < 12; m++) {
             const pos = monthPositions[m] || 0;
             const nextPos = m < 11 ? (monthPositions[m+1] || totalWeeks) : totalWeeks;
-            const span = document.createElemen__t('span');
+            const span = document.createElement('span');
             span.textContent = monthNames[m];
             span.style.width = ((nextPos - pos) * cellSize) + 'px';
             span.style.flexShrink = '0';
@@ -475,10 +475,10 @@
         // Render grid
         const tooltip = document.getElementById('heatmap-tooltip');
         weeks.forEach(week => {
-            const col = document.createElemen__t('div');
+            const col = document.createElement('div');
             col.className = 'heatmap-week';
             week.forEach(day => {
-                const cell = document.createElemen__t('div');
+                const cell = document.createElement('div');
                 cell.className = 'heatmap-cell';
                 if (day.inYear) {
                     cell.setAttribute('data-level', day.level);
