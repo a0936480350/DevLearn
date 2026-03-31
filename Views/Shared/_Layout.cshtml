@@ -1623,7 +1623,21 @@ function toggleVoice() {
     recognition.interimResults = true;
     recognition.lang = 'zh-TW';
 
+    var abortCount = 0;
+    var everStarted = false;
+
+    recognition.onstart = function() {
+        everStarted = true;
+        abortCount = 0;
+        document.getElementById('voiceText').textContent = '🎙️ 聆聽中，請說話...';
+    };
+
+    recognition.onsoundstart = function() {
+        document.getElementById('voiceText').textContent = '🎤 偵測到聲音...';
+    };
+
     recognition.onresult = function(event) {
+        abortCount = 0;
         var interim = '', final = '';
         for (var i = event.resultIndex; i < event.results.length; i++) {
             var t = event.results[i][0].transcript;
@@ -1636,23 +1650,34 @@ function toggleVoice() {
     };
 
     recognition.onerror = function(e) {
-        if (e.error === 'no-speech' || e.error === 'aborted') return;
-        var status = document.getElementById('voiceText');
+        if (e.error === 'no-speech') return;
+        var txt = document.getElementById('voiceText');
         if (e.error === 'not-allowed') {
-            status.textContent = '❌ 請允許麥克風權限';
+            txt.textContent = '❌ 請在瀏覽器允許麥克風權限後重試';
             toggleVoice();
+        } else if (e.error === 'aborted') {
+            abortCount++;
+            if (abortCount >= 3) {
+                txt.textContent = '⚠️ 麥克風無法啟動，請確認權限或重新整理頁面';
+            }
         } else if (e.error === 'network') {
-            status.textContent = '⚠️ 網路問題，重試中...';
+            txt.textContent = '⚠️ 網路問題，重試中...';
         } else {
-            status.textContent = '❌ ' + e.error;
+            txt.textContent = '❌ ' + e.error;
         }
     };
 
     recognition.onend = function() {
         if (voiceActive) {
+            var delay = (abortCount > 0) ? 800 : 100;
             setTimeout(function() {
-                try { recognition.start(); } catch(e) {}
-            }, 100);
+                if (voiceActive && abortCount < 5) {
+                    try { recognition.start(); } catch(e) {}
+                } else if (abortCount >= 5) {
+                    document.getElementById('voiceText').textContent = '❌ 麥克風無法使用，請重新整理頁面';
+                    toggleVoice();
+                }
+            }, delay);
         }
     };
 
