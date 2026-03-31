@@ -110,25 +110,22 @@
     </div>
 
     <script src="/js/site.js"></script>
-    @if(ViewBag.Error != null) {
     <script>
-        document.querySelector('input[name="email"]').value = '';
-    </script>
+    function clearLoginForm() {
+        document.querySelectorAll('form input').forEach(function(el) {
+            el.value = '';
+            el.removeAttribute('value');
+        });
     }
-
-    <script>
-    (function(){
-        // Check for any error message on the page
-        var hasError = document.querySelector('.error-msg, .error-message, [style*="color: #ff"], [style*="color:#ff"], [style*="background: rgba(255"]');
-        if(hasError && hasError.textContent.trim().length > 0) {
-            // Clear the email (password-type) field
-            var emailField = document.querySelector('input[name="email"]');
-            if(emailField) {
-                emailField.value = '';
-                emailField.focus();
-            }
-        }
-    })();
+    // 立即清空
+    clearLoginForm();
+    // 延遲再清一次（應對瀏覽器晚期 autofill）
+    setTimeout(clearLoginForm, 50);
+    setTimeout(clearLoginForm, 300);
+    // 防止返回快取殘留（pageshow 涵蓋 bfcache）
+    window.addEventListener('pageshow', function(e) {
+        clearLoginForm();
+    });
     </script>
 </body>
 </html>
