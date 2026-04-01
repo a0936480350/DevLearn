@@ -21,7 +21,9 @@ public class AccountController : Controller
     // 個人檔案頁面
     public async Task<IActionResult> Profile()
     {
-        var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == GetAnonId());
+        var anonId = GetAnonId();
+        var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == anonId);
+        ViewBag.BattleStat = await _db.BattleStats.FirstOrDefaultAsync(s => s.UserId == anonId);
         return View(user);
     }
 

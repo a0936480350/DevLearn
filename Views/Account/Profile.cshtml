@@ -256,6 +256,34 @@
                     </div>
                 </div>
 
+                @{
+                    var battleStat = ViewBag.BattleStat as BattleStat;
+                }
+                @if (battleStat != null)
+                {
+                <div class="card" style="margin-bottom:20px;">
+                    <div class="card-title">⚔️ 對戰戰績</div>
+                    <div class="stats-row" style="margin-bottom:0">
+                        <div class="stat-card">
+                            <div class="value" style="color:#22c55e">@battleStat.TotalWins</div>
+                            <div class="label">總勝場</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="value" style="color:#22c55e;font-size:22px">@battleStat.BeginnerWins</div>
+                            <div class="label">🟢 初級勝場</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="value" style="color:#f59e0b;font-size:22px">@battleStat.IntermediateWins</div>
+                            <div class="label">🟡 中級勝場</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="value" style="color:#ef4444;font-size:22px">@battleStat.AdvancedWins</div>
+                            <div class="label">🔴 高級勝場</div>
+                        </div>
+                    </div>
+                </div>
+                }
+
                 <div class="card">
                     <div class="card-title" data-i18n="profile-account-info">帳號資訊</div>
                     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">

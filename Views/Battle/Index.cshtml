@@ -1,0 +1,212 @@
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "對戰大廳";
+    string userId = ViewBag.UserId ?? "";
+    string userName = ViewBag.UserName ?? "";
+    var stat = ViewBag.MyStat as BattleStat;
+}
+
+<style>
+.battle-lobby { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
+.lobby-title { text-align: center; font-size: 2.2rem; font-weight: 900; margin-bottom: 8px; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.lobby-sub { text-align: center; color: #8b949e; margin-bottom: 40px; font-size: 1rem; }
+.difficulty-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 40px; }
+.diff-card { background: #161b22; border: 2px solid #30363d; border-radius: 16px; padding: 28px; transition: all 0.3s; }
+.diff-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+.diff-card.beginner { border-color: #22c55e; }
+.diff-card.intermediate { border-color: #f59e0b; }
+.diff-card.advanced { border-color: #ef4444; }
+.diff-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; }
+.diff-card.beginner .diff-title { color: #22c55e; }
+.diff-card.intermediate .diff-title { color: #f59e0b; }
+.diff-card.advanced .diff-title { color: #ef4444; }
+.diff-desc { color: #8b949e; font-size: 0.9rem; margin-bottom: 16px; }
+.online-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); border-radius: 20px; padding: 4px 12px; font-size: 0.85rem; margin-bottom: 18px; }
+.battle-btns { display: flex; flex-direction: column; gap: 10px; }
+.btn-pvp { padding: 12px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+.diff-card.beginner .btn-pvp { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+.diff-card.intermediate .btn-pvp { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
+.diff-card.advanced .btn-pvp { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+.btn-ai { padding: 10px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit; background: #21262d; border: 1px solid #30363d; color: #e6edf3; transition: all 0.2s; }
+.btn-ai:hover { background: #30363d; }
+.ai-levels { display: flex; gap: 8px; margin-top: 8px; }
+.ai-btn { flex: 1; padding: 8px 4px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: #8b949e; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+.ai-btn:hover { border-color: #667eea; color: #667eea; }
+.stats-section { background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 28px; margin-bottom: 30px; }
+.stats-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; color: #e6edf3; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.stat-box { background: #0d1117; border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #30363d; }
+.stat-num { font-size: 2rem; font-weight: 900; }
+.stat-label { font-size: 0.8rem; color: #8b949e; margin-top: 4px; }
+.win-num { color: #22c55e; }
+.total-num { color: #667eea; }
+.history-section { background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 28px; }
+.history-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; }
+.history-table { width: 100%; border-collapse: collapse; }
+.history-table th { padding: 10px 12px; text-align: left; font-size: 0.85rem; color: #8b949e; border-bottom: 1px solid #30363d; }
+.history-table td { padding: 10px 12px; font-size: 0.9rem; border-bottom: 1px solid #21262d; }
+.badge-win { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); border-radius: 6px; padding: 2px 10px; font-size: 0.8rem; }
+.badge-lose { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); border-radius: 6px; padding: 2px 10px; font-size: 0.8rem; }
+.diff-badge { border-radius: 6px; padding: 2px 8px; font-size: 0.78rem; }
+.diff-badge.beginner { background: rgba(34,197,94,0.15); color: #22c55e; }
+.diff-badge.intermediate { background: rgba(245,158,11,0.15); color: #f59e0b; }
+.diff-badge.advanced { background: rgba(239,68,68,0.15); color: #ef4444; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal-box { background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 40px; text-align: center; max-width: 400px; width: 90%; }
+.modal-spinner { font-size: 3rem; animation: spin 1s linear infinite; display: inline-block; margin-bottom: 16px; }
+@@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.modal-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
+.modal-sub { color: #8b949e; margin-bottom: 24px; }
+.btn-cancel { padding: 10px 24px; border-radius: 10px; border: 1px solid #30363d; background: transparent; color: #8b949e; cursor: pointer; font-family: inherit; }
+@@media (max-width: 600px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .difficulty-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="battle-lobby">
+    <div class="lobby-title">⚔️ 對戰大廳</div>
+    <div class="lobby-sub">選擇難度，與真人或 AI 對戰程式碼速度與準確度</div>
+
+    <div class="difficulty-grid">
+        @foreach (var d in new[] { ("beginner","初級","🟢","適合 C# 基礎語法練習，120 秒限時"), ("intermediate","中級","🟡","資料結構與演算法，90 秒限時"), ("advanced","高級","🔴","進階設計模式與系統設計，60 秒限時") })
+        {
+        <div class="diff-card @d.Item1">
+            <div class="diff-title">@d.Item3 @d.Item2</div>
+            <div class="diff-desc">@d.Item4</div>
+            <div class="online-badge"><span>●</span> <span class="online-count" data-diff="@d.Item1">0</span> 人在線</div>
+            <div class="battle-btns">
+                <button class="btn-pvp" onclick="joinQueue('@d.Item1')">🎯 配對真人對戰</button>
+                <div style="color:#8b949e;font-size:0.82rem;margin-top:4px;">沒有對手時選 AI 練習：</div>
+                <div class="ai-levels">
+                    <button class="ai-btn" onclick="startAI('@d.Item1','easy')">🤖 初等 AI</button>
+                    <button class="ai-btn" onclick="startAI('@d.Item1','medium')">🤖 中等 AI</button>
+                    <button class="ai-btn" onclick="startAI('@d.Item1','hard')">🤖 高等 AI</button>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- My Stats -->
+    <div class="stats-section">
+        <div class="stats-title">📊 我的戰績</div>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-num total-num">@((stat?.TotalWins ?? 0))</div>
+                <div class="stat-label">總勝場</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num win-num">@((stat?.BeginnerWins ?? 0))</div>
+                <div class="stat-label">🟢 初級勝場</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num" style="color:#f59e0b">@((stat?.IntermediateWins ?? 0))</div>
+                <div class="stat-label">🟡 中級勝場</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num" style="color:#ef4444">@((stat?.AdvancedWins ?? 0))</div>
+                <div class="stat-label">🔴 高級勝場</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent History -->
+    <div class="history-section">
+        <div class="history-title">🕹️ 最近對戰紀錄</div>
+        @{var battles = ViewBag.RecentBattles as List<BattleRecord> ?? new();}
+        @if (!battles.Any())
+        {
+            <div style="color:#8b949e;text-align:center;padding:30px">還沒有對戰紀錄，快去挑戰吧！</div>
+        }
+        else
+        {
+        <table class="history-table">
+            <thead><tr><th>難度</th><th>題目</th><th>對手</th><th>結果</th><th>準確度</th><th>時間</th></tr></thead>
+            <tbody>
+            @foreach (var b in battles)
+            {
+                bool won = b.WinnerId == userId;
+                string opponent = b.Player1Id == userId ? b.Player2Name : b.Player1Name;
+                int myAcc = b.Player1Id == userId ? b.Player1Accuracy : b.Player2Accuracy;
+                int myTime = b.Player1Id == userId ? b.Player1TimeSeconds : b.Player2TimeSeconds;
+                <tr>
+                    <td><span class="diff-badge @b.Difficulty">@(b.Difficulty == "beginner" ? "初級" : b.Difficulty == "intermediate" ? "中級" : "高級")</span></td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@b.QuestionTitle</td>
+                    <td>@opponent</td>
+                    <td><span class="@(won ? "badge-win" : "badge-lose")">@(won ? "勝" : "敗")</span></td>
+                    <td>@myAcc%</td>
+                    <td>@myTime 秒</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        }
+    </div>
+</div>
+
+<!-- Waiting Modal -->
+<div class="modal-overlay" id="waitingModal">
+    <div class="modal-box">
+        <div class="modal-spinner">⏳</div>
+        <div class="modal-title">配對中...</div>
+        <div class="modal-sub" id="waitingMsg">等待對手中，請稍候</div>
+        <button class="btn-cancel" onclick="cancelQueue()">取消</button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script>
+const userId = '@userId';
+const userName = '@userName';
+let connection, currentDifficulty, currentAILevel;
+
+async function initSignalR() {
+    connection = new signalR.HubConnectionBuilder()
+        .withUrl("/battleHub")
+        .withAutomaticReconnect()
+        .build();
+
+    connection.on("Queued", d => {
+        document.getElementById('waitingMsg').textContent = d.message || '等待對手中...';
+        document.getElementById('waitingModal').classList.add('active');
+    });
+
+    connection.on("BattleStart", data => {
+        sessionStorage.setItem('battleData', JSON.stringify(data));
+        window.location.href = '/Battle/Room?roomId=' + data.roomId;
+    });
+
+    connection.on("OnlineCount", d => {
+        document.querySelectorAll('.online-count').forEach(el => {
+            if (el.dataset.diff === d.difficulty) el.textContent = d.count;
+        });
+    });
+
+    connection.on("LeftQueue", () => {
+        document.getElementById('waitingModal').classList.remove('active');
+    });
+
+    await connection.start();
+    ['beginner','intermediate','advanced'].forEach(d => connection.invoke("GetOnlineCount", d));
+}
+
+async function joinQueue(difficulty) {
+    currentDifficulty = difficulty;
+    currentAILevel = null;
+    document.getElementById('waitingMsg').textContent = '等待對手中...';
+    document.getElementById('waitingModal').classList.add('active');
+    await connection.invoke("JoinQueue", difficulty, userId, userName);
+}
+
+async function startAI(difficulty, aiLevel) {
+    currentDifficulty = difficulty;
+    currentAILevel = aiLevel;
+    await connection.invoke("StartAIBattle", difficulty, aiLevel, userId, userName);
+}
+
+async function cancelQueue() {
+    await connection.invoke("LeaveQueue", currentDifficulty, userId);
+    document.getElementById('waitingModal').classList.remove('active');
+}
+
+initSignalR();
+</script>

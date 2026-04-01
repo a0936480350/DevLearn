@@ -197,6 +197,15 @@ using (var scope = app.Services.CreateScope())
                 ""DurationSeconds"" INTEGER DEFAULT 0, ""StartedAt"" TIMESTAMP DEFAULT NOW(),
                 ""CompletedAt"" TIMESTAMP
             );
+            CREATE TABLE IF NOT EXISTS ""Announcements"" (
+                ""Id"" SERIAL PRIMARY KEY, ""Title"" TEXT DEFAULT '', ""Content"" TEXT DEFAULT '',
+                ""Type"" TEXT DEFAULT 'info', ""IsPinned"" BOOLEAN DEFAULT false,
+                ""IsVisible"" BOOLEAN DEFAULT true, ""CreatedBy"" TEXT DEFAULT 'Admin',
+                ""CreatedAt"" TIMESTAMP DEFAULT NOW(), ""ExpiresAt"" TIMESTAMP
+            );
+            CREATE TABLE IF NOT EXISTS ""BattleQuestions"" (""Id"" SERIAL PRIMARY KEY, ""Title"" TEXT DEFAULT '', ""Description"" TEXT DEFAULT '', ""StarterCode"" TEXT DEFAULT '', ""SampleInput"" TEXT DEFAULT '', ""SampleOutput"" TEXT DEFAULT '', ""ValidationKeywords"" TEXT DEFAULT '', ""Difficulty"" TEXT DEFAULT 'beginner', ""TimeLimitSeconds"" INT DEFAULT 120, ""Tags"" TEXT DEFAULT '');
+            CREATE TABLE IF NOT EXISTS ""BattleRecords"" (""Id"" SERIAL PRIMARY KEY, ""Player1Id"" TEXT DEFAULT '', ""Player1Name"" TEXT DEFAULT '', ""Player2Id"" TEXT DEFAULT '', ""Player2Name"" TEXT DEFAULT '', ""WinnerId"" TEXT DEFAULT '', ""Difficulty"" TEXT DEFAULT '', ""QuestionId"" INT DEFAULT 0, ""QuestionTitle"" TEXT DEFAULT '', ""Player1TimeSeconds"" INT DEFAULT 0, ""Player2TimeSeconds"" INT DEFAULT 0, ""Player1Accuracy"" INT DEFAULT 0, ""Player2Accuracy"" INT DEFAULT 0, ""IsAIMatch"" BOOLEAN DEFAULT false, ""AILevel"" TEXT DEFAULT '', ""StartedAt"" TIMESTAMP DEFAULT NOW(), ""EndedAt"" TIMESTAMP);
+            CREATE TABLE IF NOT EXISTS ""BattleStats"" (""Id"" SERIAL PRIMARY KEY, ""UserId"" TEXT DEFAULT '', ""UserName"" TEXT DEFAULT '', ""BeginnerWins"" INT DEFAULT 0, ""IntermediateWins"" INT DEFAULT 0, ""AdvancedWins"" INT DEFAULT 0, ""BeginnerLosses"" INT DEFAULT 0, ""IntermediateLosses"" INT DEFAULT 0, ""AdvancedLosses"" INT DEFAULT 0, ""UpdatedAt"" TIMESTAMP DEFAULT NOW());
         ");
         Console.WriteLine("[DB] All tables ensured.");
     }
@@ -217,6 +226,41 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine("[DB] Admin account created.");
     }
 
+    // Seed 公告欄初始資料
+    if (!db.Announcements.Any())
+    {
+        db.Announcements.AddRange(new[]
+        {
+            new DotNetLearning.Models.Announcement {
+                Title = "🎉 全新對戰系統上線！",
+                Content = "支援真人 PvP 即時配對對戰，以及初等 / 中等 / 高等 AI 對手。挑選難度（初級 / 中級 / 高級），手打程式碼比拼速度與準確度，贏得戰績積分！",
+                Type = "success", IsPinned = true, CreatedAt = new DateTime(2026, 3, 31)
+            },
+            new DotNetLearning.Models.Announcement {
+                Title = "🎤 語音辨識大幅強化",
+                Content = "新增模糊比對技術，現在可以說「點登入」、「按開始學習」直接觸發按鈕。支援語音填表（帳號是 XXX / 密碼是 XXX）、語音打字模式，麥克風狀態即時顯示。",
+                Type = "info", CreatedAt = new DateTime(2026, 3, 31)
+            },
+            new DotNetLearning.Models.Announcement {
+                Title = "🌐 三語系支援完整上線（中 / 英 / 日）",
+                Content = "首頁、章節頁、Profile 頁等全站 101 個章節標題、18 個分類名稱、所有學習路徑名稱均支援繁體中文 / English / 日本語切換。",
+                Type = "info", CreatedAt = new DateTime(2026, 3, 30)
+            },
+            new DotNetLearning.Models.Announcement {
+                Title = "📷 鏡頭手勢控制修復",
+                Content = "修復手勢辨識頁面永遠卡在讀取中的問題（Canvas getContext 方法錯誤），Arena、Speed Run、Detective 等遊戲功能現已正常運作。",
+                Type = "warning", CreatedAt = new DateTime(2026, 3, 29)
+            },
+            new DotNetLearning.Models.Announcement {
+                Title = "🤖 AI 自動 BUG 修復排程啟動",
+                Content = "系統每 5 分鐘自動掃描前端錯誤日誌，AI 分析並嘗試自動修復，修復後自動部署。Admin 後台可查看 AI 工作紀錄。",
+                Type = "info", CreatedAt = new DateTime(2026, 3, 28)
+            },
+        });
+        db.SaveChanges();
+        Console.WriteLine("[DB] Announcements seeded.");
+    }
+
     // Migrate existing data: set Role for registered users and admin
     try
     {
@@ -230,6 +274,9 @@ using (var scope = app.Services.CreateScope())
         try { SeedData.Initialize(db); Console.WriteLine("[Seed] Background seed completed."); }
         catch (Exception ex) { Console.WriteLine($"[Seed] Background seed error: {ex.Message}"); }
     });
+
+    try { await SeedBattleQuestions.SeedAsync(db); Console.WriteLine("[Seed] Battle questions seeded."); }
+    catch (Exception ex) { Console.WriteLine($"[Seed] Battle questions seed error: {ex.Message}"); }
 }
 
 if (!app.Environment.IsDevelopment())
@@ -357,5 +404,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapHub<ChatHub>("/chathub");
+app.MapHub<DotNetLearning.Hubs.BattleHub>("/battleHub");
 
 app.Run();

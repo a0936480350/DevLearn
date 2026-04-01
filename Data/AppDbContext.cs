@@ -54,4 +54,12 @@ public class AppDbContext : DbContext
     // 錯誤日誌 + AI 工作紀錄
     public DbSet<ErrorLog> ErrorLogs => Set<ErrorLog>();
     public DbSet<AIWorkLog> AIWorkLogs => Set<AIWorkLog>();
+
+    // 對戰系統
+    public DbSet<BattleQuestion> BattleQuestions { get; set; }
+    public DbSet<BattleRecord> BattleRecords { get; set; }
+    public DbSet<BattleStat> BattleStats { get; set; }
+
+    // 公告欄
+    public DbSet<Announcement> Announcements => Set<Announcement>();
 }

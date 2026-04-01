@@ -1,0 +1,207 @@
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "對戰中";
+    string userId = Context.Session.GetString("SessionId") ?? "";
+    string userName = Context.Session.GetString("Nickname") ?? "訪客";
+}
+<style>
+.battle-room { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1300px; margin: 0 auto; padding: 20px; height: calc(100vh - 120px); }
+.panel { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; overflow-y: auto; }
+.room-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #30363d; }
+.question-title { font-size: 1.2rem; font-weight: 700; }
+.timer { font-size: 1.8rem; font-weight: 900; font-family: monospace; }
+.timer.danger { color: #ef4444; animation: pulse 0.5s ease infinite; }
+@@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+.q-desc { color: #c9d1d9; line-height: 1.7; margin-bottom: 16px; white-space: pre-wrap; }
+.sample-box { background: #0d1117; border-radius: 8px; padding: 12px 16px; margin-bottom: 10px; font-family: monospace; font-size: 0.9rem; }
+.sample-label { color: #8b949e; font-size: 0.8rem; margin-bottom: 6px; }
+.code-editor { width: 100%; height: calc(100% - 120px); background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 14px; resize: none; outline: none; line-height: 1.6; }
+.code-editor:focus { border-color: #667eea; }
+.submit-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 10px; transition: all 0.2s; }
+.submit-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(102,126,234,0.4); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.players-bar { display: flex; gap: 16px; margin-bottom: 16px; }
+.player-card { flex: 1; background: #0d1117; border-radius: 10px; padding: 12px 16px; border: 2px solid #30363d; transition: all 0.3s; }
+.player-card.me { border-color: #667eea; }
+.player-card.submitted { border-color: #22c55e; }
+.player-name { font-weight: 700; font-size: 0.95rem; }
+.player-status { font-size: 0.82rem; color: #8b949e; margin-top: 4px; }
+.result-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; }
+.result-overlay.active { display: flex; }
+.result-box { background: #161b22; border: 1px solid #30363d; border-radius: 20px; padding: 40px; text-align: center; max-width: 520px; width: 90%; }
+.result-emoji { font-size: 4rem; margin-bottom: 16px; }
+.result-title { font-size: 2rem; font-weight: 900; margin-bottom: 24px; }
+.result-win { color: #22c55e; }
+.result-lose { color: #ef4444; }
+.result-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+.result-table th { padding: 8px 12px; color: #8b949e; font-size: 0.85rem; border-bottom: 1px solid #30363d; }
+.result-table td { padding: 10px 12px; border-bottom: 1px solid #21262d; }
+.result-btns { display: flex; gap: 12px; justify-content: center; }
+.btn-lobby { padding: 12px 28px; border-radius: 10px; background: #21262d; border: 1px solid #30363d; color: #e6edf3; cursor: pointer; font-family: inherit; font-size: 0.95rem; }
+.btn-again { padding: 12px 28px; border-radius: 10px; background: linear-gradient(135deg, #667eea, #764ba2); border: none; color: #fff; cursor: pointer; font-family: inherit; font-size: 0.95rem; font-weight: 700; }
+@@media (max-width: 768px) { .battle-room { grid-template-columns: 1fr; height: auto; } .code-editor { height: 300px; } }
+</style>
+
+<div class="battle-room">
+    <div class="panel" id="questionPanel">
+        <div class="room-header">
+            <div>
+                <div style="color:#8b949e;font-size:0.82rem" id="diffLabel">難度：-</div>
+                <div class="question-title" id="qTitle">載入中...</div>
+            </div>
+            <div class="timer" id="timer">--:--</div>
+        </div>
+        <div class="players-bar">
+            <div class="player-card me" id="p1Card">
+                <div class="player-name" id="p1Name">我</div>
+                <div class="player-status" id="p1Status">⌨️ 作答中</div>
+            </div>
+            <div style="font-size:1.4rem;display:flex;align-items:center">⚔️</div>
+            <div class="player-card" id="p2Card">
+                <div class="player-name" id="p2Name">對手</div>
+                <div class="player-status" id="p2Status">⌨️ 作答中</div>
+            </div>
+        </div>
+        <div class="q-desc" id="qDesc"></div>
+        <div id="sampleSection"></div>
+    </div>
+    <div class="panel" style="display:flex;flex-direction:column">
+        <div style="font-size:0.85rem;color:#8b949e;margin-bottom:8px">✏️ 輸入你的程式碼（C#）：</div>
+        <textarea class="code-editor" id="codeEditor" placeholder="// 在這裡輸入你的程式碼...&#10;// 按下「提交答案」完成作答&#10;&#10;"></textarea>
+        <button class="submit-btn" id="submitBtn" onclick="submitCode()">🚀 提交答案</button>
+    </div>
+</div>
+
+<div class="result-overlay" id="resultOverlay">
+    <div class="result-box">
+        <div class="result-emoji" id="resultEmoji">🏆</div>
+        <div class="result-title" id="resultTitle">勝利！</div>
+        <table class="result-table">
+            <thead><tr><th>玩家</th><th>準確度</th><th>時間</th><th>得分</th></tr></thead>
+            <tbody id="resultBody"></tbody>
+        </table>
+        <div id="pointMsg" style="color:#f59e0b;margin-bottom:20px;font-weight:700"></div>
+        <div class="result-btns">
+            <button class="btn-lobby" onclick="location.href='/Battle'">🏠 回大廳</button>
+            <button class="btn-again" onclick="location.href='/Battle'">🔄 再戰一局</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script>
+const userId = '@userId';
+const roomId = new URLSearchParams(location.search).get('roomId');
+let battleData = null, timerInterval = null, timeLeft = 120, submitted = false;
+
+async function init() {
+    const raw = sessionStorage.getItem('battleData');
+    if (!raw) { location.href = '/Battle'; return; }
+    battleData = JSON.parse(raw);
+    sessionStorage.removeItem('battleData');
+
+    const q = battleData.question;
+    const diffMap = { beginner: '🟢 初級', intermediate: '🟡 中級', advanced: '🔴 高級' };
+    document.getElementById('diffLabel').textContent = '難度：' + (diffMap[battleData.difficulty] || battleData.difficulty);
+    document.getElementById('qTitle').textContent = q.title;
+    document.getElementById('qDesc').textContent = q.description;
+
+    let sampleHtml = '';
+    if (q.sampleInput) sampleHtml += `<div class="sample-box"><div class="sample-label">📥 範例輸入</div><div>${escHtml(q.sampleInput)}</div></div>`;
+    if (q.sampleOutput) sampleHtml += `<div class="sample-box"><div class="sample-label">📤 範例輸出</div><div>${escHtml(q.sampleOutput)}</div></div>`;
+    document.getElementById('sampleSection').innerHTML = sampleHtml;
+
+    const p1 = battleData.player1, p2 = battleData.player2;
+    if (p1.userId === userId) {
+        document.getElementById('p1Name').textContent = '👤 ' + p1.userName + '（我）';
+        document.getElementById('p2Name').textContent = '🤖 ' + p2.userName;
+    } else {
+        document.getElementById('p1Name').textContent = '👤 ' + p2.userName + '（我）';
+        document.getElementById('p2Name').textContent = '👤 ' + p1.userName;
+    }
+
+    if (q.starterCode) document.getElementById('codeEditor').value = q.starterCode;
+
+    timeLeft = q.timeLimitSeconds || 120;
+    timerInterval = setInterval(updateTimer, 1000);
+
+    await initSignalR();
+}
+
+function updateTimer() {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60).toString().padStart(2,'0');
+    const s = (timeLeft % 60).toString().padStart(2,'0');
+    const el = document.getElementById('timer');
+    el.textContent = m + ':' + s;
+    el.className = 'timer' + (timeLeft <= 15 ? ' danger' : '');
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitCode(); }
+}
+
+async function initSignalR() {
+    const connection = new signalR.HubConnectionBuilder().withUrl("/battleHub").build();
+
+    connection.on("PlayerSubmitted", d => {
+        if (d.userId !== userId) {
+            document.getElementById('p2Status').textContent = '✅ 已提交！準確度 ' + d.accuracy + '%';
+            document.getElementById('p2Card').classList.add('submitted');
+        }
+    });
+
+    connection.on("BattleEnd", data => {
+        clearInterval(timerInterval);
+        showResult(data);
+    });
+
+    await connection.start();
+    window._battleConn = connection;
+}
+
+async function submitCode() {
+    if (submitted) return;
+    submitted = true;
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('submitBtn').textContent = '✅ 已提交，等待結果...';
+    document.getElementById('p1Status').textContent = '✅ 已提交！';
+    document.getElementById('p1Card').classList.add('submitted');
+    clearInterval(timerInterval);
+    const code = document.getElementById('codeEditor').value;
+    await window._battleConn.invoke("SubmitCode", roomId, code, userId);
+}
+
+function showResult(data) {
+    const won = data.winnerId === userId;
+    document.getElementById('resultEmoji').textContent = won ? '🏆' : '😔';
+    document.getElementById('resultTitle').textContent = won ? '勝利！' : '失敗';
+    document.getElementById('resultTitle').className = 'result-title ' + (won ? 'result-win' : 'result-lose');
+
+    const p1 = data.player1, p2 = data.player2;
+    const myData = p1.userId === userId ? p1 : p2;
+    const oppData = p1.userId === userId ? p2 : p1;
+
+    document.getElementById('resultBody').innerHTML = `
+        <tr style="color:${won?'#22c55e':'#e6edf3'}">
+            <td>👤 ${myData.userName}（我）</td>
+            <td>${myData.player1Accuracy ?? myData.accuracy ?? 0}%</td>
+            <td>${myData.player1TimeSeconds ?? myData.playerTimeSeconds ?? 0} 秒</td>
+            <td><b>${myData.score}</b></td>
+        </tr>
+        <tr>
+            <td>${oppData.userName}</td>
+            <td>${oppData.player2Accuracy ?? oppData.accuracy ?? 0}%</td>
+            <td>${oppData.player2TimeSeconds ?? oppData.playerTimeSeconds ?? 0} 秒</td>
+            <td>${oppData.score}</td>
+        </tr>`;
+
+    if (won) {
+        const diff = battleData.difficulty;
+        const diffName = diff === 'beginner' ? '初級' : diff === 'intermediate' ? '中級' : '高級';
+        document.getElementById('pointMsg').textContent = `🎉 獲得 ${diffName} 戰績 +1 分！`;
+    }
+    document.getElementById('resultOverlay').classList.add('active');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+init();
+</script>
