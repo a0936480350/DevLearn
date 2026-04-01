@@ -21,6 +21,15 @@ public class HomeController : Controller
             .Where(c => c.IsPublished)
             .OrderBy(c => c.Order)
             .ToListAsync();
+
+        var now = DateTime.Now;
+        ViewBag.Announcements = await _db.Announcements
+            .Where(a => a.IsVisible && (a.ExpiresAt == null || a.ExpiresAt > now))
+            .OrderByDescending(a => a.IsPinned)
+            .ThenByDescending(a => a.CreatedAt)
+            .Take(5)
+            .ToListAsync();
+
         return View(chapters);
     }
 

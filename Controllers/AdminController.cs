@@ -482,6 +482,73 @@ public class AdminController : Controller
         return Ok(new { success = true });
     }
 
+    // ========== 公告欄 CRUD ==========
+
+    public async Task<IActionResult> Announcements()
+    {
+        if (!IsAdmin()) return RedirectToAction("Login");
+        ViewBag.List = await _db.Announcements.OrderByDescending(a => a.IsPinned).ThenByDescending(a => a.CreatedAt).ToListAsync();
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AnnouncementCreate([FromBody] AnnouncementReq req)
+    {
+        if (!IsAdmin()) return Unauthorized();
+        var ann = new DotNetLearning.Models.Announcement
+        {
+            Title = req.Title ?? "",
+            Content = req.Content ?? "",
+            Type = req.Type ?? "info",
+            IsPinned = req.IsPinned,
+            IsVisible = req.IsVisible,
+            CreatedBy = "Admin",
+            CreatedAt = DateTime.Now,
+            ExpiresAt = req.ExpiresAt
+        };
+        _db.Announcements.Add(ann);
+        await _db.SaveChangesAsync();
+        return Ok(new { success = true, id = ann.Id });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AnnouncementUpdate([FromBody] AnnouncementReq req)
+    {
+        if (!IsAdmin()) return Unauthorized();
+        var ann = await _db.Announcements.FindAsync(req.Id);
+        if (ann == null) return NotFound();
+        ann.Title = req.Title ?? ann.Title;
+        ann.Content = req.Content ?? ann.Content;
+        ann.Type = req.Type ?? ann.Type;
+        ann.IsPinned = req.IsPinned;
+        ann.IsVisible = req.IsVisible;
+        ann.ExpiresAt = req.ExpiresAt;
+        await _db.SaveChangesAsync();
+        return Ok(new { success = true });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AnnouncementDelete([FromBody] AdminDeleteReq req)
+    {
+        if (!IsAdmin()) return Unauthorized();
+        var ann = await _db.Announcements.FindAsync(req.Id);
+        if (ann == null) return NotFound();
+        _db.Announcements.Remove(ann);
+        await _db.SaveChangesAsync();
+        return Ok(new { success = true });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AnnouncementToggle([FromBody] AdminDeleteReq req)
+    {
+        if (!IsAdmin()) return Unauthorized();
+        var ann = await _db.Announcements.FindAsync(req.Id);
+        if (ann == null) return NotFound();
+        ann.IsVisible = !ann.IsVisible;
+        await _db.SaveChangesAsync();
+        return Ok(new { success = true, isVisible = ann.IsVisible });
+    }
+
     // ========== AI 工作紀錄 ==========
 
     public async Task<IActionResult> AIWorkLogs()
@@ -880,5 +947,6 @@ public record UpdateChapterReq(int Id, string? Title, string? Content, bool? IsP
 public record AdminDeleteReq(int Id);
 public record RejectTeacherReq(int Id, string? Reason);
 public record ReplyTicketReq(int Id, string Reply);
+public record AnnouncementReq(int Id, string? Title, string? Content, string? Type, bool IsPinned, bool IsVisible, DateTime? ExpiresAt);
 public record ChangeRoleReq(int Id, string Role);
 public record BanUserReq(int Id, bool Ban, string? Reason);

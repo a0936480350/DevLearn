@@ -31,6 +31,61 @@
 
 <div class="home-layout">
 
+    <!-- ══════════ 公告欄 ══════════ -->
+    @{
+        var announcements = ViewBag.Announcements as List<DotNetLearning.Models.Announcement> ?? new();
+        var typeMap = new Dictionary<string,string> { {"success","#22c55e"}, {"warning","#f59e0b"}, {"danger","#ef4444"}, {"info","#3b82f6"} };
+        var iconMap = new Dictionary<string,string> { {"success","✅"}, {"warning","⚠️"}, {"danger","🚨"}, {"info","📢"} };
+    }
+    @if (announcements.Any())
+    {
+    <div id="announcementBar" style="background:#0d1117;border-bottom:1px solid #30363d;padding:0;">
+        <div style="max-width:1200px;margin:0 auto;padding:0 20px;">
+            @foreach (var ann in announcements)
+            {
+                var color = typeMap.GetValueOrDefault(ann.Type, "#3b82f6");
+                var icon = iconMap.GetValueOrDefault(ann.Type, "📢");
+                <div class="ann-item" style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #21262d;position:relative;" data-ann-id="@ann.Id">
+                    <span style="font-size:1.1rem;flex-shrink:0;margin-top:1px;">@icon</span>
+                    <div style="flex:1;min-width:0;">
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                            @if (ann.IsPinned) { <span style="background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);border-radius:4px;padding:1px 7px;font-size:0.72rem;font-weight:700;">📌 置頂</span> }
+                            <span style="font-weight:700;color:@color;font-size:0.95rem;">@ann.Title</span>
+                            <span style="color:#8b949e;font-size:0.78rem;">@ann.CreatedAt.ToString("yyyy/MM/dd HH:mm")</span>
+                        </div>
+                        <div style="color:#c9d1d9;font-size:0.875rem;margin-top:4px;line-height:1.5;">@ann.Content</div>
+                    </div>
+                    <button onclick="dismissAnn(this,@ann.Id)" style="flex-shrink:0;background:none;border:none;color:#8b949e;cursor:pointer;font-size:1rem;padding:4px;line-height:1;" title="關閉">✕</button>
+                </div>
+            }
+        </div>
+    </div>
+    <script>
+    function dismissAnn(btn, id) {
+        btn.closest('.ann-item').style.display = 'none';
+        var dismissed = JSON.parse(localStorage.getItem('dismissedAnns') || '[]');
+        dismissed.push(id);
+        localStorage.setItem('dismissedAnns', JSON.stringify(dismissed));
+        // Hide entire bar if all dismissed
+        var bar = document.getElementById('announcementBar');
+        if (!bar.querySelector('.ann-item[style*="display"]:not([style*="none"])') && !bar.querySelector('.ann-item:not([style*="display: none"])')) {
+            bar.style.display = 'none';
+        }
+    }
+    // Hide already-dismissed on load
+    (function(){
+        var dismissed = JSON.parse(localStorage.getItem('dismissedAnns') || '[]');
+        var allHidden = true;
+        document.querySelectorAll('.ann-item').forEach(function(el) {
+            if (dismissed.includes(parseInt(el.dataset.annId))) {
+                el.style.display = 'none';
+            } else { allHidden = false; }
+        });
+        if (allHidden) document.getElementById('announcementBar').style.display = 'none';
+    })();
+    </script>
+    }
+
     <!-- ══════════ Hero ══════════ -->
     <section class="hero" style="background:linear-gradient(135deg, rgba(0,184,148,0.8), rgba(9,132,227,0.7)), url('/images/hero-coding.jpg') center/cover no-repeat;">
         <div class="hero-bg" style="background:none;"></div>

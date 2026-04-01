@@ -1,5 +1,18 @@
 namespace DotNetLearning.Models;
 
+public class Announcement
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = "";       // 公告標題
+    public string Content { get; set; } = "";     // 公告內容（支援簡單 HTML）
+    public string Type { get; set; } = "info";    // info / success / warning / danger
+    public bool IsPinned { get; set; } = false;   // 置頂
+    public bool IsVisible { get; set; } = true;   // 顯示/隱藏
+    public string CreatedBy { get; set; } = "Admin";
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime? ExpiresAt { get; set; }      // null = 永不過期
+}
+
 public class ErrorLog
 {
     public int Id { get; set; }
