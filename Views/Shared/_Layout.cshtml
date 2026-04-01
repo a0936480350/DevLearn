@@ -1713,6 +1713,31 @@ function voiceSim(a, b) {
     return match / Math.max(a.length, 1);
 }
 
+// 找頁面上最相符的輸入欄位（by label/placeholder/name/aria-label）
+function findBestInput(keyword) {
+    keyword = voiceNorm(keyword);
+    var inputs = Array.from(document.querySelectorAll(
+        'input[type="text"], input[type="email"], input[type="number"], input[type="search"], input[type="tel"], textarea, input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"])'
+    )).filter(function(el) {
+        var rect = el.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0 && !el.readOnly && !el.disabled && !el.closest('#voiceStatus');
+    });
+
+    var best = null, bestScore = 0;
+    inputs.forEach(function(el) {
+        var labelText = '';
+        if (el.id) {
+            var lbl = document.querySelector('label[for="' + el.id + '"]');
+            if (lbl) labelText = lbl.textContent;
+        }
+        var parts = voiceNorm(labelText + ' ' + (el.placeholder||'') + ' ' + (el.name||'') + ' ' + (el.getAttribute('aria-label')||'') + ' ' + (el.title||''));
+        var score = voiceSim(keyword, parts);
+        if (parts.includes(keyword) || keyword.includes(parts.replace(/\s/g,''))) score = Math.max(score, 0.85);
+        if (score > bestScore && score >= 0.25) { bestScore = score; best = el; }
+    });
+    return best;
+}
+
 // 找頁面上最相符的可點擊元素
 function findBestClickable(keyword) {
     keyword = voiceNorm(keyword);
@@ -1782,6 +1807,83 @@ function processVoiceCommand(rawText) {
             voiceInputMode = false;
             voiceInputTarget = null;
             voiceMsg('✅ 完成輸入');
+        }
+        return;
+    }
+
+    // ── 選擇輸入框 (說「選擇XX輸入框」/「到XX欄位」/「選XX欄」) ──
+    var selectInputMatch = rawText.match(/(?:選擇|選|到|點開|切換到|跳到)\s*(.{1,10}?)\s*(?:輸入框|欄位|欄|框|input)/i);
+    if (!selectInputMatch) selectInputMatch = rawText.match(/(?:輸入框|欄位|框)\s*(.{1,10})/i);
+    if (selectInputMatch) {
+        var inputKeyword = voiceNorm(selectInputMatch[1]);
+        var targetInput = findBestInput(inputKeyword);
+        if (targetInput) {
+            targetInput.focus();
+            voiceInputTarget = targetInput;
+            var inputLabel = targetInput.placeholder || targetInput.name || inputKeyword;
+            voiceMsg('✅ 已選擇「' + inputLabel + '」輸入框，請說「輸入XXX」');
+        } else {
+            voiceMsg('❓ 找不到「' + selectInputMatch[1] + '」欄位');
+        }
+        return;
+    }
+
+    // ── 直接輸入（說「輸入XXX」/「填入XXX」/「打XXX」）──
+    var fillMatch = rawText.match(/^(?:輸入|填入|填|打入|打)\s*(.+)/);
+    if (fillMatch) {
+        var fillValue = fillMatch[1].trim();
+        var fillTarget = voiceInputTarget || document.activeElement;
+        if (fillTarget && (fillTarget.tagName === 'INPUT' || fillTarget.tagName === 'TEXTAREA') && !fillTarget.readOnly && !fillTarget.disabled) {
+            fillTarget.value = fillValue;
+            fillTarget.dispatchEvent(new Event('input', {bubbles:true}));
+            fillTarget.dispatchEvent(new Event('change', {bubbles:true}));
+            var fillLabel = fillTarget.placeholder || fillTarget.name || '欄位';
+            voiceMsg('✏️ 已在「' + fillLabel + '」輸入: ' + fillValue);
+        } else {
+            // Try to find any visible input
+            var anyInput = document.querySelector('input[type="text"]:not([readonly]):not([disabled]), textarea:not([readonly]):not([disabled])');
+            if (anyInput) {
+                anyInput.focus();
+                anyInput.value = fillValue;
+                anyInput.dispatchEvent(new Event('input', {bubbles:true}));
+                voiceInputTarget = anyInput;
+                voiceMsg('✏️ 已輸入: ' + fillValue);
+            } else {
+                voiceMsg('❓ 請先說「選擇XX輸入框」選擇欄位');
+            }
+        }
+        return;
+    }
+
+    // ── 在XX輸入YYY（一句話選擇並輸入）──
+    var inFieldMatch = rawText.match(/在\s*(.{1,10}?)\s*(?:輸入框|欄位|欄|框)?\s*(?:輸入|填入|打)\s*(.+)/);
+    if (inFieldMatch) {
+        var fieldName = voiceNorm(inFieldMatch[1]);
+        var fieldValue = inFieldMatch[2].trim();
+        var targetField = findBestInput(fieldName);
+        if (targetField) {
+            targetField.focus();
+            targetField.value = fieldValue;
+            targetField.dispatchEvent(new Event('input', {bubbles:true}));
+            voiceInputTarget = targetField;
+            var fLabel = targetField.placeholder || targetField.name || inFieldMatch[1];
+            voiceMsg('✏️ 已在「' + fLabel + '」輸入: ' + fieldValue);
+        } else {
+            voiceMsg('❓ 找不到「' + inFieldMatch[1] + '」欄位');
+        }
+        return;
+    }
+
+    // ── 清空欄位（說「清空XX」/「清除內容」） ──
+    var clearMatch = rawText.match(/(?:清空|清除|刪除內容|清掉)\s*(.{0,10})/);
+    if (clearMatch) {
+        var clearTarget = voiceInputTarget || document.activeElement;
+        if (clearTarget && (clearTarget.tagName === 'INPUT' || clearTarget.tagName === 'TEXTAREA')) {
+            clearTarget.value = '';
+            clearTarget.dispatchEvent(new Event('input', {bubbles:true}));
+            voiceMsg('🗑️ 已清空欄位');
+        } else {
+            voiceMsg('❓ 請先選擇輸入框');
         }
         return;
     }
@@ -1930,7 +2032,7 @@ function processVoiceCommand(rawText) {
         return;
     }
     if (/說明|幫助|help|指令|有什麼功能/.test(text)) {
-        voiceMsg('📖 可說：找LINQ、點登入、帳號是xxx、下一章、往下、首頁...', '#F9A825');
+        voiceMsg('📖 可說：選擇搜尋輸入框、輸入hello、在標題輸入XXX、找LINQ、點登入、帳號是xxx、往下...', '#F9A825');
         return;
     }
 

@@ -12,7 +12,8 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:#16213e; color:#eee; display:flex; min-height:100vh; }
-        .sidebar { width:240px; background:#1a1a2e; min-height:100vh; padding:20px 0; position:fixed; top:0; left:0; overflow-y:auto; z-index:100; border-right:1px solid rgba(233,69,96,0.2); }
+        .sidebar { width:240px; background:#1a1a2e; height:100vh; padding:20px 0; position:fixed; top:0; left:0; overflow-y:auto; z-index:100; border-right:1px solid rgba(233,69,96,0.2); }
+        .sidebar::-webkit-scrollbar { width:4px; } .sidebar::-webkit-scrollbar-track { background:transparent; } .sidebar::-webkit-scrollbar-thumb { background:rgba(233,69,96,0.3); border-radius:2px; }
         .sidebar-brand { text-align:center; padding:16px 20px 24px; border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:12px; }
         .sidebar-brand .logo { font-size:32px; } .sidebar-brand .title { color:#F9A825; font-size:18px; font-weight:700; margin-top:4px; }
         .sidebar a { display:flex; align-items:center; padding:11px 24px; color:#aab; text-decoration:none; font-size:14px; transition:all 0.2s; border-left:3px solid transparent; }
@@ -118,5 +119,122 @@
 
 <script>document.querySelectorAll('.sidebar a').forEach(a=>{a.addEventListener('click',()=>{if(window.innerWidth<=900){document.querySelector('.sidebar').classList.remove('open');document.querySelector('.mobile-overlay').classList.remove('open');}});});</script>
     <script src="/js/site.js"></script>
+<!-- 語音控制（浮動按鈕） -->
+<div id="adminVoiceBar" style="position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+    <div id="adminVoiceStatus" style="display:none;background:rgba(0,0,0,0.85);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;max-width:280px;text-align:right">
+        <div id="adminVoiceText">🎙️ 聆聽中...</div>
+        <div id="adminVoiceResult" style="color:#22c55e;margin-top:4px"></div>
+    </div>
+    <button id="adminVoiceBtn" onclick="adminToggleVoice()" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;border-radius:50px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 15px rgba(0,0,0,0.4)">🎤 語音控制</button>
+</div>
+<script>
+var adminVoiceActive = false, adminRec = null, adminVoiceTarget = null, adminAbortCount = 0;
+function adminToggleVoice() {
+    var btn = document.getElementById('adminVoiceBtn');
+    var status = document.getElementById('adminVoiceStatus');
+    if (adminVoiceActive) {
+        adminVoiceActive = false;
+        localStorage.setItem('voiceOn','false');
+        if (adminRec) adminRec.stop();
+        btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
+        btn.textContent = '🎤 語音控制';
+        status.style.display = 'none';
+        return;
+    }
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert('請使用 Chrome 瀏覽器以支援語音辨識'); return; }
+    adminVoiceActive = true;
+    localStorage.setItem('voiceOn','true');
+    btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+    btn.textContent = '🎤 聆聽中...';
+    status.style.display = 'block';
+    adminRec = new SR();
+    adminRec.continuous = true; adminRec.interimResults = true; adminRec.lang = 'zh-TW';
+    adminAbortCount = 0;
+    adminRec.onstart = function() { adminAbortCount = 0; document.getElementById('adminVoiceText').textContent = '🎙️ 聆聽中，請說話...'; };
+    adminRec.onsoundstart = function() { document.getElementById('adminVoiceText').textContent = '🎤 偵測到聲音...'; };
+    adminRec.onresult = function(e) {
+        adminAbortCount = 0;
+        var interim = '', final = '';
+        for (var i = e.resultIndex; i < e.results.length; i++) {
+            var t = e.results[i][0].transcript;
+            if (e.results[i].isFinal) final += t; else interim += t;
+        }
+        document.getElementById('adminVoiceText').textContent = '🎤 ' + (final||interim);
+        if (final) adminProcessVoice(final.trim());
+    };
+    adminRec.onerror = function(e) {
+        if (e.error === 'no-speech') return;
+        if (e.error === 'aborted') { adminAbortCount++; if (adminAbortCount >= 3) document.getElementById('adminVoiceText').textContent = '⚠️ 麥克風無法啟動'; return; }
+        if (e.error === 'not-allowed') { adminVoiceMsg('❌ 請允許麥克風權限'); adminToggleVoice(); }
+    };
+    adminRec.onend = function() {
+        if (adminVoiceActive) {
+            var delay = adminAbortCount > 0 ? 800 : 100;
+            setTimeout(function() { if (adminVoiceActive && adminAbortCount < 5) { try { adminRec.start(); } catch(ex) {} } else if (adminAbortCount >= 5) adminToggleVoice(); }, delay);
+        }
+    };
+    adminRec.start();
+}
+function adminVoiceMsg(msg, color) {
+    var el = document.getElementById('adminVoiceResult');
+    el.style.color = color || '#22c55e'; el.textContent = msg;
+    clearTimeout(el._t); el._t = setTimeout(function(){ el.textContent=''; }, 4000);
+}
+function adminNorm(s) { return s.replace(/\s+/g,'').toLowerCase(); }
+function adminFindInput(kw) {
+    kw = adminNorm(kw);
+    var inputs = Array.from(document.querySelectorAll('input[type="text"],input[type="email"],input[type="number"],input[type="search"],textarea')).filter(function(el) {
+        var r = el.getBoundingClientRect(); return r.width>0 && r.height>0 && !el.readOnly && !el.disabled;
+    });
+    var best = null, bestScore = 0;
+    inputs.forEach(function(el) {
+        var lbl = ''; if (el.id) { var l = document.querySelector('label[for="'+el.id+'"]'); if(l) lbl = l.textContent; }
+        var parts = adminNorm(lbl+' '+(el.placeholder||'')+' '+(el.name||'')+' '+(el.getAttribute('aria-label')||''));
+        var score = 0;
+        if (parts.includes(kw) || kw.includes(parts)) score = 0.9;
+        else { for(var i=0;i<kw.length;i++) if(parts.includes(kw[i])) score++; score = score/Math.max(kw.length,1); }
+        if (score > bestScore && score >= 0.25) { bestScore = score; best = el; }
+    });
+    return best;
+}
+function adminProcessVoice(raw) {
+    var text = adminNorm(raw);
+    // 選擇輸入框
+    var selMatch = raw.match(/(?:選擇|選|到)\s*(.{1,10}?)\s*(?:輸入框|欄位|欄|框)/i);
+    if (selMatch) {
+        var inp = adminFindInput(selMatch[1]);
+        if (inp) { inp.focus(); adminVoiceTarget = inp; adminVoiceMsg('✅ 已選「'+(inp.placeholder||inp.name||selMatch[1])+'」'); }
+        else adminVoiceMsg('❓ 找不到「'+selMatch[1]+'」欄位');
+        return;
+    }
+    // 直接輸入
+    var fillM = raw.match(/^(?:輸入|填入|填|打)\s*(.+)/);
+    if (fillM) {
+        var t = adminVoiceTarget || document.activeElement;
+        if (t && (t.tagName==='INPUT'||t.tagName==='TEXTAREA') && !t.readOnly) {
+            t.value = fillM[1].trim(); t.dispatchEvent(new Event('input',{bubbles:true}));
+            adminVoiceMsg('✏️ 已輸入: '+fillM[1].trim());
+        } else adminVoiceMsg('❓ 請先選擇輸入框');
+        return;
+    }
+    // 在XX輸入YYY
+    var inM = raw.match(/在\s*(.{1,10}?)\s*(?:輸入框|欄位|欄|框)?\s*(?:輸入|填入|打)\s*(.+)/);
+    if (inM) {
+        var t2 = adminFindInput(inM[1]);
+        if (t2) { t2.focus(); t2.value=inM[2].trim(); t2.dispatchEvent(new Event('input',{bubbles:true})); adminVoiceTarget=t2; adminVoiceMsg('✏️ 「'+(t2.placeholder||inM[1])+'」= '+inM[2].trim()); }
+        else adminVoiceMsg('❓ 找不到「'+inM[1]+'」欄位');
+        return;
+    }
+    // 往下/往上
+    if (/往下|下捲/.test(text)) { window.scrollBy({top:500,behavior:'smooth'}); adminVoiceMsg('⬇️ 往下'); return; }
+    if (/往上|上捲/.test(text)) { window.scrollBy({top:-500,behavior:'smooth'}); adminVoiceMsg('⬆️ 往上'); return; }
+    // 回首頁
+    if (/首頁|回家/.test(text)) { location.href='/'; return; }
+    adminVoiceMsg('🤔 沒聽懂，試試「選擇搜尋欄位」、「輸入hello」', '#F9A825');
+}
+// 自動恢復語音
+if (localStorage.getItem('voiceOn') === 'true') setTimeout(adminToggleVoice, 500);
+</script>
 </body>
 </html>
