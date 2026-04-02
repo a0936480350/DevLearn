@@ -42,25 +42,27 @@ public static class SeedData
         chapters.AddRange(SeedChapters_Angular.GetChapters());
         chapters.AddRange(SeedChapters_Vue.GetChapters());
 
-        // 只新增不存在的章節（不砍舊資料）— 逐筆新增避免單筆衝突導致全部失敗
+        // 只新增不存在的章節（不砍舊資料）— 用參數化 raw SQL 確保 Id 被寫入
         var newChapters = chapters.Where(c => !existingChapterIds.Contains(c.Id)).ToList();
         int addedCount = 0;
         foreach (var ch in newChapters)
         {
             try
             {
-                db.Chapters.Add(ch);
-                db.SaveChanges();
+                db.Database.ExecuteSqlRaw(
+                    @"INSERT INTO ""Chapters"" (""Id"", ""Title"", ""Slug"", ""Content"", ""Category"", ""Order"", ""Level"", ""Icon"", ""IsPublished"")
+                    VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8})
+                    ON CONFLICT (""Id"") DO NOTHING",
+                    ch.Id, ch.Title, ch.Slug, ch.Content, ch.Category, ch.Order, ch.Level, ch.Icon, ch.IsPublished);
                 addedCount++;
             }
             catch (Exception ex)
             {
-                db.Entry(ch).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
                 Console.WriteLine($"[Seed] Skip chapter {ch.Id} ({ch.Slug}): {ex.InnerException?.Message ?? ex.Message}");
             }
         }
         if (addedCount > 0)
-            Console.WriteLine($"[Seed] Added {addedCount} new chapters (total: {db.Chapters.Count()})");
+            Console.WriteLine($"[Seed] Inserted {addedCount} new chapters via SQL (total: {db.Chapters.Count()})");
 
         // 只新增不存在的測驗題
         var allChapterIds = db.Chapters.Select(c => c.Id).ToHashSet();

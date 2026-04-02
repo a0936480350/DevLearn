@@ -11,7 +11,7 @@ public static class SeedChapters_Vue
             // ── Chapter 600: Vue.js 入門：什麼是前端框架？ ──
             new Chapter
             {
-                Id = 600,
+                Id = 1000,
                 Title = "Vue.js 入門：什麼是前端框架？",
                 Slug = "vue-intro",
                 Category = "vue",
@@ -225,7 +225,7 @@ Level 5: 加上 Nuxt → 伺服端渲染 (SSR)
             // ── Chapter 601: Vue 3 基礎語法 ──
             new Chapter
             {
-                Id = 601,
+                Id = 1001,
                 Title = "Vue 3 基礎語法：模板、資料綁定與事件",
                 Slug = "vue-basics",
                 Category = "vue",
@@ -615,7 +615,7 @@ const remainingCount = computed(() => {
             // ── Chapter 602: Vue 元件系統 ──
             new Chapter
             {
-                Id = 602,
+                Id = 1002,
                 Title = "Vue 元件系統：Props、Emit 與插槽",
                 Slug = "vue-components",
                 Category = "vue",
@@ -987,7 +987,7 @@ defineEmits(['update:modelValue'])
             // ── Chapter 603: Vue Router ──
             new Chapter
             {
-                Id = 603,
+                Id = 1003,
                 Title = "Vue Router：單頁應用路由管理",
                 Slug = "vue-router",
                 Category = "vue",
@@ -1310,7 +1310,7 @@ const navLinks = [
             // ── Chapter 604: Pinia 狀態管理 ──
             new Chapter
             {
-                Id = 604,
+                Id = 1004,
                 Title = "Pinia 狀態管理：跨元件資料共享",
                 Slug = "vue-state",
                 Category = "vue",
@@ -1643,7 +1643,7 @@ export const useCartStore = defineStore('cart', () => {
             // ── Chapter 605: Vue 進階 ──
             new Chapter
             {
-                Id = 605,
+                Id = 1005,
                 Title = "Vue 進階：組合式函式與效能優化",
                 Slug = "vue-advanced",
                 Category = "vue",
@@ -2010,7 +2010,7 @@ import * as Vue from 'vue'
             // ── Chapter 606: Vue 測試與部署 ──
             new Chapter
             {
-                Id = 606,
+                Id = 1006,
                 Title = "Vue 測試與部署：從開發到上線",
                 Slug = "vue-testing",
                 Category = "vue",
@@ -2430,7 +2430,7 @@ jobs:
             // ── Chapter 607: Vue + ASP.NET Core 全端整合 ──
             new Chapter
             {
-                Id = 607,
+                Id = 1007,
                 Title = "Vue + ASP.NET Core 全端整合",
                 Slug = "vue-fullstack",
                 Category = "vue",

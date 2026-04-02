@@ -66,4 +66,11 @@ public class AppDbContext : DbContext
 
     // Claude 任務佇列
     public DbSet<ClaudeTask> ClaudeTasks => Set<ClaudeTask>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        // Allow explicit Id values for seeded data (disable SERIAL auto-generation)
+        modelBuilder.Entity<Chapter>().Property(c => c.Id).ValueGeneratedNever();
+        modelBuilder.Entity<Question>().Property(q => q.Id).ValueGeneratedNever();
+    }
 }

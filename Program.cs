@@ -324,10 +324,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ChatReactions_Unique""
     }
     catch (Exception ex) { Console.WriteLine($"[DB] Role migration note: {ex.Message}"); }
 
-    Task.Run(() => {
-        try { SeedData.Initialize(db); Console.WriteLine("[Seed] Background seed completed."); }
-        catch (Exception ex) { Console.WriteLine($"[Seed] Background seed error: {ex.Message}"); }
-    });
+    try { SeedData.Initialize(db); Console.WriteLine("[Seed] Seed completed."); }
+    catch (Exception ex) { Console.WriteLine($"[Seed] Seed error: {ex.Message}"); }
 
     try { await SeedBattleQuestions.SeedAsync(db); Console.WriteLine("[Seed] Battle questions seeded."); }
     catch (Exception ex) { Console.WriteLine($"[Seed] Battle questions seed error: {ex.Message}"); }
