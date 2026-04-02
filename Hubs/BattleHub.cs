@@ -190,42 +190,58 @@ public class BattleHub : Hub
         string winnerId = p1Score >= p2Score ? room.Player1.UserId : room.Player2.UserId;
         string winnerName = winnerId == room.Player1.UserId ? room.Player1.UserName : room.Player2.UserName;
 
-        // Save to DB
-        var record = new BattleRecord
+        int recordId = 0;
+        // Save to DB — wrapped in try/catch so broadcast always happens
+        try
         {
-            Player1Id = room.Player1.UserId,
-            Player1Name = room.Player1.UserName,
-            Player2Id = room.Player2.UserId,
-            Player2Name = room.Player2.UserName,
-            WinnerId = winnerId,
-            Difficulty = room.Difficulty,
-            QuestionId = room.Question.Id,
-            QuestionTitle = room.Question.Title,
-            Player1TimeSeconds = room.Player1TimeSeconds,
-            Player2TimeSeconds = room.Player2TimeSeconds,
-            Player1Accuracy = room.Player1Accuracy,
-            Player2Accuracy = room.Player2Accuracy,
-            IsAIMatch = room.IsAIBattle,
-            AILevel = room.AILevel,
-            StartedAt = room.StartedAt,
-            EndedAt = DateTime.Now
-        };
-        _db.BattleRecords.Add(record);
+            var record = new BattleRecord
+            {
+                Player1Id = room.Player1.UserId,
+                Player1Name = room.Player1.UserName,
+                Player2Id = room.Player2.UserId,
+                Player2Name = room.Player2.UserName,
+                WinnerId = winnerId,
+                Difficulty = room.Difficulty,
+                QuestionId = room.Question.Id,
+                QuestionTitle = room.Question.Title,
+                Player1TimeSeconds = room.Player1TimeSeconds,
+                Player2TimeSeconds = room.Player2TimeSeconds,
+                Player1Accuracy = room.Player1Accuracy,
+                Player2Accuracy = room.Player2Accuracy,
+                IsAIMatch = room.IsAIBattle,
+                AILevel = room.AILevel,
+                StartedAt = room.StartedAt,
+                EndedAt = DateTime.Now
+            };
+            _db.BattleRecords.Add(record);
 
-        // Update stats for real players
-        await UpdateStats(room.Player1.UserId, room.Player1.UserName, room.Difficulty, winnerId == room.Player1.UserId);
-        if (!room.IsAIBattle)
-            await UpdateStats(room.Player2.UserId, room.Player2.UserName, room.Difficulty, winnerId == room.Player2.UserId);
+            // Update stats for real players
+            await UpdateStats(room.Player1.UserId, room.Player1.UserName, room.Difficulty, winnerId == room.Player1.UserId);
+            if (!room.IsAIBattle)
+                await UpdateStats(room.Player2.UserId, room.Player2.UserName, room.Difficulty, winnerId == room.Player2.UserId);
 
-        await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync();
+            recordId = record.Id;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BattleHub] DB save error: {ex.InnerException?.Message ?? ex.Message}");
+        }
 
-        // Notify result
-        await Clients.Group(room.RoomId).SendAsync("BattleEnd", new {
-            winnerId, winnerName,
-            player1 = new { room.Player1.UserId, room.Player1.UserName, score = (int)p1Score, room.Player1TimeSeconds, room.Player1Accuracy },
-            player2 = new { room.Player2.UserId, room.Player2.UserName, score = (int)p2Score, room.Player2TimeSeconds, room.Player2Accuracy },
-            recordId = record.Id
-        });
+        // ALWAYS notify result even if DB save failed
+        try
+        {
+            await Clients.Group(room.RoomId).SendAsync("BattleEnd", new {
+                winnerId, winnerName,
+                player1 = new { room.Player1.UserId, room.Player1.UserName, score = (int)p1Score, room.Player1TimeSeconds, room.Player1Accuracy },
+                player2 = new { room.Player2.UserId, room.Player2.UserName, score = (int)p2Score, room.Player2TimeSeconds, room.Player2Accuracy },
+                recordId
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BattleHub] BattleEnd broadcast error: {ex.Message}");
+        }
 
         _rooms.TryRemove(room.RoomId, out _);
     }
