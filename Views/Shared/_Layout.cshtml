@@ -165,6 +165,24 @@
         .pm-chat-input button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap}
         .pm-refresh-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;padding:4px 10px;font-size:12px;margin:6px 8px}
         .pm-refresh-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+        .chat-msg{position:relative;}
+        .chat-msg-actions{display:none;position:absolute;top:2px;right:4px;gap:4px;z-index:2;}
+        .chat-msg:hover .chat-msg-actions{display:flex;}
+        .chat-msg-actions button{background:rgba(30,30,30,0.85);border:1px solid #30363d;border-radius:6px;color:#8b949e;cursor:pointer;font-size:0.72rem;padding:2px 6px;line-height:1;}
+        .chat-msg-actions button:hover{color:#e6edf3;border-color:#58a6ff;}
+        .chat-reply-header{background:rgba(88,166,255,0.08);border-left:2px solid #58a6ff;border-radius:0 6px 6px 0;padding:2px 8px;margin-bottom:4px;font-size:0.72rem;color:#8b949e;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .chat-reply-header:hover{background:rgba(88,166,255,0.15);}
+        .chat-reply-bar{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(88,166,255,0.08);border-left:3px solid #58a6ff;border-radius:0 6px 6px 0;font-size:0.8rem;color:#8b949e;}
+        .chat-reply-bar .reply-close{background:none;border:none;color:#8b949e;cursor:pointer;font-size:1rem;padding:0 4px;}
+        .chat-reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;}
+        .chat-reaction-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:12px;font-size:0.75rem;cursor:pointer;background:rgba(139,148,158,0.1);border:1px solid rgba(139,148,158,0.2);color:#8b949e;transition:all .15s;}
+        .chat-reaction-badge:hover,.chat-reaction-badge.mine{background:rgba(88,166,255,0.15);border-color:rgba(88,166,255,0.4);color:#58a6ff;}
+        .reaction-picker{position:absolute;bottom:100%;right:0;background:#1c2128;border:1px solid #30363d;border-radius:10px;padding:6px;display:flex;gap:4px;flex-wrap:wrap;width:180px;z-index:10;box-shadow:0 4px 16px rgba(0,0,0,0.4);}
+        .reaction-picker span{cursor:pointer;font-size:1.1rem;padding:4px;border-radius:6px;transition:background .15s;}
+        .reaction-picker span:hover{background:rgba(88,166,255,0.15);}
+        .chat-nick-click{cursor:pointer;transition:color .15s;}
+        .chat-nick-click:hover{color:#58a6ff !important;text-decoration:underline;}
     </style>
 
     <button id="chatToggleBtn" onclick="toggleChat()">
@@ -201,6 +219,10 @@
                 <button class="chat-join-btn" onclick="joinChat()" data-i18n="chat-join">&#x52A0;&#x5165;&#x804A;&#x5929;</button>
             </div>
             <div class="chat-messages" id="chatMessages" style="display:none"></div>
+            <div class="chat-reply-bar" id="chatReplyBar" style="display:none;">
+                <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">回覆 <strong id="replyToName"></strong>: <span id="replyToPreview"></span></span>
+                <button class="reply-close" onclick="cancelReply()">✕</button>
+            </div>
             <div class="chat-input-area" id="chatInputArea" style="display:none">
                 <input type="text" id="chatMsgInput" placeholder="&#x8F38;&#x5165;&#x8A0A;&#x606F;..." maxlength="500" data-i18n-placeholder="chat-placeholder" />
                 <button id="chatSendBtn" onclick="sendChatMsg()" data-i18n="chat-send">&#x50B3;&#x9001;</button>
@@ -412,7 +434,8 @@
             // Always use the current nickname (may have been updated by login sync)
             var currentNick = localStorage.getItem('chatNick') || chatNick || '\u533F\u540D';
             var currentEmoji = localStorage.getItem('chatEmoji') || chatEmoji || '\u{1F600}';
-            connection.invoke('SendMessage', currentNick, msg, currentEmoji).catch(function(err){ console.error(err); });
+            connection.invoke('SendMessage', currentNick, msg, currentEmoji, _replyToId).catch(function(err){ console.error(err); });
+            cancelReply();
             msgInput.value = '';
             msgInput.focus();
         };
@@ -433,8 +456,8 @@
                 .withAutomaticReconnect()
                 .build();
 
-            connection.on('ReceiveMessage', function(nick, msg, emoji, time){
-                appendMsg(nick, msg, emoji, time);
+            connection.on('ReceiveMessage', function(id, nick, msg, emoji, time, replyToId, replyToNick, replyToPreview){
+                appendMsg(id, nick, msg, emoji, time, replyToId, replyToNick, replyToPreview, null);
                 if(!chatOpen){
                     unreadCount++;
                     unreadBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
@@ -444,8 +467,25 @@
 
             connection.on('LoadHistory', function(messages){
                 msgsDiv.innerHTML = '';
-                messages.forEach(function(m){ appendMsg(m.nickname, m.message, m.avatarEmoji, m.time, true); });
+                messages.forEach(function(m){ appendMsg(m.id, m.nickname, m.message, m.avatarEmoji, m.time, m.replyToId, m.replyToNick, m.replyToPreview, m.reactions, true); });
                 scrollToBottom();
+            });
+
+            connection.on('UpdateReactions', function(messageId, reactions){
+                var el = document.querySelector('[data-msg-id="'+messageId+'"] .chat-reactions');
+                if (!el) return;
+                el.innerHTML = '';
+                if (reactions) {
+                    var myNickname = localStorage.getItem('chatNick') || '';
+                    reactions.forEach(function(r) {
+                        var badge = document.createElement('span');
+                        badge.className = 'chat-reaction-badge' + (r.users && r.users.includes(myNickname) ? ' mine' : '');
+                        badge.innerHTML = r.emoji + ' ' + r.count;
+                        badge.title = r.users ? r.users.join(', ') : '';
+                        badge.onclick = function() { toggleReaction(messageId, r.emoji); };
+                        el.appendChild(badge);
+                    });
+                }
             });
 
             connection.on('UserCount', function(count){
@@ -457,19 +497,41 @@
             }).catch(function(err){ console.error('SignalR connection error:', err); });
         }
 
-        function appendMsg(nick, msg, emoji, time, isHistory){
+        function appendMsg(id, nick, msg, emoji, time, replyToId, replyToNick, replyToPreview, reactions, isHistory){
             var isMine = nick === chatNick;
             var div = document.createElement('div');
             div.className = 'chat-msg' + (isMine ? ' mine' : '');
-            div.innerHTML =
-                '<span class="chat-msg-avatar">' + escHtml(emoji) + '</span>' +
-                '<div class="chat-msg-body">' +
-                    '<div class="chat-msg-meta">' +
-                        '<span class="chat-msg-nick">' + escHtml(nick) + '</span>' +
-                        '<span class="chat-msg-time">' + escHtml(time) + '</span>' +
-                    '</div>' +
-                    '<div class="chat-msg-text">' + escHtml(msg) + '</div>' +
-                '</div>';
+            if (id) div.setAttribute('data-msg-id', id);
+            var preview = msg ? (msg.length > 30 ? msg.substring(0,30) + '...' : msg) : '';
+            var html = '';
+            // Hover action buttons
+            html += '<div class="chat-msg-actions">';
+            html += '<button onclick="startReply(' + (id||0) + ',\'' + escHtml(nick).replace(/'/g, "\\'") + '\',\'' + escHtml(preview).replace(/'/g, "\\'") + '\')" title="回覆">↩</button>';
+            html += '<button onclick="showReactionPicker(this,' + (id||0) + ')" title="表情">😀</button>';
+            html += '</div>';
+            html += '<span class="chat-msg-avatar">' + escHtml(emoji) + '</span>';
+            html += '<div class="chat-msg-body">';
+            // Reply header
+            if (replyToId && replyToNick) {
+                html += '<div class="chat-reply-header" onclick="scrollToMsg(' + replyToId + ')">↩ 回覆 @@' + escHtml(replyToNick) + ': ' + escHtml(replyToPreview || '') + '</div>';
+            }
+            html += '<div class="chat-msg-meta">';
+            html += '<span class="chat-nick-click" onclick="startPmFromChat(\'' + escHtml(nick).replace(/'/g, "\\'") + '\')" style="color:var(--accent);font-weight:700;">' + escHtml(nick) + '</span>';
+            html += '<span class="chat-msg-time">' + escHtml(time) + '</span>';
+            html += '</div>';
+            html += '<div class="chat-msg-text">' + escHtml(msg) + '</div>';
+            // Reactions
+            html += '<div class="chat-reactions">';
+            if (reactions && reactions.length) {
+                var myNickname = localStorage.getItem('chatNick') || '';
+                reactions.forEach(function(r) {
+                    var isMineReaction = r.users && r.users.includes(myNickname) ? ' mine' : '';
+                    html += '<span class="chat-reaction-badge' + isMineReaction + '" title="' + escHtml((r.users||[]).join(', ')) + '" onclick="toggleReaction(' + id + ',\'' + escHtml(r.emoji) + '\')">' + escHtml(r.emoji) + ' ' + r.count + '</span>';
+                });
+            }
+            html += '</div>';
+            html += '</div>';
+            div.innerHTML = html;
             msgsDiv.appendChild(div);
             if(!isHistory) scrollToBottom();
         }
@@ -483,6 +545,86 @@
             d.textContent = s;
             return d.innerHTML;
         }
+
+        var _replyToId = null;
+
+        window.startReply = function(msgId, nick, preview) {
+            _replyToId = msgId;
+            document.getElementById('replyToName').textContent = nick;
+            document.getElementById('replyToPreview').textContent = preview || '';
+            document.getElementById('chatReplyBar').style.display = 'flex';
+            document.getElementById('chatMsgInput').focus();
+        };
+
+        window.cancelReply = function() {
+            _replyToId = null;
+            document.getElementById('chatReplyBar').style.display = 'none';
+        };
+
+        window.scrollToMsg = function(msgId) {
+            var el = document.querySelector('[data-msg-id="'+msgId+'"]');
+            if (el) {
+                el.scrollIntoView({behavior:'smooth', block:'center'});
+                el.style.transition = 'background 0.3s';
+                el.style.background = 'rgba(88,166,255,0.15)';
+                setTimeout(function(){ el.style.background = ''; }, 1500);
+            }
+        };
+
+        window.toggleReaction = function(msgId, emoji) {
+            var myNick = localStorage.getItem('chatNick') || '\u533F\u540D';
+            var mySession = localStorage.getItem('chatSessionId') || '';
+            connection.invoke('AddReaction', msgId, emoji, myNick, mySession);
+        };
+
+        window.showReactionPicker = function(btn, msgId) {
+            // Close any existing picker
+            document.querySelectorAll('.reaction-picker').forEach(function(p){p.remove();});
+            var picker = document.createElement('div');
+            picker.className = 'reaction-picker';
+            var emojis = ['\u2764\uFE0F','\uD83D\uDCA9','\uD83D\uDE02','\uD83D\uDC4D','\uD83D\uDD25','\uD83D\uDE2E','\uD83D\uDC4F','\uD83C\uDF89'];
+            emojis.forEach(function(e) {
+                var s = document.createElement('span');
+                s.textContent = e;
+                s.onclick = function(ev) { ev.stopPropagation(); toggleReaction(msgId, e); picker.remove(); };
+                picker.appendChild(s);
+            });
+            btn.parentElement.appendChild(picker);
+            // Close on outside click
+            setTimeout(function(){
+                document.addEventListener('click', function handler(){
+                    picker.remove();
+                    document.removeEventListener('click', handler);
+                }, {once:true});
+            }, 10);
+        };
+
+        window.startPmFromChat = function(nick) {
+            var myNick = localStorage.getItem('chatNick') || '\u533F\u540D';
+            if (nick === myNick) return;
+            // Look up the user's anonymousId
+            fetch('/Account/LookupByNickname?nickname=' + encodeURIComponent(nick))
+                .then(function(r){return r.json()})
+                .then(function(data) {
+                    if (!data.found) {
+                        alert('\u6B64\u7528\u6236\u5C1A\u672A\u8A3B\u518A\uFF0C\u7121\u6CD5\u79C1\u8A0A');
+                        return;
+                    }
+                    // Switch to PM tab and open conversation
+                    document.querySelectorAll('.chat-tab').forEach(function(t){t.classList.remove('active');});
+                    var pmTab = document.querySelector('.chat-tab[data-tab="pm"]') || document.querySelectorAll('.chat-tab')[1];
+                    if (pmTab) pmTab.classList.add('active');
+                    // Show PM panel, hide others
+                    document.querySelectorAll('.chat-tab-content, .pm-tab-content').forEach(function(c){c.classList.remove('active');});
+                    var pmPanel = document.getElementById('pmTabContent');
+                    if (pmPanel) pmPanel.classList.add('active');
+                    // Open conversation with this user
+                    if (typeof openPmChat === 'function') {
+                        openPmChat(data.anonymousId, 0, data.nickname);
+                    }
+                })
+                .catch(function(){ alert('\u67E5\u8A62\u5931\u6557\uFF0C\u8ACB\u7A0D\u5F8C\u518D\u8A66'); });
+        };
     })();
     </script>
 

@@ -228,6 +228,22 @@ public class AccountController : Controller
         });
     }
 
+    // API: 用暱稱查詢用戶 AnonymousId（供私訊功能使用）
+    [HttpGet]
+    public async Task<IActionResult> LookupByNickname(string nickname)
+    {
+        if (string.IsNullOrWhiteSpace(nickname))
+            return Json(new { found = false });
+
+        var user = await _db.SiteUsers
+            .FirstOrDefaultAsync(u => u.Nickname == nickname && u.IsRegistered);
+
+        if (user == null)
+            return Json(new { found = false });
+
+        return Json(new { found = true, anonymousId = user.AnonymousId, nickname = user.Nickname });
+    }
+
     // API: 快速設定暱稱（不需要 email）
     [HttpPost]
     public async Task<IActionResult> SetNickname([FromBody] SetNickRequest req)

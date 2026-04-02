@@ -153,12 +153,20 @@ public class BattleHub : Hub
         {
             // AI submits at its pre-determined time (or immediately if AI time already passed)
             int aiDelay = Math.Max(0, room.AITimeSeconds - elapsed) * 1000;
-            _ = Task.Delay(aiDelay).ContinueWith(async _ =>
+            _ = Task.Run(async () =>
             {
-                room.Player2TimeSeconds = room.AITimeSeconds;
-                room.Player2Accuracy = room.AIAccuracy;
-                room.Player2Submitted = true;
-                await FinalizeBattle(room);
+                try
+                {
+                    await Task.Delay(aiDelay);
+                    room.Player2TimeSeconds = room.AITimeSeconds;
+                    room.Player2Accuracy = room.AIAccuracy;
+                    room.Player2Submitted = true;
+                    await FinalizeBattle(room);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[BattleHub] AI finalize error: {ex.Message}");
+                }
             });
         }
         else if (bothDone)

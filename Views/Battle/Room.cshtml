@@ -166,7 +166,25 @@ async function submitCode() {
     document.getElementById('p1Card').classList.add('submitted');
     clearInterval(timerInterval);
     const code = document.getElementById('codeEditor').value;
-    await window._battleConn.invoke("SubmitCode", roomId, code, userId);
+    try {
+        await window._battleConn.invoke("SubmitCode", roomId, code, userId);
+    } catch (err) {
+        console.error('Submit failed:', err);
+        submitted = false;
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('submitBtn').textContent = '🚀 提交答案';
+        alert('提交失敗，請重試');
+        return;
+    }
+    // Timeout: if no BattleEnd within 60s, re-enable submit
+    let battleTimeout = setTimeout(() => {
+        if (submitted && !document.getElementById('resultOverlay')?.classList.contains('active')) {
+            submitted = false;
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('submitBtn').textContent = '🚀 重新提交';
+            alert('等待逾時，請重新提交');
+        }
+    }, 60000);
 }
 
 function showResult(data) {

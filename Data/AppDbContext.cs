@@ -36,6 +36,7 @@ public class AppDbContext : DbContext
     public DbSet<StudyBuddy> StudyBuddies => Set<StudyBuddy>();
     public DbSet<BuddyMatch> BuddyMatches => Set<BuddyMatch>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
+    public DbSet<ChatReaction> ChatReactions => Set<ChatReaction>();
 
     // 老師配對系統
     public DbSet<Teacher> Teachers => Set<Teacher>();
