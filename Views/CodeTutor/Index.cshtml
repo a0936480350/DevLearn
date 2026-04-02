@@ -455,6 +455,11 @@
             </div>
         </div>
 
+        <div id="explanationPanel" style="background:linear-gradient(135deg,#1a1f2e,#161b22);border:1px solid #30363d;border-radius:12px;padding:20px 24px;margin-top:16px;display:none;transition:opacity 0.3s ease;">
+            <div style="font-size:0.85rem;font-weight:700;color:#f59e0b;margin-bottom:10px;">💡 語法說明</div>
+            <div id="explanationText" style="color:#c9d1d9;font-size:0.9rem;line-height:1.8;"></div>
+        </div>
+
         <div class="feedback idle" id="feedback">等待 AI 教練出題中...</div>
     </div>
 </div>
@@ -520,6 +525,8 @@
     const timerDisplay = document.getElementById('timerDisplay');
     const correctCount = document.getElementById('correctCount');
     const totalLinesEl = document.getElementById('totalLines');
+    const explanationPanel = document.getElementById('explanationPanel');
+    const explanationText = document.getElementById('explanationText');
 
     // Load lessons
     fetch('/CodeTutor/GetLessons')
@@ -576,6 +583,7 @@
         playerInput.value = '';
         playerInput.disabled = true;
         setFeedback('idle', '等待 AI 教練出題中...');
+        explanationPanel.style.display = 'none';
         updateProgress();
 
         // Start timer
@@ -598,6 +606,10 @@
         isTyping = true;
         inputLocked = true;
         playerInput.disabled = true;
+
+        // Hide explanation when advancing to next line
+        explanationPanel.style.opacity = '0';
+        setTimeout(() => { if (explanationPanel.style.opacity === '0') explanationPanel.style.display = 'none'; }, 300);
 
         // Create a new line element in AI panel
         const lineEl = document.createElement('div');
@@ -665,6 +677,18 @@
         playerInput.value = '';
         playerInput.focus();
         setFeedback('typing', '💡 現在輪到你了！照著打一模一樣的程式碼');
+
+        // Show explanation for current line
+        const line = allDisplayLines[currentLineIdx];
+        if (line && line.explanation) {
+            explanationPanel.style.display = 'block';
+            explanationText.innerHTML = line.explanation;
+            // Fade in
+            explanationPanel.style.opacity = '0';
+            requestAnimationFrame(() => { explanationPanel.style.opacity = '1'; });
+        } else {
+            explanationPanel.style.display = 'none';
+        }
     }
 
     // Player input handling
@@ -782,6 +806,7 @@
         clearInterval(timerInterval);
         gameArea.style.display = 'none';
         lobby.style.display = 'block';
+        explanationPanel.style.display = 'none';
         document.getElementById('completionOverlay').classList.remove('active');
     };
 
