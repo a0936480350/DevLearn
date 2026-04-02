@@ -1,0 +1,1438 @@
+@{
+    ViewData["Title"] = "SQL 查詢模擬器";
+}
+
+<style>
+    /* === SQL Game Dark Theme === */
+    .sql-container {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', sans-serif;
+        color: #e0e0e0;
+    }
+
+    /* --- Lobby --- */
+    .sql-lobby {
+        text-align: center;
+        padding: 30px 0;
+    }
+    .sql-lobby h1 {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, #f59e0b, #ef4444);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 8px;
+    }
+    .sql-lobby .subtitle {
+        color: #999;
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+    .sql-lobby .progress-summary {
+        color: #8b949e;
+        font-size: 0.95rem;
+        margin-bottom: 28px;
+    }
+    .sql-lobby .progress-summary strong {
+        color: #4ade80;
+    }
+
+    /* Level Sections */
+    .level-section {
+        margin-bottom: 28px;
+        text-align: left;
+    }
+    .level-label {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+        padding-left: 4px;
+    }
+    .level-label.level-1 { color: #4ade80; }
+    .level-label.level-2 { color: #fbbf24; }
+    .level-label.level-3 { color: #f87171; }
+
+    .challenge-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 14px;
+    }
+    .challenge-card {
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 18px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: left;
+        position: relative;
+    }
+    .challenge-card:hover {
+        border-color: #f59e0b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(245, 158, 11, 0.15);
+    }
+    .challenge-card.completed {
+        border-color: #238636;
+    }
+    .challenge-card.completed::after {
+        content: '\2713';
+        position: absolute;
+        top: 12px;
+        right: 14px;
+        color: #4ade80;
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+    .challenge-card .card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #e6edf3;
+        margin-bottom: 6px;
+    }
+    .challenge-card .card-desc {
+        color: #8b949e;
+        font-size: 0.85rem;
+        margin-bottom: 10px;
+    }
+    .level-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .level-badge.lb-1 { background: #1b3a1b; color: #6fcf6f; border: 1px solid #2d5a2d; }
+    .level-badge.lb-2 { background: #3a2e1b; color: #ffb74d; border: 1px solid #5a4a2d; }
+    .level-badge.lb-3 { background: #3a1b1b; color: #ef9a9a; border: 1px solid #5a2d2d; }
+
+    /* --- Game Area --- */
+    .sql-game {
+        display: none;
+    }
+    .game-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .game-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #e6edf3;
+    }
+    .game-stats {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        font-size: 0.9rem;
+        color: #8b949e;
+    }
+    .game-stats span {
+        background: #161b22;
+        border: 1px solid #30363d;
+        padding: 4px 12px;
+        border-radius: 8px;
+    }
+    .back-btn {
+        background: #21262d;
+        border: 1px solid #30363d;
+        color: #8b949e;
+        padding: 6px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+    .back-btn:hover {
+        border-color: #f59e0b;
+        color: #f59e0b;
+    }
+
+    /* Challenge description banner */
+    .challenge-banner {
+        background: linear-gradient(135deg, #1a1f2e, #161b22);
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .challenge-banner .desc-text {
+        font-size: 1.05rem;
+        color: #e6edf3;
+    }
+    .challenge-banner .desc-text .task-label {
+        color: #f59e0b;
+        font-weight: 700;
+        margin-right: 8px;
+    }
+    .challenge-nav-btns {
+        display: flex;
+        gap: 8px;
+    }
+    .nav-btn {
+        background: #21262d;
+        border: 1px solid #30363d;
+        color: #8b949e;
+        padding: 5px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+    }
+    .nav-btn:hover { border-color: #58a6ff; color: #58a6ff; }
+    .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Main layout: table(s) left, editor right */
+    .game-panels {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    /* DB Table Panel */
+    .db-panel {
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    .db-panel-header {
+        background: #161b22;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 1px solid #30363d;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #8b949e;
+    }
+    .db-panel-header .dots {
+        display: flex;
+        gap: 6px;
+        margin-right: 8px;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .db-panel-body {
+        padding: 12px;
+        overflow-x: auto;
+        overflow-y: auto;
+        max-height: 480px;
+    }
+
+    /* Virtual DB Table */
+    .db-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: 'JetBrains Mono', 'Consolas', monospace;
+        font-size: 0.82rem;
+    }
+    .db-table th {
+        background: #1c2333;
+        color: #58a6ff;
+        padding: 8px 12px;
+        text-align: left;
+        border-bottom: 2px solid #30363d;
+        font-weight: 700;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+    .db-table td {
+        padding: 6px 12px;
+        border-bottom: 1px solid #21262d;
+        color: #c9d1d9;
+        white-space: nowrap;
+    }
+    .db-table tr:hover td {
+        background: rgba(88, 166, 255, 0.05);
+    }
+    .db-table .str-val { color: #a5d6ff; }
+    .db-table .num-val { color: #d2a8ff; }
+    .table-label {
+        font-size: 0.8rem;
+        color: #f59e0b;
+        font-weight: 700;
+        margin-bottom: 8px;
+        margin-top: 14px;
+    }
+    .table-label:first-child { margin-top: 0; }
+
+    /* SQL Editor Panel */
+    .editor-panel {
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    .editor-header {
+        background: #161b22;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 1px solid #30363d;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #8b949e;
+    }
+    .editor-body {
+        padding: 16px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .sql-input-wrap {
+        position: relative;
+        flex: 1;
+        margin-bottom: 12px;
+    }
+    .sql-line-numbers {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 36px;
+        background: #161b22;
+        border-right: 1px solid #30363d;
+        padding-top: 12px;
+        text-align: right;
+        font-family: 'JetBrains Mono', 'Consolas', monospace;
+        font-size: 0.82rem;
+        color: #484f58;
+        line-height: 1.6;
+        user-select: none;
+        overflow: hidden;
+    }
+    .sql-line-numbers span {
+        display: block;
+        padding-right: 8px;
+    }
+    #sqlInput {
+        width: 100%;
+        min-height: 140px;
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        color: #e6edf3;
+        font-family: 'JetBrains Mono', 'Consolas', monospace;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        padding: 12px 12px 12px 44px;
+        resize: vertical;
+        outline: none;
+        caret-color: #f59e0b;
+        transition: border-color 0.2s;
+    }
+    #sqlInput:focus {
+        border-color: #f59e0b;
+    }
+    #sqlInput::placeholder {
+        color: #484f58;
+    }
+    .editor-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .btn-run {
+        padding: 10px 24px;
+        background: linear-gradient(135deg, #f59e0b, #ef4444);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .btn-run:hover { transform: scale(1.04); box-shadow: 0 4px 16px rgba(245,158,11,0.3); }
+    .btn-hint {
+        padding: 10px 20px;
+        background: #21262d;
+        border: 1px solid #30363d;
+        color: #fbbf24;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-hint:hover { border-color: #fbbf24; background: #2a2520; }
+    .btn-answer {
+        padding: 10px 20px;
+        background: #21262d;
+        border: 1px solid #30363d;
+        color: #8b949e;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-answer:hover { border-color: #58a6ff; color: #58a6ff; }
+
+    /* Hint toast */
+    .hint-toast {
+        display: none;
+        background: #1c2333;
+        border: 1px solid #fbbf2440;
+        border-radius: 8px;
+        padding: 10px 16px;
+        margin-top: 10px;
+        color: #fbbf24;
+        font-size: 0.9rem;
+        animation: slideIn 0.3s ease;
+    }
+    .hint-toast.visible { display: block; }
+
+    /* Results area */
+    .results-area {
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 16px;
+    }
+    .results-header {
+        background: #161b22;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 1px solid #30363d;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #8b949e;
+    }
+    .results-body {
+        padding: 16px;
+        overflow-x: auto;
+        min-height: 60px;
+    }
+    .results-body .empty-msg {
+        color: #484f58;
+        font-size: 0.9rem;
+        text-align: center;
+        padding: 20px;
+    }
+    .result-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: 'JetBrains Mono', 'Consolas', monospace;
+        font-size: 0.82rem;
+        animation: slideIn 0.3s ease;
+    }
+    .result-table th {
+        background: #1c2333;
+        color: #4ade80;
+        padding: 8px 12px;
+        text-align: left;
+        border-bottom: 2px solid #30363d;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    .result-table td {
+        padding: 6px 12px;
+        border-bottom: 1px solid #21262d;
+        color: #c9d1d9;
+        white-space: nowrap;
+    }
+    .result-meta {
+        margin-top: 10px;
+        font-size: 0.85rem;
+        color: #8b949e;
+    }
+
+    @@keyframes slideIn {
+        0% { opacity: 0; transform: translateY(8px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Feedback bar */
+    .sql-feedback {
+        text-align: center;
+        padding: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 10px;
+        margin-bottom: 16px;
+        transition: all 0.3s;
+    }
+    .sql-feedback.correct {
+        background: rgba(35, 134, 54, 0.15);
+        color: #4ade80;
+        border: 1px solid #23863640;
+        animation: popIn 0.4s ease;
+    }
+    .sql-feedback.wrong {
+        background: rgba(248, 81, 73, 0.1);
+        color: #f85149;
+        border: 1px solid #f8514940;
+    }
+    .sql-feedback.idle {
+        background: transparent;
+        color: #8b949e;
+        border: 1px solid transparent;
+    }
+    @@keyframes popIn {
+        0% { transform: scale(0.95); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Explanation panel */
+    .explanation-panel {
+        background: linear-gradient(135deg, #1a1f2e, #161b22);
+        border: 1px solid #238636;
+        border-radius: 12px;
+        padding: 18px 22px;
+        margin-bottom: 16px;
+        display: none;
+        animation: slideIn 0.3s ease;
+    }
+    .explanation-panel .exp-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #4ade80;
+        margin-bottom: 8px;
+    }
+    .explanation-panel .exp-body {
+        color: #c9d1d9;
+        font-size: 0.9rem;
+        line-height: 1.8;
+    }
+    .explanation-panel code {
+        background: #1c2333;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: 'JetBrains Mono', 'Consolas', monospace;
+        font-size: 0.85rem;
+        color: #f59e0b;
+    }
+
+    /* Next challenge button */
+    .btn-next {
+        padding: 12px 28px;
+        background: linear-gradient(135deg, #238636, #2ea043);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.15s;
+        animation: popIn 0.3s ease;
+    }
+    .btn-next:hover { transform: scale(1.04); }
+
+    /* --- Completion Overlay --- */
+    .completion-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 999;
+        justify-content: center;
+        align-items: center;
+    }
+    .completion-overlay.active {
+        display: flex;
+    }
+    .completion-card {
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 16px;
+        padding: 40px;
+        text-align: center;
+        max-width: 460px;
+        width: 90%;
+        animation: popIn 0.4s ease;
+    }
+    .completion-card h2 {
+        font-size: 2rem;
+        margin-bottom: 8px;
+        color: #e6edf3;
+    }
+    .completion-card .stars {
+        font-size: 2.5rem;
+        margin-bottom: 16px;
+    }
+    .stat-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 20px 0;
+    }
+    .stat-item {
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 10px;
+        padding: 14px;
+    }
+    .stat-item .stat-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #f59e0b;
+    }
+    .stat-item .stat-label {
+        font-size: 0.8rem;
+        color: #8b949e;
+        margin-top: 2px;
+    }
+    .completion-btns {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    .btn-primary {
+        padding: 12px 28px;
+        background: linear-gradient(135deg, #f59e0b, #ef4444);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.15s;
+    }
+    .btn-primary:hover { transform: scale(1.04); }
+    .btn-secondary {
+        padding: 12px 28px;
+        background: #21262d;
+        color: #8b949e;
+        border: 1px solid #30363d;
+        border-radius: 10px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-secondary:hover { border-color: #f59e0b; color: #f59e0b; }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .game-panels {
+            grid-template-columns: 1fr;
+        }
+        .sql-lobby h1 {
+            font-size: 1.8rem;
+        }
+        .challenge-grid {
+            grid-template-columns: 1fr;
+        }
+        .game-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .completion-card {
+            padding: 24px;
+        }
+        .challenge-banner {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="sql-container">
+    <!-- ===== Lobby ===== -->
+    <div class="sql-lobby" id="lobby">
+        <h1>📊 SQL 查詢模擬器</h1>
+        <p class="subtitle">看著資料表，寫出正確的 SQL 查詢！</p>
+        <div class="progress-summary" id="progressSummary"></div>
+        <div id="levelSections"></div>
+    </div>
+
+    <!-- ===== Game Area ===== -->
+    <div class="sql-game" id="gameArea">
+        <div class="game-header">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <button class="back-btn" onclick="sqlGame.backToLobby()">← 返回</button>
+                <span class="game-title" id="gameTitle"></span>
+            </div>
+            <div class="game-stats">
+                <span>📊 <span id="progressDisplay">0 / 0</span></span>
+            </div>
+        </div>
+
+        <!-- Challenge description -->
+        <div class="challenge-banner">
+            <div class="desc-text">
+                <span class="task-label">任務：</span><span id="challengeDesc"></span>
+            </div>
+            <div class="challenge-nav-btns">
+                <button class="nav-btn" id="btnPrev" onclick="sqlGame.prevChallenge()">← 上一題</button>
+                <button class="nav-btn" id="btnNext2" onclick="sqlGame.nextChallenge()">下一題 →</button>
+            </div>
+        </div>
+
+        <!-- Main panels -->
+        <div class="game-panels">
+            <!-- DB Table Panel (left) -->
+            <div class="db-panel">
+                <div class="db-panel-header">
+                    <div class="dots"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span></div>
+                    🗄️ 資料表
+                </div>
+                <div class="db-panel-body" id="tableDisplay"></div>
+            </div>
+
+            <!-- SQL Editor Panel (right) -->
+            <div class="editor-panel">
+                <div class="editor-header">
+                    <div class="dots"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span></div>
+                    ✏️ SQL 編輯器
+                </div>
+                <div class="editor-body">
+                    <div class="sql-input-wrap">
+                        <div class="sql-line-numbers" id="lineNumbers"><span>1</span></div>
+                        <textarea id="sqlInput" placeholder="在這裡輸入你的 SQL 查詢..." spellcheck="false"></textarea>
+                    </div>
+                    <div class="editor-actions">
+                        <button class="btn-run" onclick="sqlGame.executeQuery()">▶ 執行查詢</button>
+                        <button class="btn-hint" onclick="sqlGame.showHint()">💡 提示</button>
+                        <button class="btn-answer" onclick="sqlGame.showAnswer()">📖 看答案</button>
+                    </div>
+                    <div class="hint-toast" id="hintToast"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results area -->
+        <div class="results-area" id="resultsArea">
+            <div class="results-header">
+                📋 查詢結果
+            </div>
+            <div class="results-body" id="resultsBody">
+                <div class="empty-msg">執行查詢後，結果會顯示在這裡</div>
+            </div>
+        </div>
+
+        <!-- Feedback -->
+        <div class="sql-feedback idle" id="feedback"></div>
+
+        <!-- Explanation (shown after correct answer) -->
+        <div class="explanation-panel" id="explanationPanel">
+            <div class="exp-title">📚 SQL 觀念解析</div>
+            <div class="exp-body" id="explanationBody"></div>
+        </div>
+
+        <!-- Next challenge button -->
+        <div style="text-align:center;margin-bottom:20px;display:none;" id="nextBtnWrap">
+            <button class="btn-next" onclick="sqlGame.nextChallenge()">下一題挑戰 →</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Completion Overlay ===== -->
+<div class="completion-overlay" id="completionOverlay">
+    <div class="completion-card">
+        <h2>🎉 全部完成！</h2>
+        <div class="stars" id="stars"></div>
+        <p style="color:#8b949e;margin-bottom:10px;">你已經掌握了基礎 SQL 查詢技巧！</p>
+        <div class="stat-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="statCompleted">--</div>
+                <div class="stat-label">完成題數</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statAccuracy">--</div>
+                <div class="stat-label">一次正確率</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statAttempts">--</div>
+                <div class="stat-label">總嘗試次數</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statHints">--</div>
+                <div class="stat-label">使用提示</div>
+            </div>
+        </div>
+        <div class="completion-btns">
+            <button class="btn-secondary" onclick="sqlGame.backToLobby()">回到選題</button>
+            <button class="btn-primary" onclick="sqlGame.resetAll()">重新挑戰</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const sqlGame = (function() {
+    // State
+    let challenges = [];
+    let currentIdx = 0;
+    let completedSet = new Set();
+    let firstTrySet = new Set();
+    let totalAttempts = 0;
+    let hintsUsed = 0;
+    let attemptedCurrent = false;
+
+    // DOM refs
+    const lobby = document.getElementById('lobby');
+    const gameArea = document.getElementById('gameArea');
+    const levelSections = document.getElementById('levelSections');
+    const progressSummary = document.getElementById('progressSummary');
+    const gameTitle = document.getElementById('gameTitle');
+    const progressDisplay = document.getElementById('progressDisplay');
+    const challengeDesc = document.getElementById('challengeDesc');
+    const tableDisplay = document.getElementById('tableDisplay');
+    const sqlInput = document.getElementById('sqlInput');
+    const lineNumbers = document.getElementById('lineNumbers');
+    const resultsBody = document.getElementById('resultsBody');
+    const feedback = document.getElementById('feedback');
+    const hintToast = document.getElementById('hintToast');
+    const explanationPanel = document.getElementById('explanationPanel');
+    const explanationBody = document.getElementById('explanationBody');
+    const nextBtnWrap = document.getElementById('nextBtnWrap');
+
+    // SQL concept explanations
+    const explanations = {
+        1: '<code>SELECT *</code> 表示選取所有欄位。<code>FROM</code> 指定資料表名稱。這是最基本的 SQL 查詢語法，用來取出資料表中的所有資料。',
+        2: '<code>WHERE</code> 子句用來篩選符合條件的資料列。字串值要用單引號包起來，例如 <code>\'Engineering\'</code>。',
+        3: '在 <code>SELECT</code> 後面列出你要的欄位名稱，用逗號分隔。這樣只會回傳指定的欄位，而不是所有欄位。',
+        4: '<code>WHERE</code> 搭配比較運算子（<code>></code>、<code><</code>、<code>>=</code>、<code><=</code>、<code>!=</code>）可以做數值篩選。',
+        5: '<code>ORDER BY</code> 用來排序結果。<code>ASC</code> 是升序（預設），<code>DESC</code> 是降序。可以用來找最高或最低的值。',
+        6: '<code>GROUP BY</code> 把資料按某個欄位分組，搭配聚合函數如 <code>COUNT(*)</code> 計算每組的筆數。常用的聚合函數還有 <code>SUM</code>、<code>AVG</code>、<code>MAX</code>、<code>MIN</code>。',
+        7: '<code>JOIN</code> 用來連接兩張表。<code>ON</code> 指定連接條件，通常是外鍵對應主鍵。這是關聯式資料庫最重要的操作之一。',
+        8: '子查詢（Subquery）是放在括號裡的 SELECT 語句。它會先執行，結果再給外層查詢使用。<code>AVG()</code> 計算平均值。'
+    };
+
+    // Load challenges
+    fetch('/SqlGame/GetChallenges')
+        .then(r => r.json())
+        .then(data => {
+            challenges = data;
+            renderLobby();
+        });
+
+    // Line number updater
+    sqlInput.addEventListener('input', updateLineNumbers);
+    sqlInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            executeQuery();
+        }
+    });
+
+    function updateLineNumbers() {
+        const lines = sqlInput.value.split('\n').length;
+        let html = '';
+        for (let i = 1; i <= Math.max(lines, 1); i++) {
+            html += '<span>' + i + '</span>';
+        }
+        lineNumbers.innerHTML = html;
+    }
+
+    function renderLobby() {
+        const levels = [
+            { num: 1, label: '⭐ Level 1 — 基礎查詢', cls: 'level-1' },
+            { num: 2, label: '⭐⭐ Level 2 — 進階篩選', cls: 'level-2' },
+            { num: 3, label: '⭐⭐⭐ Level 3 — 多表與子查詢', cls: 'level-3' }
+        ];
+
+        let html = '';
+        levels.forEach(lv => {
+            const lvChallenges = challenges.filter(c => c.level === lv.num);
+            if (lvChallenges.length === 0) return;
+            html += '<div class="level-section">';
+            html += '<div class="level-label ' + lv.cls + '">' + lv.label + '</div>';
+            html += '<div class="challenge-grid">';
+            lvChallenges.forEach(c => {
+                const done = completedSet.has(c.id);
+                html += '<div class="challenge-card' + (done ? ' completed' : '') + '" onclick="sqlGame.startChallenge(' + c.id + ')">';
+                html += '<div class="card-title">' + escapeHtml(c.title) + '</div>';
+                html += '<div class="card-desc">' + escapeHtml(c.description) + '</div>';
+                html += '<span class="level-badge lb-' + c.level + '">' + '⭐'.repeat(c.level) + ' Level ' + c.level + '</span>';
+                html += '</div>';
+            });
+            html += '</div></div>';
+        });
+        levelSections.innerHTML = html;
+
+        const total = challenges.length;
+        const done = completedSet.size;
+        progressSummary.innerHTML = '進度：<strong>' + done + ' / ' + total + '</strong> 題完成';
+    }
+
+    function startChallenge(id) {
+        currentIdx = challenges.findIndex(c => c.id === id);
+        if (currentIdx < 0) currentIdx = 0;
+        attemptedCurrent = false;
+        showGame();
+    }
+
+    function showGame() {
+        lobby.style.display = 'none';
+        gameArea.style.display = 'block';
+        loadChallenge();
+    }
+
+    function loadChallenge() {
+        const ch = challenges[currentIdx];
+        gameTitle.textContent = ch.title;
+        progressDisplay.textContent = (currentIdx + 1) + ' / ' + challenges.length;
+        challengeDesc.textContent = ch.description;
+        attemptedCurrent = false;
+
+        // Nav buttons
+        document.getElementById('btnPrev').disabled = (currentIdx === 0);
+        document.getElementById('btnNext2').disabled = (currentIdx >= challenges.length - 1);
+
+        // Render table(s)
+        let tableHtml = '';
+        tableHtml += '<div class="table-label">📋 ' + escapeHtml(ch.tableName) + '</div>';
+        tableHtml += renderTable(ch.columns, ch.data);
+
+        if (ch.extraTableName && ch.extraColumns && ch.extraData) {
+            tableHtml += '<div class="table-label">📋 ' + escapeHtml(ch.extraTableName) + '</div>';
+            tableHtml += renderTable(ch.extraColumns, ch.extraData);
+        }
+        tableDisplay.innerHTML = tableHtml;
+
+        // Clear editor
+        sqlInput.value = '';
+        updateLineNumbers();
+        resultsBody.innerHTML = '<div class="empty-msg">執行查詢後，結果會顯示在這裡</div>';
+        feedback.className = 'sql-feedback idle';
+        feedback.innerHTML = '';
+        hintToast.className = 'hint-toast';
+        explanationPanel.style.display = 'none';
+        nextBtnWrap.style.display = 'none';
+        sqlInput.focus();
+    }
+
+    function renderTable(columns, data) {
+        let html = '<table class="db-table"><thead><tr>';
+        columns.forEach(col => {
+            html += '<th>' + escapeHtml(col) + '</th>';
+        });
+        html += '</tr></thead><tbody>';
+        data.forEach(row => {
+            html += '<tr>';
+            row.forEach(val => {
+                const cls = typeof val === 'number' ? 'num-val' : 'str-val';
+                html += '<td class="' + cls + '">' + escapeHtml(String(val)) + '</td>';
+            });
+            html += '</tr>';
+        });
+        html += '</tbody></table>';
+        return html;
+    }
+
+    // ========== SQL Engine ==========
+
+    function executeQuery() {
+        const ch = challenges[currentIdx];
+        const sql = sqlInput.value.trim();
+        if (!sql) {
+            setFeedback('wrong', '❌ 請輸入 SQL 查詢');
+            return;
+        }
+
+        totalAttempts++;
+        if (!attemptedCurrent) attemptedCurrent = true;
+
+        try {
+            const result = runSQL(sql, ch);
+            displayResults(result.columns, result.rows);
+
+            // Check correctness
+            const expectedCols = ch.expectedColumns.map(c => c.toLowerCase());
+            const resultCols = result.columns.map(c => c.toLowerCase());
+            const colMatch = arraysEqual(expectedCols, resultCols);
+            const rowMatch = result.rows.length === ch.expectedRows;
+
+            if (colMatch && rowMatch) {
+                onCorrect(ch);
+            } else {
+                let msg = '❌ 不正確 — ';
+                if (!colMatch) msg += '欄位不匹配（期望：' + expectedCols.join(', ') + '，你的：' + resultCols.join(', ') + '）';
+                else if (!rowMatch) msg += '行數不匹配（期望：' + ch.expectedRows + ' 行，你的：' + result.rows.length + ' 行）';
+                setFeedback('wrong', msg);
+            }
+        } catch (e) {
+            setFeedback('wrong', '❌ SQL 語法錯誤：' + escapeHtml(e.message));
+            resultsBody.innerHTML = '<div class="empty-msg" style="color:#f85149;">執行錯誤：' + escapeHtml(e.message) + '</div>';
+        }
+    }
+
+    function onCorrect(ch) {
+        const wasFirst = !completedSet.has(ch.id);
+        completedSet.add(ch.id);
+
+        if (wasFirst && totalAttempts === 1) {
+            firstTrySet.add(ch.id);
+        }
+
+        setFeedback('correct', '✅ 正確！太棒了！');
+
+        // Show explanation
+        if (explanations[ch.id]) {
+            explanationBody.innerHTML = explanations[ch.id];
+            explanationPanel.style.display = 'block';
+        }
+
+        // Show next button if not last
+        if (currentIdx < challenges.length - 1) {
+            nextBtnWrap.style.display = 'block';
+        } else {
+            // All done check
+            if (completedSet.size >= challenges.length) {
+                setTimeout(showCompletion, 800);
+            } else {
+                nextBtnWrap.style.display = 'none';
+            }
+        }
+    }
+
+    function displayResults(columns, rows) {
+        let html = '<table class="result-table"><thead><tr>';
+        columns.forEach(col => {
+            html += '<th>' + escapeHtml(col) + '</th>';
+        });
+        html += '</tr></thead><tbody>';
+        rows.forEach(row => {
+            html += '<tr>';
+            columns.forEach(col => {
+                const val = row[col] !== undefined ? row[col] : '';
+                html += '<td>' + escapeHtml(String(val)) + '</td>';
+            });
+            html += '</tr>';
+        });
+        html += '</tbody></table>';
+        html += '<div class="result-meta">共 ' + rows.length + ' 筆結果</div>';
+        resultsBody.innerHTML = html;
+    }
+
+    // ========== Simple SQL Parser & Engine ==========
+
+    function runSQL(sql, challenge) {
+        // Normalize
+        let q = sql.replace(/\s+/g, ' ').trim();
+        // Remove trailing semicolon
+        if (q.endsWith(';')) q = q.slice(0, -1).trim();
+
+        const upper = q.toUpperCase();
+        if (!upper.startsWith('SELECT')) throw new Error('只支援 SELECT 查詢');
+
+        // Build tables from challenge data
+        const tables = {};
+        tables[challenge.tableName.toLowerCase()] = buildTable(challenge.columns, challenge.data);
+        if (challenge.extraTableName && challenge.extraColumns && challenge.extraData) {
+            tables[challenge.extraTableName.toLowerCase()] = buildTable(challenge.extraColumns, challenge.extraData);
+        }
+
+        return parseAndExecute(q, tables);
+    }
+
+    function buildTable(columns, data) {
+        return data.map(row => {
+            const obj = {};
+            columns.forEach((col, i) => { obj[col] = row[i]; });
+            return obj;
+        });
+    }
+
+    function parseAndExecute(sql, tables) {
+        const upper = sql.toUpperCase();
+
+        // Detect JOIN
+        const joinMatch = upper.match(/\bJOIN\s+/);
+        if (joinMatch) return executeJoin(sql, tables);
+
+        // Detect GROUP BY
+        const groupMatch = upper.match(/\bGROUP\s+BY\b/);
+        if (groupMatch) return executeGroupBy(sql, tables);
+
+        // Detect subquery in WHERE
+        const subqueryMatch = sql.match(/WHERE\s+\w+\s*[><=!]+\s*\(\s*SELECT\s+/i);
+        if (subqueryMatch) return executeSubquery(sql, tables);
+
+        // Simple SELECT with optional WHERE, ORDER BY
+        return executeSimple(sql, tables);
+    }
+
+    function executeSimple(sql, tables) {
+        const upper = sql.toUpperCase();
+
+        // Extract FROM table
+        const fromMatch = sql.match(/FROM\s+(\w+)/i);
+        if (!fromMatch) throw new Error('缺少 FROM 子句');
+        const tableName = fromMatch[1].toLowerCase();
+        let rows = tables[tableName];
+        if (!rows) throw new Error('找不到資料表: ' + fromMatch[1]);
+        rows = rows.map(r => ({...r}));
+
+        // WHERE
+        const whereMatch = sql.match(/WHERE\s+(.+?)(?:\s+ORDER\s+BY|\s+LIMIT|\s*$)/i);
+        if (whereMatch) {
+            rows = applyWhere(rows, whereMatch[1].trim());
+        }
+
+        // ORDER BY
+        const orderMatch = sql.match(/ORDER\s+BY\s+(\w+)(?:\s+(ASC|DESC))?/i);
+        if (orderMatch) {
+            const col = orderMatch[1].toLowerCase();
+            const desc = orderMatch[2] && orderMatch[2].toUpperCase() === 'DESC';
+            rows.sort((a, b) => {
+                const va = a[col], vb = b[col];
+                if (typeof va === 'number' && typeof vb === 'number') return desc ? vb - va : va - vb;
+                return desc ? String(vb).localeCompare(String(va)) : String(va).localeCompare(String(vb));
+            });
+        }
+
+        // SELECT columns
+        const columns = parseSelectColumns(sql, rows);
+        if (columns[0] === '*') {
+            const allCols = rows.length > 0 ? Object.keys(rows[0]) : [];
+            return { columns: allCols, rows: rows };
+        }
+        const projected = rows.map(r => {
+            const obj = {};
+            columns.forEach(c => { obj[c] = r[c]; });
+            return obj;
+        });
+        return { columns, rows: projected };
+    }
+
+    function executeJoin(sql, tables) {
+        // Pattern: SELECT ... FROM t1 JOIN t2 ON t1.col = t2.col
+        const fromMatch = sql.match(/FROM\s+(\w+)\s+JOIN\s+(\w+)\s+ON\s+(\w+)\.(\w+)\s*=\s*(\w+)\.(\w+)/i);
+        if (!fromMatch) throw new Error('JOIN 語法格式不正確');
+
+        const t1Name = fromMatch[1].toLowerCase();
+        const t2Name = fromMatch[2].toLowerCase();
+        const onT1 = fromMatch[3].toLowerCase();
+        const onCol1 = fromMatch[4].toLowerCase();
+        const onT2 = fromMatch[5].toLowerCase();
+        const onCol2 = fromMatch[6].toLowerCase();
+
+        const t1 = tables[t1Name];
+        const t2 = tables[t2Name];
+        if (!t1) throw new Error('找不到資料表: ' + fromMatch[1]);
+        if (!t2) throw new Error('找不到資料表: ' + fromMatch[2]);
+
+        // Determine which col belongs to which table
+        let leftCol, rightCol;
+        if (onT1 === t1Name) { leftCol = onCol1; rightCol = onCol2; }
+        else { leftCol = onCol2; rightCol = onCol1; }
+
+        // Join
+        let joined = [];
+        t1.forEach(r1 => {
+            t2.forEach(r2 => {
+                if (r1[leftCol] == r2[rightCol]) {
+                    // Merge with table prefixes for ambiguous cols
+                    const merged = {};
+                    Object.keys(r1).forEach(k => { merged[t1Name + '.' + k] = r1[k]; merged[k] = r1[k]; });
+                    Object.keys(r2).forEach(k => { merged[t2Name + '.' + k] = r2[k]; if (!(k in r1)) merged[k] = r2[k]; });
+                    joined.push(merged);
+                }
+            });
+        });
+
+        // SELECT columns
+        const selPart = sql.match(/SELECT\s+(.+?)\s+FROM/i);
+        if (!selPart) throw new Error('缺少 SELECT');
+        const colStr = selPart[1].trim();
+        if (colStr === '*') {
+            const allCols = joined.length > 0 ? Object.keys(joined[0]).filter(k => !k.includes('.')) : [];
+            return { columns: allCols, rows: joined };
+        }
+
+        const reqCols = colStr.split(',').map(c => c.trim());
+        const outputCols = [];
+        const projected = joined.map(r => {
+            const obj = {};
+            reqCols.forEach(rc => {
+                const key = rc.toLowerCase();
+                // Try with dot prefix first, then plain name
+                const val = r[key] !== undefined ? r[key] : r[key.split('.').pop()];
+                const outName = key.includes('.') ? key.split('.').pop() : key;
+                obj[outName] = val;
+                if (!outputCols.includes(outName)) outputCols.push(outName);
+            });
+            return obj;
+        });
+
+        return { columns: outputCols, rows: projected };
+    }
+
+    function executeGroupBy(sql, tables) {
+        const fromMatch = sql.match(/FROM\s+(\w+)/i);
+        if (!fromMatch) throw new Error('缺少 FROM');
+        const tableName = fromMatch[1].toLowerCase();
+        const rows = tables[tableName];
+        if (!rows) throw new Error('找不到資料表: ' + fromMatch[1]);
+
+        const groupMatch = sql.match(/GROUP\s+BY\s+(\w+)/i);
+        if (!groupMatch) throw new Error('缺少 GROUP BY 欄位');
+        const groupCol = groupMatch[1].toLowerCase();
+
+        // Group
+        const groups = {};
+        rows.forEach(r => {
+            const key = String(r[groupCol]);
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(r);
+        });
+
+        // Parse SELECT to find aggregates
+        const selPart = sql.match(/SELECT\s+(.+?)\s+FROM/i);
+        if (!selPart) throw new Error('缺少 SELECT');
+        const selCols = selPart[1].split(',').map(c => c.trim());
+
+        const outputCols = [];
+        const result = [];
+
+        Object.keys(groups).forEach(key => {
+            const grp = groups[key];
+            const obj = {};
+            selCols.forEach(sc => {
+                const scUp = sc.toUpperCase();
+                if (scUp.match(/COUNT\s*\(\s*\*\s*\)/)) {
+                    obj['count'] = grp.length;
+                    if (!outputCols.includes('count')) outputCols.push('count');
+                } else if (scUp.match(/SUM\s*\(\s*(\w+)\s*\)/)) {
+                    const col = sc.match(/SUM\s*\(\s*(\w+)\s*\)/i)[1].toLowerCase();
+                    obj['sum'] = grp.reduce((s, r) => s + (Number(r[col]) || 0), 0);
+                    if (!outputCols.includes('sum')) outputCols.push('sum');
+                } else if (scUp.match(/AVG\s*\(\s*(\w+)\s*\)/)) {
+                    const col = sc.match(/AVG\s*\(\s*(\w+)\s*\)/i)[1].toLowerCase();
+                    obj['avg'] = grp.reduce((s, r) => s + (Number(r[col]) || 0), 0) / grp.length;
+                    if (!outputCols.includes('avg')) outputCols.push('avg');
+                } else {
+                    const col = sc.toLowerCase();
+                    obj[col] = grp[0][col];
+                    if (!outputCols.includes(col)) outputCols.push(col);
+                }
+            });
+            result.push(obj);
+        });
+
+        return { columns: outputCols, rows: result };
+    }
+
+    function executeSubquery(sql, tables) {
+        // Pattern: WHERE col OP (SELECT AGG(col) FROM table)
+        const match = sql.match(/WHERE\s+(\w+)\s*([><=!]+)\s*\(\s*SELECT\s+(AVG|SUM|MIN|MAX|COUNT)\s*\(\s*(\w+|\*)\s*\)\s+FROM\s+(\w+)\s*\)/i);
+        if (!match) throw new Error('子查詢格式不支援');
+
+        const whereCol = match[1].toLowerCase();
+        const operator = match[2];
+        const aggFunc = match[3].toUpperCase();
+        const aggCol = match[4].toLowerCase();
+        const subTable = match[5].toLowerCase();
+
+        const fromMatch = sql.match(/FROM\s+(\w+)\s+WHERE/i);
+        if (!fromMatch) throw new Error('缺少 FROM');
+        const mainTable = fromMatch[1].toLowerCase();
+
+        const mainRows = tables[mainTable];
+        const subRows = tables[subTable];
+        if (!mainRows) throw new Error('找不到資料表');
+        if (!subRows) throw new Error('找不到子查詢資料表');
+
+        // Calculate aggregate
+        let aggVal = 0;
+        if (aggFunc === 'AVG') {
+            aggVal = subRows.reduce((s, r) => s + (Number(r[aggCol]) || 0), 0) / subRows.length;
+        } else if (aggFunc === 'SUM') {
+            aggVal = subRows.reduce((s, r) => s + (Number(r[aggCol]) || 0), 0);
+        } else if (aggFunc === 'MIN') {
+            aggVal = Math.min(...subRows.map(r => Number(r[aggCol])));
+        } else if (aggFunc === 'MAX') {
+            aggVal = Math.max(...subRows.map(r => Number(r[aggCol])));
+        } else if (aggFunc === 'COUNT') {
+            aggVal = subRows.length;
+        }
+
+        // Filter main rows
+        let filtered = mainRows.filter(r => compare(r[whereCol], operator, aggVal));
+
+        // SELECT columns
+        const columns = parseSelectColumns(sql, filtered);
+        if (columns[0] === '*') {
+            const allCols = filtered.length > 0 ? Object.keys(filtered[0]) : [];
+            return { columns: allCols, rows: filtered };
+        }
+        const projected = filtered.map(r => {
+            const obj = {};
+            columns.forEach(c => { obj[c] = r[c]; });
+            return obj;
+        });
+        return { columns, rows: projected };
+    }
+
+    function parseSelectColumns(sql, sampleRows) {
+        const selMatch = sql.match(/SELECT\s+(.+?)\s+FROM/i);
+        if (!selMatch) throw new Error('缺少 SELECT');
+        const colStr = selMatch[1].trim();
+        if (colStr === '*') return ['*'];
+        return colStr.split(',').map(c => c.trim().toLowerCase());
+    }
+
+    function applyWhere(rows, condition) {
+        // Handle AND/OR (simple single condition for now, plus AND)
+        if (condition.toUpperCase().includes(' AND ')) {
+            const parts = condition.split(/\s+AND\s+/i);
+            let result = rows;
+            parts.forEach(p => { result = applySingleWhere(result, p.trim()); });
+            return result;
+        }
+        return applySingleWhere(rows, condition);
+    }
+
+    function applySingleWhere(rows, condition) {
+        // Pattern: col OP value
+        const match = condition.match(/^(\w+)\s*(>=|<=|!=|<>|=|>|<|LIKE)\s*(.+)$/i);
+        if (!match) throw new Error('無法解析 WHERE 條件: ' + condition);
+
+        const col = match[1].toLowerCase();
+        const op = match[2].toUpperCase();
+        let val = match[3].trim();
+
+        // Remove quotes
+        if ((val.startsWith("'") && val.endsWith("'")) || (val.startsWith('"') && val.endsWith('"'))) {
+            val = val.slice(1, -1);
+        } else {
+            const num = Number(val);
+            if (!isNaN(num)) val = num;
+        }
+
+        return rows.filter(r => {
+            const rv = r[col];
+            return compare(rv, op === '=' ? '=' : op, val);
+        });
+    }
+
+    function compare(a, op, b) {
+        if (typeof a === 'number' && typeof b !== 'number') b = Number(b);
+        if (typeof b === 'number' && typeof a !== 'number') a = Number(a);
+
+        switch(op) {
+            case '=': case '==': return a == b;
+            case '!=': case '<>': return a != b;
+            case '>': return a > b;
+            case '<': return a < b;
+            case '>=': return a >= b;
+            case '<=': return a <= b;
+            case 'LIKE': return String(a).includes(String(b).replace(/%/g, ''));
+            default: return false;
+        }
+    }
+
+    function arraysEqual(a, b) {
+        if (a.length !== b.length) return false;
+        for (let i = 0; i < a.length; i++) {
+            if (a[i] !== b[i]) return false;
+        }
+        return true;
+    }
+
+    // ========== UI Actions ==========
+
+    function showHint() {
+        const ch = challenges[currentIdx];
+        hintToast.innerHTML = '💡 ' + escapeHtml(ch.hint);
+        hintToast.className = 'hint-toast visible';
+        hintsUsed++;
+    }
+
+    function showAnswer() {
+        const ch = challenges[currentIdx];
+        sqlInput.value = ch.expectedQuery;
+        updateLineNumbers();
+        hintToast.innerHTML = '📖 已填入參考答案，按「執行查詢」看看結果';
+        hintToast.className = 'hint-toast visible';
+    }
+
+    function nextChallenge() {
+        if (currentIdx < challenges.length - 1) {
+            currentIdx++;
+            loadChallenge();
+        } else {
+            if (completedSet.size >= challenges.length) {
+                showCompletion();
+            }
+        }
+    }
+
+    function prevChallenge() {
+        if (currentIdx > 0) {
+            currentIdx--;
+            loadChallenge();
+        }
+    }
+
+    function backToLobby() {
+        gameArea.style.display = 'none';
+        lobby.style.display = 'block';
+        document.getElementById('completionOverlay').classList.remove('active');
+        renderLobby();
+    }
+
+    function resetAll() {
+        completedSet.clear();
+        firstTrySet.clear();
+        totalAttempts = 0;
+        hintsUsed = 0;
+        currentIdx = 0;
+        document.getElementById('completionOverlay').classList.remove('active');
+        gameArea.style.display = 'none';
+        lobby.style.display = 'block';
+        renderLobby();
+    }
+
+    function showCompletion() {
+        const total = challenges.length;
+        const accuracy = total > 0 ? Math.round((firstTrySet.size / total) * 100) : 0;
+        const starCount = accuracy >= 80 ? 3 : accuracy >= 50 ? 2 : 1;
+
+        document.getElementById('stars').textContent = '\u2B50'.repeat(starCount) + '\u2606'.repeat(3 - starCount);
+        document.getElementById('statCompleted').textContent = completedSet.size + ' / ' + total;
+        document.getElementById('statAccuracy').textContent = accuracy + '%';
+        document.getElementById('statAttempts').textContent = totalAttempts;
+        document.getElementById('statHints').textContent = hintsUsed;
+        document.getElementById('completionOverlay').classList.add('active');
+    }
+
+    function setFeedback(type, html) {
+        feedback.className = 'sql-feedback ' + type;
+        feedback.innerHTML = html;
+    }
+
+    function escapeHtml(text) {
+        const d = document.createElement('div');
+        d.textContent = text;
+        return d.innerHTML;
+    }
+
+    // Public API
+    return {
+        startChallenge,
+        executeQuery: executeQuery,
+        showHint,
+        showAnswer,
+        nextChallenge,
+        prevChallenge,
+        backToLobby,
+        resetAll
+    };
+})();
+</script>
