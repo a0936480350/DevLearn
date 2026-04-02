@@ -1,0 +1,804 @@
+@{
+    ViewData["Title"] = "AI 教你打程式";
+}
+
+<style>
+    /* === AI Code Tutor Dark Theme === */
+    .tutor-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', sans-serif;
+        color: #e0e0e0;
+    }
+
+    /* --- Lobby --- */
+    .tutor-lobby {
+        text-align: center;
+        padding: 30px 0;
+    }
+    .tutor-lobby h1 {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, #58a6ff, #a371f7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 8px;
+    }
+    .tutor-lobby .subtitle {
+        color: #999;
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+
+    /* Lesson Cards */
+    .lesson-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+    .lesson-card {
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: left;
+    }
+    .lesson-card:hover {
+        border-color: #58a6ff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(88, 166, 255, 0.15);
+    }
+    .lesson-card .lesson-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #e6edf3;
+        margin-bottom: 6px;
+    }
+    .lesson-card .lesson-desc {
+        color: #8b949e;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+    .badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .badge-beginner { background: #1b3a1b; color: #6fcf6f; border: 1px solid #2d5a2d; }
+    .badge-intermediate { background: #3a2e1b; color: #ffb74d; border: 1px solid #5a4a2d; }
+    .badge-advanced { background: #3a1b1b; color: #ef9a9a; border: 1px solid #5a2d2d; }
+
+    /* --- Game Area --- */
+    .tutor-game {
+        display: none;
+    }
+    .game-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .game-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #e6edf3;
+    }
+    .game-stats {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        font-size: 0.9rem;
+        color: #8b949e;
+    }
+    .game-stats span {
+        background: #161b22;
+        border: 1px solid #30363d;
+        padding: 4px 12px;
+        border-radius: 8px;
+    }
+    .back-btn {
+        background: #21262d;
+        border: 1px solid #30363d;
+        color: #8b949e;
+        padding: 6px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+    .back-btn:hover {
+        border-color: #58a6ff;
+        color: #58a6ff;
+    }
+
+    /* Progress Bar */
+    .progress-wrap {
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        height: 32px;
+        margin-bottom: 16px;
+        overflow: hidden;
+        position: relative;
+    }
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #238636, #2ea043);
+        border-radius: 8px;
+        transition: width 0.4s ease;
+        min-width: 0;
+    }
+    .progress-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #e6edf3;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    /* Panels */
+    .panels {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    .panel {
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    .panel-header {
+        background: #161b22;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 1px solid #30363d;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    .panel-header .dots {
+        display: flex;
+        gap: 6px;
+        margin-right: 8px;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .panel-body {
+        padding: 16px;
+        flex: 1;
+        font-family: 'JetBrains Mono', 'Consolas', monospace;
+        font-size: 0.88rem;
+        line-height: 1.7;
+        min-height: 300px;
+        overflow-y: auto;
+    }
+
+    /* AI code display */
+    .ai-line {
+        white-space: pre;
+        min-height: 1.7em;
+    }
+    .ai-line .comment-text {
+        color: #6a9955;
+    }
+    .ai-line .code-text {
+        color: #e6edf3;
+    }
+    .ai-cursor {
+        display: inline-block;
+        width: 8px;
+        height: 1.1em;
+        background: #58a6ff;
+        animation: blink-cursor 0.8s steps(1) infinite;
+        vertical-align: text-bottom;
+        margin-left: 1px;
+    }
+    @@keyframes blink-cursor {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0; }
+    }
+
+    /* Player side */
+    .player-done-lines {
+        white-space: pre;
+        color: #6e7681;
+    }
+    .player-current-wrap {
+        display: flex;
+        align-items: center;
+        margin-top: 4px;
+    }
+    .player-prompt {
+        color: #58a6ff;
+        margin-right: 4px;
+        user-select: none;
+    }
+    #playerInput {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #e6edf3;
+        font-family: 'JetBrains Mono', 'Consolas', monospace;
+        font-size: 0.88rem;
+        caret-color: #58a6ff;
+    }
+    #playerInput::placeholder {
+        color: #484f58;
+    }
+
+    /* Feedback */
+    .feedback {
+        text-align: center;
+        padding: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        min-height: 40px;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+    .feedback.correct {
+        background: rgba(35, 134, 54, 0.15);
+        color: #4ade80;
+        border: 1px solid #23863630;
+    }
+    .feedback.wrong {
+        background: rgba(248, 81, 73, 0.1);
+        color: #f85149;
+        border: 1px solid #f8514930;
+    }
+    .feedback.typing {
+        background: rgba(88, 166, 255, 0.08);
+        color: #58a6ff;
+        border: 1px solid #58a6ff30;
+    }
+    .feedback.idle {
+        background: transparent;
+        color: #8b949e;
+        border: 1px solid transparent;
+    }
+
+    /* Flash effects */
+    .flash-green {
+        animation: flashGreen 0.5s ease;
+    }
+    @@keyframes flashGreen {
+        0% { box-shadow: inset 0 0 30px rgba(74, 222, 128, 0.3); }
+        100% { box-shadow: none; }
+    }
+    .flash-red {
+        animation: flashRed 0.4s ease;
+    }
+    @@keyframes flashRed {
+        0% { box-shadow: inset 0 0 30px rgba(248, 81, 73, 0.3); }
+        100% { box-shadow: none; }
+    }
+
+    /* --- Completion Overlay --- */
+    .completion-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 999;
+        justify-content: center;
+        align-items: center;
+    }
+    .completion-overlay.active {
+        display: flex;
+    }
+    .completion-card {
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 16px;
+        padding: 40px;
+        text-align: center;
+        max-width: 440px;
+        width: 90%;
+        animation: popIn 0.4s ease;
+    }
+    @@keyframes popIn {
+        0% { transform: scale(0.8); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .completion-card h2 {
+        font-size: 2rem;
+        margin-bottom: 8px;
+        color: #e6edf3;
+    }
+    .completion-card .stars {
+        font-size: 2.5rem;
+        margin-bottom: 16px;
+    }
+    .stat-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 20px 0;
+    }
+    .stat-item {
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 10px;
+        padding: 14px;
+    }
+    .stat-item .stat-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #58a6ff;
+    }
+    .stat-item .stat-label {
+        font-size: 0.8rem;
+        color: #8b949e;
+        margin-top: 2px;
+    }
+    .completion-btns {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    .btn-primary {
+        padding: 12px 28px;
+        background: linear-gradient(135deg, #238636, #2ea043);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.15s;
+    }
+    .btn-primary:hover { transform: scale(1.04); }
+    .btn-secondary {
+        padding: 12px 28px;
+        background: #21262d;
+        color: #8b949e;
+        border: 1px solid #30363d;
+        border-radius: 10px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-secondary:hover { border-color: #58a6ff; color: #58a6ff; }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .panels {
+            grid-template-columns: 1fr;
+        }
+        .tutor-lobby h1 {
+            font-size: 1.8rem;
+        }
+        .lesson-grid {
+            grid-template-columns: 1fr;
+        }
+        .game-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .completion-card {
+            padding: 24px;
+        }
+    }
+</style>
+
+<div class="tutor-container">
+    <!-- ===== Lobby ===== -->
+    <div class="tutor-lobby" id="lobby">
+        <h1>🤖 AI 教你打程式</h1>
+        <p class="subtitle">AI 一行一行教你寫，跟著打就能學會！</p>
+
+        <div class="lesson-grid" id="lessonGrid">
+            <!-- filled by JS -->
+        </div>
+    </div>
+
+    <!-- ===== Game ===== -->
+    <div class="tutor-game" id="gameArea">
+        <div class="game-header">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <button class="back-btn" onclick="backToLobby()">← 返回</button>
+                <span class="game-title" id="gameTitle"></span>
+            </div>
+            <div class="game-stats">
+                <span>⏱️ <span id="timerDisplay">00:00</span></span>
+                <span>✅ <span id="correctCount">0</span> / <span id="totalLines">0</span></span>
+            </div>
+        </div>
+
+        <div class="progress-wrap">
+            <div class="progress-fill" id="progressFill" style="width:0%"></div>
+            <div class="progress-text" id="progressText">0 / 0</div>
+        </div>
+
+        <div class="panels">
+            <!-- AI Panel -->
+            <div class="panel" id="aiPanel">
+                <div class="panel-header">
+                    <div class="dots"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span></div>
+                    🤖 AI 教練
+                </div>
+                <div class="panel-body" id="aiBody">
+                </div>
+            </div>
+            <!-- Player Panel -->
+            <div class="panel" id="playerPanel">
+                <div class="panel-header">
+                    <div class="dots"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span></div>
+                    ✏️ 你的程式碼
+                </div>
+                <div class="panel-body">
+                    <div class="player-done-lines" id="playerDone"></div>
+                    <div class="player-current-wrap">
+                        <span class="player-prompt">▶</span>
+                        <input type="text" id="playerInput" placeholder="在這裡打程式碼..." autocomplete="off" spellcheck="false" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feedback idle" id="feedback">等待 AI 教練出題中...</div>
+    </div>
+</div>
+
+<!-- ===== Completion Overlay ===== -->
+<div class="completion-overlay" id="completionOverlay">
+    <div class="completion-card">
+        <h2>🎉 課程完成！</h2>
+        <div class="stars" id="stars"></div>
+        <div class="stat-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="statTime">--</div>
+                <div class="stat-label">花費時間</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statLines">--</div>
+                <div class="stat-label">程式碼行數</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statAccuracy">--</div>
+                <div class="stat-label">一次正確率</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statAttempts">--</div>
+                <div class="stat-label">總嘗試次數</div>
+            </div>
+        </div>
+        <div class="completion-btns">
+            <button class="btn-secondary" onclick="backToLobby()">選其他課程</button>
+            <button class="btn-primary" onclick="replayLesson()">再練一次</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // State
+    let lessons = [];
+    let currentLesson = null;
+    let currentLineIdx = 0;
+    let isTyping = false;       // AI is typing animation in progress
+    let inputLocked = true;     // player can't type yet
+    let startTime = 0;
+    let timerInterval = null;
+    let firstTryCorrect = 0;
+    let totalAttempts = 0;
+    let lineAttempts = 0;       // attempts on current line
+    let codeOnlyLines = [];     // lines that need player input (only code lines)
+    let allDisplayLines = [];   // all lines for AI display
+    let completedCodeLines = [];// player's completed code
+
+    // DOM
+    const lobby = document.getElementById('lobby');
+    const gameArea = document.getElementById('gameArea');
+    const lessonGrid = document.getElementById('lessonGrid');
+    const aiBody = document.getElementById('aiBody');
+    const playerDone = document.getElementById('playerDone');
+    const playerInput = document.getElementById('playerInput');
+    const feedback = document.getElementById('feedback');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const gameTitle = document.getElementById('gameTitle');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const correctCount = document.getElementById('correctCount');
+    const totalLinesEl = document.getElementById('totalLines');
+
+    // Load lessons
+    fetch('/CodeTutor/GetLessons')
+        .then(r => r.json())
+        .then(data => {
+            lessons = data;
+            renderLessonGrid();
+        });
+
+    function renderLessonGrid() {
+        lessonGrid.innerHTML = lessons.map(l => `
+            <div class="lesson-card" onclick="window._startLesson(${l.id})">
+                <div class="lesson-title">${l.title}</div>
+                <div class="lesson-desc">${l.description}</div>
+                <span class="badge badge-${l.difficulty}">${
+                    l.difficulty === 'beginner' ? '🟢 入門' :
+                    l.difficulty === 'intermediate' ? '🟡 中級' : '🔴 進階'
+                }</span>
+            </div>
+        `).join('');
+    }
+
+    window._startLesson = function(id) {
+        fetch('/CodeTutor/GetLesson?id=' + id)
+            .then(r => r.json())
+            .then(lesson => {
+                currentLesson = lesson;
+                beginGame();
+            });
+    };
+
+    function beginGame() {
+        // Reset state
+        currentLineIdx = 0;
+        firstTryCorrect = 0;
+        totalAttempts = 0;
+        lineAttempts = 0;
+        completedCodeLines = [];
+        isTyping = false;
+        inputLocked = true;
+
+        // Build line lists
+        allDisplayLines = currentLesson.lines;
+        codeOnlyLines = allDisplayLines.filter(l => l.code && l.code.trim() !== '');
+
+        // UI
+        lobby.style.display = 'none';
+        gameArea.style.display = 'block';
+        gameTitle.textContent = currentLesson.title;
+        totalLinesEl.textContent = codeOnlyLines.length;
+        correctCount.textContent = '0';
+        aiBody.innerHTML = '';
+        playerDone.textContent = '';
+        playerInput.value = '';
+        playerInput.disabled = true;
+        setFeedback('idle', '等待 AI 教練出題中...');
+        updateProgress();
+
+        // Start timer
+        startTime = Date.now();
+        clearInterval(timerInterval);
+        timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // Start first line
+        showNextAILine();
+    }
+
+    function showNextAILine() {
+        if (currentLineIdx >= allDisplayLines.length) {
+            finishGame();
+            return;
+        }
+
+        const line = allDisplayLines[currentLineIdx];
+        isTyping = true;
+        inputLocked = true;
+        playerInput.disabled = true;
+
+        // Create a new line element in AI panel
+        const lineEl = document.createElement('div');
+        lineEl.className = 'ai-line';
+        aiBody.appendChild(lineEl);
+
+        // Scroll AI panel to bottom
+        aiBody.scrollTop = aiBody.scrollHeight;
+
+        // If line has comment, type it first, then type code
+        if (line.comment) {
+            typeText(lineEl, line.comment, 'comment-text', 25, () => {
+                if (line.code && line.code.trim() !== '') {
+                    // New line for code
+                    const codeLineEl = document.createElement('div');
+                    codeLineEl.className = 'ai-line';
+                    aiBody.appendChild(codeLineEl);
+                    aiBody.scrollTop = aiBody.scrollHeight;
+                    typeText(codeLineEl, line.code, 'code-text', 30, () => {
+                        unlockInput(line.code);
+                    });
+                } else {
+                    // Comment-only line, auto-advance
+                    currentLineIdx++;
+                    setTimeout(() => showNextAILine(), 200);
+                }
+            });
+        } else if (line.code && line.code.trim() !== '') {
+            typeText(lineEl, line.code, 'code-text', 30, () => {
+                unlockInput(line.code);
+            });
+        } else {
+            // Empty line, skip
+            currentLineIdx++;
+            setTimeout(() => showNextAILine(), 100);
+        }
+    }
+
+    function typeText(el, text, className, speed, callback) {
+        let i = 0;
+        el.innerHTML = `<span class="${className}"></span><span class="ai-cursor"></span>`;
+        const textSpan = el.querySelector('.' + className);
+        const cursor = el.querySelector('.ai-cursor');
+
+        function tick() {
+            if (i < text.length) {
+                textSpan.textContent = text.substring(0, i + 1);
+                i++;
+                aiBody.scrollTop = aiBody.scrollHeight;
+                setTimeout(tick, speed);
+            } else {
+                // Remove cursor
+                if (cursor) cursor.remove();
+                if (callback) callback();
+            }
+        }
+        tick();
+    }
+
+    function unlockInput(expectedCode) {
+        isTyping = false;
+        inputLocked = false;
+        lineAttempts = 0;
+        playerInput.disabled = false;
+        playerInput.value = '';
+        playerInput.focus();
+        setFeedback('typing', '💡 現在輪到你了！照著打一模一樣的程式碼');
+    }
+
+    // Player input handling
+    playerInput.addEventListener('input', function() {
+        if (inputLocked) return;
+        const line = allDisplayLines[currentLineIdx];
+        const expected = line.code;
+        const val = playerInput.value;
+
+        // Real-time partial matching feedback
+        if (expected.startsWith(val) && val.length > 0) {
+            setFeedback('typing', '💡 繼續打...');
+        } else if (val.length > 0 && !expected.startsWith(val)) {
+            setFeedback('wrong', '⚠️ 有地方不太對，注意拼寫和空格');
+        }
+
+        // Exact match
+        if (val === expected) {
+            onCorrect(expected);
+        }
+    });
+
+    playerInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !inputLocked) {
+            const line = allDisplayLines[currentLineIdx];
+            const expected = line.code;
+            const val = playerInput.value;
+            totalAttempts++;
+            lineAttempts++;
+
+            if (val === expected) {
+                onCorrect(expected);
+            } else {
+                // Wrong
+                const panel = document.getElementById('playerPanel');
+                panel.classList.remove('flash-red');
+                void panel.offsetWidth;
+                panel.classList.add('flash-red');
+                setFeedback('wrong', '❌ 再試一次！正確答案是：<code>' + escapeHtml(expected) + '</code>');
+            }
+        }
+    });
+
+    function onCorrect(expected) {
+        inputLocked = true;
+        playerInput.disabled = true;
+        totalAttempts++;
+        if (lineAttempts === 0) firstTryCorrect++;
+
+        // Flash green
+        const panel = document.getElementById('playerPanel');
+        panel.classList.remove('flash-green');
+        void panel.offsetWidth;
+        panel.classList.add('flash-green');
+
+        // Add to completed lines
+        completedCodeLines.push(expected);
+        playerDone.textContent = completedCodeLines.join('\n');
+        playerInput.value = '';
+
+        // Update score
+        const doneCount = completedCodeLines.length;
+        correctCount.textContent = doneCount;
+        setFeedback('correct', '✅ 正確！太棒了！');
+
+        // Advance
+        currentLineIdx++;
+        updateProgress();
+
+        setTimeout(() => {
+            showNextAILine();
+        }, 500);
+    }
+
+    function updateProgress() {
+        const total = codeOnlyLines.length;
+        const done = completedCodeLines.length;
+        const pct = total > 0 ? (done / total) * 100 : 0;
+        progressFill.style.width = pct + '%';
+        progressText.textContent = done + ' / ' + total;
+    }
+
+    function updateTimer() {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+        const s = String(elapsed % 60).padStart(2, '0');
+        timerDisplay.textContent = m + ':' + s;
+    }
+
+    function finishGame() {
+        clearInterval(timerInterval);
+        inputLocked = true;
+        playerInput.disabled = true;
+
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+        const s = String(elapsed % 60).padStart(2, '0');
+        const total = codeOnlyLines.length;
+        const accuracy = total > 0 ? Math.round((firstTryCorrect / total) * 100) : 0;
+
+        // Stars
+        let starCount = accuracy >= 90 ? 3 : accuracy >= 70 ? 2 : 1;
+        document.getElementById('stars').textContent = '⭐'.repeat(starCount) + '☆'.repeat(3 - starCount);
+
+        document.getElementById('statTime').textContent = m + ':' + s;
+        document.getElementById('statLines').textContent = total;
+        document.getElementById('statAccuracy').textContent = accuracy + '%';
+        document.getElementById('statAttempts').textContent = totalAttempts;
+
+        setFeedback('correct', '🎉 全部完成！你太厲害了！');
+        document.getElementById('completionOverlay').classList.add('active');
+    }
+
+    window.backToLobby = function() {
+        clearInterval(timerInterval);
+        gameArea.style.display = 'none';
+        lobby.style.display = 'block';
+        document.getElementById('completionOverlay').classList.remove('active');
+    };
+
+    window.replayLesson = function() {
+        document.getElementById('completionOverlay').classList.remove('active');
+        beginGame();
+    };
+
+    function setFeedback(type, html) {
+        feedback.className = 'feedback ' + type;
+        feedback.innerHTML = html;
+    }
+
+    function escapeHtml(text) {
+        const d = document.createElement('div');
+        d.textContent = text;
+        return d.innerHTML;
+    }
+})();
+</script>

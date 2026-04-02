@@ -275,9 +275,24 @@ CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ChatReactions_Unique""
     var defaultAnns = new[]
     {
         new DotNetLearning.Models.Announcement {
+            Title = "🤖 全新「AI 教你打程式」遊戲上線！",
+            Content = "AI 教練一行一行帶你寫程式！左邊 AI 先打註解說明，再示範正確程式碼，右邊你跟著打。涵蓋 8 個課程：Hello World、變數、if/else、迴圈、陣列、方法、OOP、LINQ。從「遊戲」選單進入！",
+            Type = "success", IsPinned = true, CreatedAt = new DateTime(2026, 4, 3)
+        },
+        new DotNetLearning.Models.Announcement {
+            Title = "🏗️ 微服務架構教學上線（10 篇）",
+            Content = "全新微服務分類：從 DDD 設計、ASP.NET Core API、gRPC / RabbitMQ 通訊、API Gateway、Docker Compose、Polly 韌性、Saga 模式、OpenTelemetry 可觀測性到 Kubernetes 部署，完整 .NET 微服務學習路徑！",
+            Type = "info", IsPinned = false, CreatedAt = new DateTime(2026, 4, 3)
+        },
+        new DotNetLearning.Models.Announcement {
+            Title = "⚛️ Vue / React / Angular 前端框架教學上線（24 篇）",
+            Content = "三大前端框架完整教學：Vue 8 篇、React 8 篇、Angular 8 篇，從入門到全端整合。每篇都強調框架不是原生 JS，底層是 JavaScript，附大量程式碼範例與原生 JS 對比。",
+            Type = "info", IsPinned = false, CreatedAt = new DateTime(2026, 4, 2)
+        },
+        new DotNetLearning.Models.Announcement {
             Title = "🎉 全新對戰系統上線！",
-            Content = "支援真人 PvP 即時配對對戰，以及初等 / 中等 / 高等 AI 對手。挑選難度（初級 / 中級 / 高級），手打程式碼比拼速度與準確度，贏得戰績積分！",
-            Type = "success", IsPinned = true, CreatedAt = new DateTime(2026, 3, 31)
+            Content = "支援真人 PvP 即時配對對戰。挑選難度（初級 / 中級 / 高級），手打程式碼比拼速度與準確度，贏得戰績積分！",
+            Type = "success", IsPinned = false, CreatedAt = new DateTime(2026, 3, 31)
         },
         new DotNetLearning.Models.Announcement {
             Title = "🎤 語音辨識大幅強化",
