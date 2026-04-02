@@ -246,6 +246,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ChatReactions_Unique""
     }
     catch (Exception ex) { Console.WriteLine($"[DB] Chat reply/reaction migration note: {ex.Message}"); }
 
+    // Fix chapter categories for Vue/React/Angular (move from 'frontend' to dedicated categories)
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"UPDATE ""Chapters"" SET ""Category"" = 'vue' WHERE ""Slug"" LIKE 'vue-%' AND ""Category"" = 'frontend';");
+        db.Database.ExecuteSqlRaw(@"UPDATE ""Chapters"" SET ""Category"" = 'react' WHERE ""Slug"" LIKE 'react-%' AND ""Category"" = 'frontend';");
+        db.Database.ExecuteSqlRaw(@"UPDATE ""Chapters"" SET ""Category"" = 'angular' WHERE ""Slug"" LIKE 'angular-%' AND ""Category"" = 'frontend';");
+        Console.WriteLine("[DB] Framework chapter categories updated.");
+    }
+    catch (Exception ex) { Console.WriteLine($"[DB] Category migration note: {ex.Message}"); }
+
     // 確保 Admin 帳號存在
     if (!db.SiteUsers.Any(u => u.Email == "1234@hotmail.com"))
     {

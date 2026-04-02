@@ -7,7 +7,7 @@ public static class SeedChapters_Angular
     public static List<Chapter> GetChapters() => new()
     {
         // ── Chapter 800: Angular 入門 ────────────────────────────
-        new() { Id=900, Category="frontend", Order=90, Level="beginner", Icon="🅰️", Title="Angular 入門：Google 的企業級框架", Slug="angular-intro", IsPublished=true, Content=@"# 🅰️ Angular 入門：Google 的企業級框架
+        new() { Id=900, Category="angular", Order=90, Level="beginner", Icon="🅰️", Title="Angular 入門：Google 的企業級框架", Slug="angular-intro", IsPublished=true, Content=@"# 🅰️ Angular 入門：Google 的企業級框架
 
 ## 📌 Angular 是什麼？
 
@@ -135,7 +135,7 @@ my-app/
 " },
 
         // ── Chapter 801: Angular 基礎 ────────────────────────────
-        new() { Id=901, Category="frontend", Order=91, Level="beginner", Icon="🧱", Title="Angular 基礎：模板語法、資料綁定與元件", Slug="angular-basics", IsPublished=true, Content=@"# 🧱 Angular 基礎：模板語法、資料綁定與元件
+        new() { Id=901, Category="angular", Order=91, Level="beginner", Icon="🧱", Title="Angular 基礎：模板語法、資料綁定與元件", Slug="angular-basics", IsPublished=true, Content=@"# 🧱 Angular 基礎：模板語法、資料綁定與元件
 
 ## 📌 元件（Component）= TypeScript + HTML + CSS
 
@@ -388,7 +388,7 @@ export class TodoComponent {
 " },
 
         // ── Chapter 802: Angular 服務與依賴注入 ────────────────────────────
-        new() { Id=902, Category="frontend", Order=92, Level="intermediate", Icon="💉", Title="Angular 服務與依賴注入", Slug="angular-services", IsPublished=true, Content=@"# 💉 Angular 服務與依賴注入
+        new() { Id=902, Category="angular", Order=92, Level="intermediate", Icon="💉", Title="Angular 服務與依賴注入", Slug="angular-services", IsPublished=true, Content=@"# 💉 Angular 服務與依賴注入
 
 ## 📌 什麼是服務（Service）？
 
@@ -643,7 +643,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 " },
 
         // ── Chapter 803: Angular Router ────────────────────────────
-        new() { Id=903, Category="frontend", Order=93, Level="intermediate", Icon="🧭", Title="Angular Router：導航與路由管理", Slug="angular-routing", IsPublished=true, Content=@"# 🧭 Angular Router：導航與路由管理
+        new() { Id=903, Category="angular", Order=93, Level="intermediate", Icon="🧭", Title="Angular Router：導航與路由管理", Slug="angular-routing", IsPublished=true, Content=@"# 🧭 Angular Router：導航與路由管理
 
 ## 📌 路由模組設定
 
@@ -863,7 +863,7 @@ export class MyComponent {
 " },
 
         // ── Chapter 804: Angular 表單 ────────────────────────────
-        new() { Id=904, Category="frontend", Order=94, Level="intermediate", Icon="📝", Title="Angular 表單：Template-driven vs Reactive Forms", Slug="angular-forms", IsPublished=true, Content=@"# 📝 Angular 表單：Template-driven vs Reactive Forms
+        new() { Id=904, Category="angular", Order=94, Level="intermediate", Icon="📝", Title="Angular 表單：Template-driven vs Reactive Forms", Slug="angular-forms", IsPublished=true, Content=@"# 📝 Angular 表單：Template-driven vs Reactive Forms
 
 ## 📌 兩種表單策略
 
@@ -1102,7 +1102,7 @@ this.fb.group({
 " },
 
         // ── Chapter 805: Angular 進階 ────────────────────────────
-        new() { Id=905, Category="frontend", Order=95, Level="advanced", Icon="⚡", Title="Angular 進階：RxJS、效能優化與 Signals", Slug="angular-advanced", IsPublished=true, Content=@"# ⚡ Angular 進階：RxJS、效能優化與 Signals
+        new() { Id=905, Category="angular", Order=95, Level="advanced", Icon="⚡", Title="Angular 進階：RxJS、效能優化與 Signals", Slug="angular-advanced", IsPublished=true, Content=@"# ⚡ Angular 進階：RxJS、效能優化與 Signals
 
 ## 📌 RxJS 操作符
 
@@ -1352,7 +1352,7 @@ JavaScript 事件循環（Event Loop）
 " },
 
         // ── Chapter 806: Angular 測試與部署 ────────────────────────────
-        new() { Id=906, Category="frontend", Order=96, Level="advanced", Icon="🧪", Title="Angular 測試與部署", Slug="angular-testing", IsPublished=true, Content=@"# 🧪 Angular 測試與部署
+        new() { Id=906, Category="angular", Order=96, Level="advanced", Icon="🧪", Title="Angular 測試與部署", Slug="angular-testing", IsPublished=true, Content=@"# 🧪 Angular 測試與部署
 
 ## 📌 Jasmine + Karma 單元測試
 
@@ -1634,7 +1634,7 @@ server {
 " },
 
         // ── Chapter 807: Angular + ASP.NET Core 全端整合 ────────────────────────────
-        new() { Id=907, Category="frontend", Order=97, Level="advanced", Icon="🔗", Title="Angular + ASP.NET Core 全端整合", Slug="angular-fullstack", IsPublished=true, Content=@"# 🔗 Angular + ASP.NET Core 全端整合
+        new() { Id=907, Category="angular", Order=97, Level="advanced", Icon="🔗", Title="Angular + ASP.NET Core 全端整合", Slug="angular-fullstack", IsPublished=true, Content=@"# 🔗 Angular + ASP.NET Core 全端整合
 
 ## 📌 前後端分離架構
 

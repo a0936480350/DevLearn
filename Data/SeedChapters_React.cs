@@ -7,7 +7,7 @@ public static class SeedChapters_React
     public static List<Chapter> GetChapters() => new()
     {
         // ── Chapter 800: React 入門 ─────────────────────────────────
-        new() { Id=800, Category="frontend", Order=20, Level="beginner", Icon="⚛️", Title="React 入門：元件化思維與 JSX", Slug="react-intro", IsPublished=true, Content=@"
+        new() { Id=800, Category="react", Order=20, Level="beginner", Icon="⚛️", Title="React 入門：元件化思維與 JSX", Slug="react-intro", IsPublished=true, Content=@"
 # ⚛️ React 入門：元件化思維與 JSX
 
 ## 📌 React 是什麼？
@@ -201,7 +201,7 @@ my-react-app/
 " },
 
         // ── Chapter 801: React 基礎 ─────────────────────────────────
-        new() { Id=801, Category="frontend", Order=21, Level="beginner", Icon="⚛️", Title="React 基礎：useState、Props 與事件處理", Slug="react-basics", IsPublished=true, Content=@"
+        new() { Id=801, Category="react", Order=21, Level="beginner", Icon="⚛️", Title="React 基礎：useState、Props 與事件處理", Slug="react-basics", IsPublished=true, Content=@"
 # ⚛️ React 基礎：useState、Props 與事件處理
 
 ## 📌 函式元件（Function Components）
@@ -466,7 +466,7 @@ function App() {
 " },
 
         // ── Chapter 802: React Hooks 深入 ─────────────────────────────
-        new() { Id=802, Category="frontend", Order=22, Level="intermediate", Icon="🪝", Title="React Hooks 深入：useEffect、useRef、useContext", Slug="react-hooks", IsPublished=true, Content=@"
+        new() { Id=802, Category="react", Order=22, Level="intermediate", Icon="🪝", Title="React Hooks 深入：useEffect、useRef、useContext", Slug="react-hooks", IsPublished=true, Content=@"
 # 🪝 React Hooks 深入：useEffect、useRef、useContext
 
 ## 📌 useEffect — 副作用管理
@@ -748,7 +748,7 @@ useEffect(() => {
 " },
 
         // ── Chapter 803: React Router ─────────────────────────────────
-        new() { Id=803, Category="frontend", Order=23, Level="intermediate", Icon="🗺️", Title="React Router：客戶端路由管理", Slug="react-router", IsPublished=true, Content=@"
+        new() { Id=803, Category="react", Order=23, Level="intermediate", Icon="🗺️", Title="React Router：客戶端路由管理", Slug="react-router", IsPublished=true, Content=@"
 # 🗺️ React Router：客戶端路由管理
 
 ## 📌 SPA 路由概念
@@ -1005,7 +1005,7 @@ function App() {
 " },
 
         // ── Chapter 804: React 狀態管理 ─────────────────────────────────
-        new() { Id=804, Category="frontend", Order=24, Level="intermediate", Icon="🏪", Title="React 狀態管理：Redux Toolkit 與 Zustand", Slug="react-state", IsPublished=true, Content=@"
+        new() { Id=804, Category="react", Order=24, Level="intermediate", Icon="🏪", Title="React 狀態管理：Redux Toolkit 與 Zustand", Slug="react-state", IsPublished=true, Content=@"
 # 🏪 React 狀態管理：Redux Toolkit 與 Zustand
 
 ## 📌 為什麼需要全域狀態管理？
@@ -1269,7 +1269,7 @@ function Cart() {
 " },
 
         // ── Chapter 805: React 進階 ─────────────────────────────────
-        new() { Id=805, Category="frontend", Order=25, Level="advanced", Icon="🚀", Title="React 進階：效能優化與設計模式", Slug="react-advanced", IsPublished=true, Content=@"
+        new() { Id=805, Category="react", Order=25, Level="advanced", Icon="🚀", Title="React 進階：效能優化與設計模式", Slug="react-advanced", IsPublished=true, Content=@"
 # 🚀 React 進階：效能優化與設計模式
 
 ## 📌 React.memo — 避免不必要的重新渲染
@@ -1549,7 +1549,7 @@ function AddToCartButton({ productId }) {
 " },
 
         // ── Chapter 806: React 測試與部署 ─────────────────────────────
-        new() { Id=806, Category="frontend", Order=26, Level="advanced", Icon="🧪", Title="React 測試與部署", Slug="react-testing", IsPublished=true, Content=@"
+        new() { Id=806, Category="react", Order=26, Level="advanced", Icon="🧪", Title="React 測試與部署", Slug="react-testing", IsPublished=true, Content=@"
 # 🧪 React 測試與部署
 
 ## 📌 為什麼要測試？
@@ -1819,7 +1819,7 @@ netlify deploy --prod --dir=dist
 " },
 
         // ── Chapter 807: React + ASP.NET Core 全端整合 ─────────────────
-        new() { Id=807, Category="frontend", Order=27, Level="advanced", Icon="🔗", Title="React + ASP.NET Core 全端整合", Slug="react-fullstack", IsPublished=true, Content=@"
+        new() { Id=807, Category="react", Order=27, Level="advanced", Icon="🔗", Title="React + ASP.NET Core 全端整合", Slug="react-fullstack", IsPublished=true, Content=@"
 # 🔗 React + ASP.NET Core 全端整合
 
 ## 📌 前後端分離架構
