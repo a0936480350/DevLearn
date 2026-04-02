@@ -41,6 +41,7 @@ public static class SeedData
         chapters.AddRange(SeedChapters_React.GetChapters());
         chapters.AddRange(SeedChapters_Angular.GetChapters());
         chapters.AddRange(SeedChapters_Vue.GetChapters());
+        chapters.AddRange(SeedChapters_Microservices.GetChapters());
 
         // 只新增不存在的章節（不砍舊資料）— 用參數化 raw SQL 確保 Id 被寫入
         var newChapters = chapters.Where(c => !existingChapterIds.Contains(c.Id)).ToList();

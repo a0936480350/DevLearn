@@ -121,48 +121,69 @@ public class BattleHub : Hub
 
     public async Task SubmitCode(string roomId, string code, string userId)
     {
-        if (!_rooms.TryGetValue(roomId, out var room)) return;
-
-        var elapsed = (int)(DateTime.Now - room.StartedAt).TotalSeconds;
-        var accuracy = ValidateCode(code, room.Question);
-
-        bool isPlayer1 = room.Player1.UserId == userId;
-
-        if (isPlayer1 && !room.Player1Submitted)
+        try
         {
-            room.Player1Code = code;
-            room.Player1TimeSeconds = elapsed;
-            room.Player1Accuracy = accuracy;
-            room.Player1Submitted = true;
+            Console.WriteLine($"[BattleHub] SubmitCode called: room={roomId}, user={userId}");
+            if (!_rooms.TryGetValue(roomId, out var room))
+            {
+                Console.WriteLine($"[BattleHub] Room {roomId} not found!");
+                return;
+            }
+
+            var elapsed = (int)(DateTime.Now - room.StartedAt).TotalSeconds;
+            var accuracy = ValidateCode(code, room.Question);
+            Console.WriteLine($"[BattleHub] elapsed={elapsed}s, accuracy={accuracy}%, isAI={room.IsAIBattle}");
+
+            bool isPlayer1 = room.Player1.UserId == userId;
+
+            if (isPlayer1 && !room.Player1Submitted)
+            {
+                room.Player1Code = code;
+                room.Player1TimeSeconds = elapsed;
+                room.Player1Accuracy = accuracy;
+                room.Player1Submitted = true;
+            }
+            else if (!isPlayer1 && !room.Player2Submitted)
+            {
+                room.Player2Code = code;
+                room.Player2TimeSeconds = elapsed;
+                room.Player2Accuracy = accuracy;
+                room.Player2Submitted = true;
+            }
+
+            // Notify opponent of submission
+            await Clients.Group(roomId).SendAsync("PlayerSubmitted", new { userId, elapsed, accuracy });
+            Console.WriteLine($"[BattleHub] PlayerSubmitted sent. P1={room.Player1Submitted}, P2={room.Player2Submitted}");
+
+            // Check if both submitted or AI battle
+            bool bothDone = room.Player1Submitted && room.Player2Submitted;
+
+            if (room.IsAIBattle && room.Player1Submitted && !room.Player2Submitted)
+            {
+                int aiDelay = Math.Max(1000, Math.Min(room.AITimeSeconds * 100, 3000));
+                Console.WriteLine($"[BattleHub] AI battle: waiting {aiDelay}ms before finalize");
+                await Task.Delay(aiDelay);
+                room.Player2TimeSeconds = room.AITimeSeconds;
+                room.Player2Accuracy = room.AIAccuracy;
+                room.Player2Submitted = true;
+                Console.WriteLine($"[BattleHub] AI submitted, calling FinalizeBattle");
+                await FinalizeBattle(room);
+                Console.WriteLine($"[BattleHub] FinalizeBattle completed");
+            }
+            else if (bothDone)
+            {
+                Console.WriteLine($"[BattleHub] Both done, calling FinalizeBattle");
+                await FinalizeBattle(room);
+            }
+            else
+            {
+                Console.WriteLine($"[BattleHub] Waiting for other player");
+            }
         }
-        else if (!isPlayer1 && !room.Player2Submitted)
+        catch (Exception ex)
         {
-            room.Player2Code = code;
-            room.Player2TimeSeconds = elapsed;
-            room.Player2Accuracy = accuracy;
-            room.Player2Submitted = true;
-        }
-
-        // Notify opponent of submission
-        await Clients.Group(roomId).SendAsync("PlayerSubmitted", new { userId, elapsed, accuracy });
-
-        // Check if both submitted or AI battle
-        bool bothDone = room.Player1Submitted && room.Player2Submitted;
-
-        if (room.IsAIBattle && room.Player1Submitted && !room.Player2Submitted)
-        {
-            // AI submits after a short delay (1-3 seconds), capped to avoid timeout.
-            // We await inline to keep the SignalR Hub context alive for broadcasting.
-            int aiDelay = Math.Max(1000, Math.Min(room.AITimeSeconds * 100, 3000));
-            await Task.Delay(aiDelay);
-            room.Player2TimeSeconds = room.AITimeSeconds;
-            room.Player2Accuracy = room.AIAccuracy;
-            room.Player2Submitted = true;
-            await FinalizeBattle(room);
-        }
-        else if (bothDone)
-        {
-            await FinalizeBattle(room);
+            Console.WriteLine($"[BattleHub] SubmitCode ERROR: {ex.Message}");
+            Console.WriteLine($"[BattleHub] Stack: {ex.StackTrace}");
         }
     }
 
