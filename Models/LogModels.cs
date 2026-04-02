@@ -41,3 +41,14 @@ public class AIWorkLog
     public DateTime StartedAt { get; set; } = DateTime.Now;
     public DateTime? CompletedAt { get; set; }
 }
+
+public class ClaudeTask
+{
+    public int Id { get; set; }
+    public string Prompt { get; set; } = "";
+    public string Status { get; set; } = "pending"; // pending, running, done, failed
+    public string Result { get; set; } = "";
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? StartedAt { get; set; }
+    public DateTime? CompletedAt { get; set; }
+}

@@ -1,0 +1,86 @@
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Claude 任務佇列";
+    bool authed = ViewBag.Authed == true;
+}
+<style>
+.task-container { max-width: 600px; margin: 40px auto; padding: 20px; }
+.task-box { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+.task-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 16px; color: #667eea; }
+.task-input { width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #e6edf3; padding: 12px; font-size: 1rem; font-family: inherit; resize: vertical; min-height: 120px; outline: none; }
+.task-input:focus { border-color: #667eea; }
+.task-btn { width: 100%; padding: 14px; background: linear-gradient(135deg,#667eea,#764ba2); border: none; border-radius: 10px; color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 12px; }
+.task-btn:disabled { opacity: 0.5; }
+.login-input { width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #e6edf3; padding: 12px; font-size: 1rem; font-family: inherit; outline: none; margin-bottom: 12px; }
+.status-item { padding: 12px; border-bottom: 1px solid #21262d; font-size: 0.9rem; }
+.status-pending { color: #f59e0b; } .status-running { color: #3b82f6; } .status-done { color: #22c55e; } .status-failed { color: #ef4444; }
+.msg { padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 0.9rem; }
+.msg-ok { background: rgba(34,197,94,0.15); color: #22c55e; }
+.msg-err { background: rgba(239,68,68,0.15); color: #ef4444; }
+</style>
+
+<div class="task-container">
+@if (!authed)
+{
+    <div class="task-box">
+        <div class="task-title">🔐 Claude 任務系統</div>
+        <form method="post" action="/claude-task/login">
+            <input class="login-input" type="password" name="password" placeholder="輸入存取密碼" autofocus />
+            <button class="task-btn" type="submit">登入</button>
+        </form>
+    </div>
+}
+else
+{
+    <div class="task-box">
+        <div class="task-title">📱 下指令給 Claude Code</div>
+        <p style="color:#8b949e;font-size:0.88rem;margin-bottom:16px">輸入任務描述，Claude Code 會在電腦端自動執行並部署</p>
+        <textarea class="task-input" id="promptInput" placeholder="例如：在首頁加一個倒數計時器，顯示距離下週一還有多少時間"></textarea>
+        <button class="task-btn" id="submitBtn" onclick="submitTask()">🚀 送出任務</button>
+        <div id="msg"></div>
+    </div>
+    <div class="task-box">
+        <div class="task-title">📋 任務狀態</div>
+        <div id="statusList"><div style="color:#8b949e">載入中...</div></div>
+    </div>
+}
+</div>
+
+@if (authed)
+{
+<script>
+async function submitTask() {
+    var prompt = document.getElementById('promptInput').value.trim();
+    if (!prompt) return;
+    var btn = document.getElementById('submitBtn');
+    btn.disabled = true; btn.textContent = '送出中...';
+    try {
+        var r = await fetch('/claude-task/submit', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'prompt='+encodeURIComponent(prompt) });
+        var d = await r.json();
+        document.getElementById('msg').innerHTML = '<div class="msg msg-ok">✅ ' + d.message + ' (ID: ' + d.id + ')</div>';
+        document.getElementById('promptInput').value = '';
+        loadStatus();
+    } catch(e) {
+        document.getElementById('msg').innerHTML = '<div class="msg msg-err">❌ 送出失敗</div>';
+    }
+    btn.disabled = false; btn.textContent = '🚀 送出任務';
+}
+
+async function loadStatus() {
+    try {
+        var r = await fetch('/claude-task/status');
+        var tasks = await r.json();
+        if (!tasks.length) { document.getElementById('statusList').innerHTML = '<div style="color:#8b949e">目前沒有任務</div>'; return; }
+        var html = tasks.map(function(t) {
+            var time = new Date(t.createdAt).toLocaleString('zh-TW');
+            var statusClass = 'status-' + t.status;
+            var statusEmoji = t.status==='pending'?'⏳':t.status==='running'?'⚙️':t.status==='done'?'✅':'❌';
+            return '<div class="status-item"><div class="'+statusClass+'">'+statusEmoji+' '+t.status.toUpperCase()+' <small style="color:#8b949e">'+time+'</small></div><div style="margin-top:4px">'+t.prompt.substring(0,80)+(t.prompt.length>80?'...':'')+'</div>'+(t.result?'<div style="color:#8b949e;font-size:0.8rem;margin-top:4px">'+t.result.substring(0,100)+'</div>':'')+'</div>';
+        }).join('');
+        document.getElementById('statusList').innerHTML = html;
+    } catch(e) {}
+}
+loadStatus();
+setInterval(loadStatus, 10000);
+</script>
+}

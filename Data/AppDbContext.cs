@@ -62,4 +62,7 @@ public class AppDbContext : DbContext
 
     // 公告欄
     public DbSet<Announcement> Announcements => Set<Announcement>();
+
+    // Claude 任務佇列
+    public DbSet<ClaudeTask> ClaudeTasks => Set<ClaudeTask>();
 }
