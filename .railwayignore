@@ -1,4 +1,5 @@
 publish/
+publish-out/
 publish-azure/
 deploy.zip
 *.db
