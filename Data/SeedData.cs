@@ -42,14 +42,25 @@ public static class SeedData
         chapters.AddRange(SeedChapters_Angular.GetChapters());
         chapters.AddRange(SeedChapters_Vue.GetChapters());
 
-        // 只新增不存在的章節（不砍舊資料）
+        // 只新增不存在的章節（不砍舊資料）— 逐筆新增避免單筆衝突導致全部失敗
         var newChapters = chapters.Where(c => !existingChapterIds.Contains(c.Id)).ToList();
-        if (newChapters.Count > 0)
+        int addedCount = 0;
+        foreach (var ch in newChapters)
         {
-            db.Chapters.AddRange(newChapters);
-            db.SaveChanges();
-            Console.WriteLine($"[Seed] Added {newChapters.Count} new chapters (total: {db.Chapters.Count()})");
+            try
+            {
+                db.Chapters.Add(ch);
+                db.SaveChanges();
+                addedCount++;
+            }
+            catch (Exception ex)
+            {
+                db.Entry(ch).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+                Console.WriteLine($"[Seed] Skip chapter {ch.Id} ({ch.Slug}): {ex.InnerException?.Message ?? ex.Message}");
+            }
         }
+        if (addedCount > 0)
+            Console.WriteLine($"[Seed] Added {addedCount} new chapters (total: {db.Chapters.Count()})");
 
         // 只新增不存在的測驗題
         var allChapterIds = db.Chapters.Select(c => c.Id).ToHashSet();
