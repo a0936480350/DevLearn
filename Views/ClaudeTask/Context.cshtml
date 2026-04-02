@@ -1,0 +1,57 @@
+@{
+    Layout = null;
+    string content = ViewBag.Content ?? "";
+}
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Claude Context - DevLearn</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0d1117; color: #e6edf3; font-family: 'Segoe UI', sans-serif; padding: 16px; }
+h1 { font-size: 1.1rem; color: #667eea; margin-bottom: 12px; }
+.copy-btn {
+    width: 100%; padding: 14px; background: linear-gradient(135deg,#667eea,#764ba2);
+    border: none; border-radius: 10px; color: #fff; font-size: 1rem; font-weight: 700;
+    cursor: pointer; font-family: inherit; margin-bottom: 12px; letter-spacing: 0.5px;
+}
+.copy-btn.ok { background: linear-gradient(135deg,#22c55e,#16a34a); }
+pre {
+    background: #161b22; border: 1px solid #30363d; border-radius: 10px;
+    padding: 16px; white-space: pre-wrap; word-break: break-word;
+    font-family: 'Courier New', monospace; font-size: 0.78rem; line-height: 1.6;
+    max-height: 60vh; overflow-y: auto; color: #c9d1d9;
+}
+.hint { color: #8b949e; font-size: 0.8rem; margin-bottom: 12px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<h1>📋 Claude Context — DevLearn</h1>
+<p class="hint">複製後貼到 Claude app，Claude 就能了解整個專案狀況。</p>
+<button class="copy-btn" id="copyBtn" onclick="copyAll()">📋 複製全部內容</button>
+<pre id="contextText">@content</pre>
+<script>
+function copyAll() {
+    var text = document.getElementById('contextText').innerText;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function() {
+            var btn = document.getElementById('copyBtn');
+            btn.textContent = '✅ 已複製！貼到 Claude app 即可';
+            btn.classList.add('ok');
+            setTimeout(function(){ btn.textContent = '📋 複製全部內容'; btn.classList.remove('ok'); }, 3000);
+        });
+    } else {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        document.getElementById('copyBtn').textContent = '✅ 已複製！';
+    }
+}
+</script>
+</body>
+</html>

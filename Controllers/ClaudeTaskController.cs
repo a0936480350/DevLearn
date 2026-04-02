@@ -24,6 +24,18 @@ public class ClaudeTaskController : Controller
         return View();
     }
 
+    // GET /claude-context → 手機讀取專案上下文（純文字，方便貼到 Claude app）
+    [HttpGet("/claude-context")]
+    public IActionResult Context()
+    {
+        var mdPath = Path.Combine(Directory.GetCurrentDirectory(), "CLAUDE_CONTEXT.md");
+        var content = System.IO.File.Exists(mdPath)
+            ? System.IO.File.ReadAllText(mdPath)
+            : "# 找不到 CLAUDE_CONTEXT.md";
+        ViewBag.Content = content;
+        return View();
+    }
+
     // POST /claude-task/login
     [HttpPost("/claude-task/login")]
     public IActionResult Login(string password)

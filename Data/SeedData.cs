@@ -38,6 +38,9 @@ public static class SeedData
         chapters.AddRange(SeedChapters_IoT3.GetChapters());
         chapters.AddRange(SeedChapters_DevLearn.GetChapters());
         chapters.AddRange(SeedChapters_Whiteboard.GetChapters());
+        chapters.AddRange(SeedChapters_React.GetChapters());
+        chapters.AddRange(SeedChapters_Angular.GetChapters());
+        chapters.AddRange(SeedChapters_Vue.GetChapters());
 
         // 只新增不存在的章節（不砍舊資料）
         var newChapters = chapters.Where(c => !existingChapterIds.Contains(c.Id)).ToList();

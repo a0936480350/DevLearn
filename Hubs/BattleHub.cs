@@ -149,25 +149,16 @@ public class BattleHub : Hub
         // Check if both submitted or AI battle
         bool bothDone = room.Player1Submitted && room.Player2Submitted;
 
-        if (room.IsAIBattle && room.Player1Submitted)
+        if (room.IsAIBattle && room.Player1Submitted && !room.Player2Submitted)
         {
-            // AI submits at its pre-determined time (or immediately if AI time already passed)
-            int aiDelay = Math.Max(0, room.AITimeSeconds - elapsed) * 1000;
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await Task.Delay(aiDelay);
-                    room.Player2TimeSeconds = room.AITimeSeconds;
-                    room.Player2Accuracy = room.AIAccuracy;
-                    room.Player2Submitted = true;
-                    await FinalizeBattle(room);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[BattleHub] AI finalize error: {ex.Message}");
-                }
-            });
+            // AI submits after a short delay (1-3 seconds), capped to avoid timeout.
+            // We await inline to keep the SignalR Hub context alive for broadcasting.
+            int aiDelay = Math.Max(1000, Math.Min(room.AITimeSeconds * 100, 3000));
+            await Task.Delay(aiDelay);
+            room.Player2TimeSeconds = room.AITimeSeconds;
+            room.Player2Accuracy = room.AIAccuracy;
+            room.Player2Submitted = true;
+            await FinalizeBattle(room);
         }
         else if (bothDone)
         {

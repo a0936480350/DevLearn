@@ -59,12 +59,65 @@
 .modal-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
 .modal-sub { color: #8b949e; margin-bottom: 24px; }
 .btn-cancel { padding: 10px 24px; border-radius: 10px; border: 1px solid #30363d; background: transparent; color: #8b949e; cursor: pointer; font-family: inherit; }
+.rules-panel { background: #161b22; border: 1px solid #30363d; border-radius: 16px; margin-bottom: 30px; overflow: hidden; }
+.rules-toggle { width: 100%; padding: 18px 24px; background: transparent; border: none; color: #e6edf3; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-family: inherit; transition: background 0.2s; }
+.rules-toggle:hover { background: rgba(102,126,234,0.08); }
+.rules-arrow { font-size: 0.9rem; transition: transform 0.3s; color: #8b949e; }
+.rules-panel.open .rules-arrow { transform: rotate(180deg); }
+.rules-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+.rules-panel.open .rules-body { max-height: 800px; }
+.rules-content { padding: 0 24px 24px; color: #c9d1d9; font-size: 0.92rem; line-height: 1.8; }
+.rules-content h4 { color: #e6edf3; font-size: 1rem; font-weight: 700; margin: 16px 0 6px; }
+.rules-content h4:first-child { margin-top: 0; }
+.rules-content ul { list-style: none; padding: 0; margin: 0 0 4px; }
+.rules-content ul li { padding: 2px 0 2px 18px; position: relative; color: #8b949e; }
+.rules-content ul li::before { content: '-'; position: absolute; left: 4px; color: #484f58; }
 @@media (max-width: 600px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .difficulty-grid { grid-template-columns: 1fr; } }
 </style>
 
 <div class="battle-lobby">
     <div class="lobby-title">⚔️ 對戰大廳</div>
     <div class="lobby-sub">選擇難度，與真人或 AI 對戰程式碼速度與準確度</div>
+
+    <div class="rules-panel" id="rulesPanel">
+        <button class="rules-toggle" onclick="document.getElementById('rulesPanel').classList.toggle('open')">
+            <span>🎮 對戰規則說明</span>
+            <span class="rules-arrow">▼</span>
+        </button>
+        <div class="rules-body">
+            <div class="rules-content">
+                <h4>⏱️ 限時挑戰</h4>
+                <ul>
+                    <li>每場對戰有時間限制，需在時間內完成作答</li>
+                    <li>回答速度會影響最終得分</li>
+                </ul>
+                <h4>🎯 計分方式</h4>
+                <ul>
+                    <li>正確率：答對題數 / 總題數</li>
+                    <li>速度加分：越快完成分數越高</li>
+                    <li>綜合評分決定勝負</li>
+                </ul>
+                <h4>🤖 AI 對手</h4>
+                <ul>
+                    <li>初級 AI：適合新手練習，正確率約 60%</li>
+                    <li>中級 AI：有一定挑戰，正確率約 75%</li>
+                    <li>高級 AI：高手對決，正確率約 90%</li>
+                </ul>
+                <h4>⚔️ 真人對戰</h4>
+                <ul>
+                    <li>系統自動配對線上玩家</li>
+                    <li>雙方同時作答，先完成且正確率高者獲勝</li>
+                    <li>勝場會記錄在排行榜</li>
+                </ul>
+                <h4>💡 小提示</h4>
+                <ul>
+                    <li>先讀懂題目再作答，速度很重要但正確更重要</li>
+                    <li>多練習不同難度可以提升實力</li>
+                    <li>查看排行榜了解自己的進步</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
     <div class="difficulty-grid">
         @foreach (var d in new[] { ("beginner","初級","🟢","適合 C# 基礎語法練習，120 秒限時"), ("intermediate","中級","🟡","資料結構與演算法，90 秒限時"), ("advanced","高級","🔴","進階設計模式與系統設計，60 秒限時") })
