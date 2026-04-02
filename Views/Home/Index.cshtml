@@ -55,7 +55,7 @@
                         </div>
                         <div style="color:#c9d1d9;font-size:0.875rem;margin-top:4px;line-height:1.5;">@ann.Content</div>
                     </div>
-                    <button onclick="dismissAnn(this,@ann.Id)" style="flex-shrink:0;background:none;border:none;color:#8b949e;cursor:pointer;font-size:1rem;padding:4px;line-height:1;" title="關閉">✕</button>
+                    <button onclick="dismissAnn(this,@ann.Id)" style="flex-shrink:0;background:none;border:none;color:#8b949e;cursor:pointer;font-size:1rem;padding:4px;line-height:1;" title="本次關閉（不影響公告內容）">✕</button>
                 </div>
             }
         </div>
@@ -63,25 +63,25 @@
     <script>
     function dismissAnn(btn, id) {
         btn.closest('.ann-item').style.display = 'none';
-        var dismissed = JSON.parse(localStorage.getItem('dismissedAnns') || '[]');
+        var dismissed = JSON.parse(sessionStorage.getItem('dismissedAnns') || '[]');
         dismissed.push(id);
-        localStorage.setItem('dismissedAnns', JSON.stringify(dismissed));
+        sessionStorage.setItem('dismissedAnns', JSON.stringify(dismissed));
         // Hide entire bar if all dismissed
         var bar = document.getElementById('announcementBar');
         if (!bar.querySelector('.ann-item[style*="display"]:not([style*="none"])') && !bar.querySelector('.ann-item:not([style*="display: none"])')) {
             bar.style.display = 'none';
         }
     }
-    // Hide already-dismissed on load
+    // Hide already-dismissed on load (session only — refresh brings them back)
     (function(){
-        var dismissed = JSON.parse(localStorage.getItem('dismissedAnns') || '[]');
+        var dismissed = JSON.parse(sessionStorage.getItem('dismissedAnns') || '[]');
         var allHidden = true;
         document.querySelectorAll('.ann-item').forEach(function(el) {
             if (dismissed.includes(parseInt(el.dataset.annId))) {
                 el.style.display = 'none';
             } else { allHidden = false; }
         });
-        if (allHidden) document.getElementById('announcementBar').style.display = 'none';
+        if (allHidden && document.getElementById('announcementBar')) document.getElementById('announcementBar').style.display = 'none';
     })();
     </script>
     }
