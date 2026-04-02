@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using DotNetLearning.Data;
 using DotNetLearning.Models;
 using Markdig;
@@ -9,21 +10,39 @@ namespace DotNetLearning.Controllers;
 public class HomeController : Controller
 {
     private readonly AppDbContext _db;
+    private readonly IMemoryCache _cache;
     private static readonly MarkdownPipeline _pipeline = new MarkdownPipelineBuilder()
         .UseAdvancedExtensions()
         .Build();
 
-    public HomeController(AppDbContext db) => _db = db;
+    public HomeController(AppDbContext db, IMemoryCache cache)
+    {
+        _db = db;
+        _cache = cache;
+    }
 
     public async Task<IActionResult> Index()
     {
-        var chapters = await _db.Chapters
-            .Where(c => c.IsPublished)
-            .OrderBy(c => c.Order)
-            .ToListAsync();
+        // Cache the chapter list for the index page (only needed columns, no Content)
+        var chapters = await _cache.GetOrCreateAsync("chapters:nav", async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
+            return await _db.Chapters
+                .AsNoTracking()
+                .Where(c => c.IsPublished)
+                .OrderBy(c => c.Order)
+                .Select(c => new Chapter
+                {
+                    Id = c.Id, Title = c.Title, Slug = c.Slug,
+                    Category = c.Category, Order = c.Order,
+                    Icon = c.Icon, Level = c.Level, IsPublished = c.IsPublished
+                })
+                .ToListAsync();
+        });
 
         var now = DateTime.Now;
         ViewBag.Announcements = await _db.Announcements
+            .AsNoTracking()
             .Where(a => a.IsVisible && (a.ExpiresAt == null || a.ExpiresAt > now))
             .OrderByDescending(a => a.IsPinned)
             .ThenByDescending(a => a.CreatedAt)
@@ -36,7 +55,9 @@ public class HomeController : Controller
     [Route("Home/Chapter/{slug}")]
     public async Task<IActionResult> Chapter(string slug)
     {
+        // Load chapter with questions (only this chapter, not all)
         var chapter = await _db.Chapters
+            .AsNoTracking()
             .Include(c => c.Questions)
             .FirstOrDefaultAsync(c => c.Slug == slug && c.IsPublished);
 
@@ -50,29 +71,50 @@ public class HomeController : Controller
             HttpContext.Session.SetString("SessionId", sessionId);
         }
 
-        var allChapters = await _db.Chapters
-            .Where(c => c.IsPublished)
-            .OrderBy(c => c.Order)
-            .ToListAsync();
+        // Cache sidebar chapter list (slim projection, no Content column)
+        var allChapters = await _cache.GetOrCreateAsync("chapters:nav", async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
+            return await _db.Chapters
+                .AsNoTracking()
+                .Where(c => c.IsPublished)
+                .OrderBy(c => c.Order)
+                .Select(c => new Chapter
+                {
+                    Id = c.Id, Title = c.Title, Slug = c.Slug,
+                    Category = c.Category, Order = c.Order,
+                    Icon = c.Icon, Level = c.Level, IsPublished = c.IsPublished
+                })
+                .ToListAsync();
+        });
 
         var completedIds = await _db.Progresses
+            .AsNoTracking()
             .Where(p => p.SessionId == sessionId && p.IsCompleted)
             .Select(p => p.ChapterId)
             .ToListAsync();
 
         // Total progress for navbar badge
-        var totalCount = allChapters.Count;
+        var totalCount = allChapters!.Count;
         var doneCount = completedIds.Count;
 
         // 最佳成績
         var bestAttempt = await _db.QuizAttempts
+            .AsNoTracking()
             .Where(a => a.SessionId == sessionId && a.ChapterId == chapter.Id && a.Total > 0)
             .OrderByDescending(a => a.Score * 100 / a.Total)
             .FirstOrDefaultAsync();
 
+        // Cache rendered Markdown HTML per chapter (expensive for large content)
+        var contentHtml = _cache.GetOrCreate($"chapter:html:{chapter.Id}", entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+            return Markdown.ToHtml(chapter.Content, _pipeline);
+        });
+
         ViewBag.AllChapters = allChapters;
         ViewBag.CompletedChapters = completedIds;
-        ViewBag.ContentHtml = Markdown.ToHtml(chapter.Content, _pipeline);
+        ViewBag.ContentHtml = contentHtml;
         ViewBag.HasQuiz = chapter.Questions.Any();
         ViewBag.QuestionCount = chapter.Questions.Count;
         ViewBag.SessionId = sessionId;
@@ -133,6 +175,7 @@ public class HomeController : Controller
 
         var lower = q.ToLower();
         var results = await _db.Chapters
+            .AsNoTracking()
             .Where(c => c.IsPublished &&
                         (c.Title.ToLower().Contains(lower) || c.Content.ToLower().Contains(lower)))
             .OrderBy(c => c.Order)

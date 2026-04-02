@@ -5,6 +5,7 @@ using DotNetLearning.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddMemoryCache();
 
 // 資料庫：有 DATABASE_URL 用 PostgreSQL（Railway），沒有用 SQLite（本機開發）
 var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
@@ -220,6 +221,31 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex) { Console.WriteLine($"[DB] Table creation note: {ex.Message}"); }
 
+    // Chat reply & reaction columns/tables
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"ALTER TABLE ""ChatMessages"" ADD COLUMN IF NOT EXISTS ""ReplyToId"" INTEGER;");
+        db.Database.ExecuteSqlRaw(@"ALTER TABLE ""ChatMessages"" ADD COLUMN IF NOT EXISTS ""ReplyToNickname"" TEXT;");
+        db.Database.ExecuteSqlRaw(@"ALTER TABLE ""ChatMessages"" ADD COLUMN IF NOT EXISTS ""ReplyToPreview"" TEXT;");
+
+        db.Database.ExecuteSqlRaw(@"
+CREATE TABLE IF NOT EXISTS ""ChatReactions"" (
+    ""Id"" SERIAL PRIMARY KEY,
+    ""ChatMessageId"" INTEGER NOT NULL DEFAULT 0,
+    ""SessionId"" TEXT DEFAULT '',
+    ""Nickname"" TEXT DEFAULT '',
+    ""Emoji"" TEXT DEFAULT '',
+    ""ReactedAt"" TIMESTAMP DEFAULT NOW()
+);");
+
+        db.Database.ExecuteSqlRaw(@"
+CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ChatReactions_Unique""
+    ON ""ChatReactions"" (""ChatMessageId"", ""SessionId"", ""Emoji"");");
+
+        Console.WriteLine("[DB] Chat reply & reaction migration done.");
+    }
+    catch (Exception ex) { Console.WriteLine($"[DB] Chat reply/reaction migration note: {ex.Message}"); }
+
     // 確保 Admin 帳號存在
     if (!db.SiteUsers.Any(u => u.Email == "1234@hotmail.com"))
     {
@@ -362,6 +388,9 @@ app.UseRouting();
 app.UseSession();
 
 // 匿名 ID 系統：Cookie 持久化（365天）+ 自動建立資料庫記錄
+// Throttle LastActiveAt writes: only update DB at most once every 5 minutes per user
+var _lastActiveSeen = new System.Collections.Concurrent.ConcurrentDictionary<string, DateTime>();
+
 app.Use(async (context, next) =>
 {
     var cookieName = "DotNetLearner";
@@ -398,8 +427,14 @@ app.Use(async (context, next) =>
     }
     else
     {
-        user.LastActiveAt = DateTime.Now;
-        await db.SaveChangesAsync();
+        // Throttle LastActiveAt DB write to once per 5 minutes per user
+        var now = DateTime.Now;
+        if (!_lastActiveSeen.TryGetValue(anonymousId, out var lastSeen) || (now - lastSeen).TotalMinutes >= 5)
+        {
+            user.LastActiveAt = now;
+            await db.SaveChangesAsync();
+            _lastActiveSeen[anonymousId] = now;
+        }
     }
 
     // Store user info in HttpContext.Items for easy access
