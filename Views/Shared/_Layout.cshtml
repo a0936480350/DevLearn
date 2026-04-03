@@ -54,6 +54,7 @@
                     <a href="/QnA" data-i18n="nav-qna">❓ 問答區</a>
                     <a href="/Buddy" data-i18n="nav-buddy">👥 學習夥伴</a>
                     <a href="/Leaderboard" data-i18n="nav-leaderboard">🏆 排行榜</a>
+                    <a href="#line-group" target="_blank">💬 LINE 社群</a>
                 </div>
             </div>
             <a href="/Teacher" class="nav-scores-link" data-i18n="nav-teacher">&#x1F468;&#x200D;&#x1F3EB; &#x627E;&#x8001;&#x5E2B;</a>
@@ -1197,12 +1198,22 @@
     <div style="font-size:10px;color:#4b5563;margin-top:4px;">說「說明」查看指令</div>
 </div>
 
+<a href="#line-group" target="_blank" id="lineGroupBtn" style="
+    position:fixed;bottom:20px;left:310px;z-index:9998;
+    background:linear-gradient(135deg,#06C755,#04B44C);color:#fff;
+    border:none;border-radius:25px;padding:10px 18px;cursor:pointer;
+    font-size:14px;font-weight:600;box-shadow:0 4px 15px rgba(6,199,85,0.4);
+    display:flex;align-items:center;gap:6px;text-decoration:none;transition:all 0.3s;">
+    💬 LINE 社群
+</a>
+
 <style>
 @@media (max-width: 600px) {
     #gestureToggleBtn { bottom: 80px !important; left: 10px !important; font-size: 12px !important; padding: 8px 14px !important; }
     #gesturePanel { bottom: 130px !important; left: 10px !important; width: 240px !important; }
     #voiceToggleBtn { bottom: 80px !important; left: 130px !important; font-size: 12px !important; padding: 8px 14px !important; }
     #voiceStatus { bottom: 130px !important; left: 10px !important; }
+    #lineGroupBtn { bottom: 80px !important; left: 250px !important; font-size: 12px !important; padding: 8px 14px !important; }
 }
 </style>
 
@@ -2198,6 +2209,97 @@ function processVoiceCommand(rawText) {
 
     voiceMsg('🤔 沒聽懂，試試說「說明」看指令', '#F9A825');
 }
+</script>
+
+<!-- ══════════ Onboarding Tour ══════════ -->
+<style>
+#onboardingOverlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:10000;pointer-events:auto}
+#onboardingOverlay.active{display:block}
+#tourSpotlight{position:absolute;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.75);transition:all .4s cubic-bezier(.4,0,.2,1);z-index:10001;pointer-events:none}
+#tourTooltip{position:absolute;z-index:10002;background:linear-gradient(135deg,#161b22,#1c2333);border:1px solid rgba(99,102,241,0.4);border-radius:14px;padding:20px 24px;max-width:340px;min-width:260px;box-shadow:0 8px 40px rgba(0,0,0,.5);font-family:'Noto Sans TC',sans-serif;transition:all .4s cubic-bezier(.4,0,.2,1);opacity:0;transform:translateY(10px)}
+#tourTooltip.show{opacity:1;transform:translateY(0)}
+#tourTooltip .tour-step{font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:600}
+#tourTooltip .tour-text{font-size:15px;color:#e6edf3;line-height:1.7;margin-bottom:16px}
+#tourTooltip .tour-btns{display:flex;align-items:center;gap:10px}
+#tourTooltip .tour-next{background:linear-gradient(135deg,#6366f1,#00b894);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:transform .2s}
+#tourTooltip .tour-next:hover{transform:scale(1.05)}
+#tourTooltip .tour-skip{background:none;border:none;color:#8b949e;font-size:13px;cursor:pointer;font-family:'Noto Sans TC',sans-serif}
+#tourTooltip .tour-skip:hover{color:#c9d1d9}
+.tour-dots{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:10003;display:flex;gap:8px}
+.tour-dots span{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.25);transition:all .3s}
+.tour-dots span.active{background:#6366f1;transform:scale(1.3)}
+</style>
+<div id="onboardingOverlay">
+    <div id="tourSpotlight"></div>
+    <div id="tourTooltip">
+        <div class="tour-step"></div>
+        <div class="tour-text"></div>
+        <div class="tour-btns">
+            <button class="tour-next" onclick="tourNext()">下一步 &rarr;</button>
+            <button class="tour-skip" onclick="tourEnd()">跳過</button>
+        </div>
+    </div>
+    <div class="tour-dots" id="tourDots"></div>
+</div>
+<script>
+(function(){
+    if(localStorage.getItem('onboardingDone')) return;
+    var steps=[
+        {el:null, text:"\uD83D\uDC4B \u6B61\u8FCE\u4F86\u5230 DevLearn\uFF01\u8B93\u6211\u5E36\u4F60\u5FEB\u901F\u8A8D\u8B58\u9019\u500B\u5E73\u53F0", pos:"center"},
+        {el:"#globalSearch", text:"\uD83D\uDD0D \u641C\u5C0B\u529F\u80FD\uFF1A\u8F38\u5165\u95DC\u9375\u5B57\u5FEB\u901F\u627E\u5230\u4EFB\u4F55\u7AE0\u7BC0", pos:"below"},
+        {el:".nav-dropdown-btn[data-i18n='nav-games']", text:"\uD83C\uDFAE \u904A\u6232\u5340\uFF1A8 \u7A2E\u4E92\u52D5\u904A\u6232\uFF0C\u908A\u73A9\u908A\u5B78", pos:"below"},
+        {el:"#chatToggleBtn", text:"\uD83D\uDCAC \u804A\u5929\u5BA4\uFF1A\u5373\u6642\u4EA4\u6D41\u3001\u79C1\u8A0A\u3001\u5BA2\u670D", pos:"above-left"},
+        {el:"#totalProgress", text:"\uD83D\uDCCA \u4F60\u7684\u9032\u5EA6\uFF1A\u8FFD\u8E64\u5B78\u7FD2\u9032\u5EA6\uFF0C\u5B8C\u6210\u6240\u6709\u7AE0\u7BC0", pos:"below"},
+        {el:null, text:"\uD83D\uDE80 \u6E96\u5099\u597D\u4E86\u55CE\uFF1F\u5F9E\u4E0B\u9762\u7684\u65B0\u624B\u4EFB\u52D9\u958B\u59CB\u5427\uFF01", pos:"center"}
+    ];
+    var cur=0, overlay=document.getElementById('onboardingOverlay'), spotlight=document.getElementById('tourSpotlight'), tooltip=document.getElementById('tourTooltip'), dotsC=document.getElementById('tourDots');
+    for(var i=0;i<steps.length;i++){var d=document.createElement('span');if(i===0)d.className='active';dotsC.appendChild(d);}
+    function showStep(n){
+        cur=n;
+        var s=steps[n], stepEl=tooltip.querySelector('.tour-step'), textEl=tooltip.querySelector('.tour-text'), nextBtn=tooltip.querySelector('.tour-next');
+        stepEl.textContent=(n+1)+' / '+steps.length;
+        textEl.textContent=s.text;
+        nextBtn.textContent= n===steps.length-1 ? '\u958B\u59CB\u63A2\u7D22 \uD83C\uDF89' : '\u4E0B\u4E00\u6B65 \u2192';
+        dotsC.querySelectorAll('span').forEach(function(d,i){d.className=i===n?'active':'';});
+        tooltip.classList.remove('show');
+        if(!s.el){
+            spotlight.style.cssText='top:50%;left:50%;width:0;height:0;border-radius:50%;box-shadow:0 0 0 9999px rgba(0,0,0,0.75)';
+            tooltip.style.left='50%';tooltip.style.top='50%';tooltip.style.transform='translate(-50%,-50%)';
+            setTimeout(function(){tooltip.classList.add('show');},50);
+            return;
+        }
+        var target=document.querySelector(s.el);
+        if(!target){showStep(n<steps.length-1?n+1:0);return;}
+        var r=target.getBoundingClientRect(), pad=8;
+        spotlight.style.cssText='top:'+(r.top-pad+window.scrollY)+'px;left:'+(r.left-pad)+'px;width:'+(r.width+pad*2)+'px;height:'+(r.height+pad*2)+'px;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.75)';
+        var tw=320, margin=12;
+        if(s.pos==='below'){
+            tooltip.style.left=Math.max(10,Math.min(r.left,window.innerWidth-tw-20))+'px';
+            tooltip.style.top=(r.bottom+margin+window.scrollY)+'px';
+            tooltip.style.transform='none';
+        }else if(s.pos==='above-left'){
+            tooltip.style.left=Math.max(10,r.right-tw)+'px';
+            tooltip.style.top=(r.top-160+window.scrollY)+'px';
+            tooltip.style.transform='none';
+        }
+        setTimeout(function(){tooltip.classList.add('show');},50);
+    }
+    window.tourNext=function(){
+        if(cur>=steps.length-1){tourEnd();return;}
+        showStep(cur+1);
+    };
+    window.tourEnd=function(){
+        overlay.classList.remove('active');
+        localStorage.setItem('onboardingDone','true');
+    };
+    overlay.addEventListener('click',function(e){
+        if(e.target===overlay||e.target===spotlight) tourNext();
+    });
+    setTimeout(function(){
+        overlay.classList.add('active');
+        showStep(0);
+    },500);
+})();
 </script>
 
 </body>
