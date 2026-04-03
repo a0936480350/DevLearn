@@ -275,13 +275,18 @@ CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ChatReactions_Unique""
     var defaultAnns = new[]
     {
         new DotNetLearning.Models.Announcement {
-            Title = "🤖 全新「AI 教你打程式」遊戲上線！",
-            Content = "AI 教練一行一行帶你寫程式！左邊 AI 先打註解說明，再示範正確程式碼，右邊你跟著打。涵蓋 8 個課程：Hello World、變數、if/else、迴圈、陣列、方法、OOP、LINQ。從「遊戲」選單進入！",
+            Title = "🎲 兩款全新遊戲上線：程式碼大富翁 & SQL 模擬器！",
+            Content = "🎲 程式碼大富翁：擲骰子在 2D 棋盤上闖關，答對程式題拿金幣、踩陷阱扣血！📊 SQL 查詢模擬器：看著虛擬資料表寫真正的 SQL，從 SELECT 到 JOIN 共 8 個挑戰。從導覽列「遊戲」選單進入！",
+            Type = "success", IsPinned = true, CreatedAt = new DateTime(2026, 4, 3, 12, 0, 0)
+        },
+        new DotNetLearning.Models.Announcement {
+            Title = "🤖 AI 教你打程式：20 堂課全語言覆蓋！",
+            Content = "AI 教練一行一行帶你寫！涵蓋 C#、JavaScript、jQuery、HTML、CSS、Vue、React、Angular、SQL 共 20 堂課。每行程式碼都有「💡語法說明」同步解說為什麼這樣寫。從「遊戲」選單進入！",
             Type = "success", IsPinned = true, CreatedAt = new DateTime(2026, 4, 3)
         },
         new DotNetLearning.Models.Announcement {
-            Title = "🏗️ 微服務架構教學上線（10 篇）",
-            Content = "全新微服務分類：從 DDD 設計、ASP.NET Core API、gRPC / RabbitMQ 通訊、API Gateway、Docker Compose、Polly 韌性、Saga 模式、OpenTelemetry 可觀測性到 Kubernetes 部署，完整 .NET 微服務學習路徑！",
+            Title = "🔴 Redis 快取 + 🏗️ 微服務教學上線（20 篇）",
+            Content = "Redis 快取 10 篇：從入門到分散式架構、Pub/Sub、效能優化。微服務 10 篇：DDD、API Gateway、Docker、Polly、Saga、K8s。全部用 .NET 實作，完整學習路徑！",
             Type = "info", IsPinned = false, CreatedAt = new DateTime(2026, 4, 3)
         },
         new DotNetLearning.Models.Announcement {
