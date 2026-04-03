@@ -1,3 +1,11 @@
+/* === NAVBAR EMERGENCY FIX === */
+.topnav { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; background-color: #2C1810; overflow-x: auto; overflow-y: visible; }
+.topnav > * { flex-shrink: 0; }
+.dropdown-content, .nav-dropdown-menu { display: none !important; position: absolute !important; z-index: 9999; }
+.dropdown:hover > .dropdown-content, .dropdown:hover > .nav-dropdown-menu { display: block !important; }
+.nav-dropdown:hover .nav-dropdown-menu { display: block !important; }
+/* === END FIX === */
+
 /* ════════════════════════════════════════════════════════════
    DevLearn — Design System
    ════════════════════════════════════════════════════════════ */
@@ -126,7 +134,8 @@ a:hover { color: var(--accent2); }
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border);
     box-shadow: none;
-    display: flex; align-items: center; gap: 1.2rem; padding: 0 1.8rem;
+    display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important;
+    align-items: center; gap: 1.2rem; padding: 0 1.8rem;
 }
 .logo {
     font-weight: 800;
@@ -210,12 +219,12 @@ a:hover { color: var(--accent2); }
 .nav-dropdown { position: relative; }
 .nav-dropdown-btn { cursor: pointer; background: none; }
 .nav-dropdown-menu {
-    display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    display: none !important; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
     background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
     padding: 6px 0; min-width: 160px; box-shadow: 0 8px 30px rgba(0,0,0,.12);
     z-index: 1000;
 }
-.nav-dropdown:hover .nav-dropdown-menu { display: block; }
+.nav-dropdown:hover .nav-dropdown-menu { display: block !important; }
 .nav-dropdown-menu a {
     display: block; padding: 8px 16px; color: var(--text); font-size: .85rem;
     text-decoration: none; transition: background .2s;

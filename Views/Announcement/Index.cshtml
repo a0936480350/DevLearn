@@ -1,0 +1,93 @@
+@model List<DotNetLearning.Models.Announcement>
+@{
+    ViewData["Title"] = "公告列表";
+    var typeMap = new Dictionary<string,string> { {"success","#22c55e"}, {"warning","#f59e0b"}, {"danger","#ef4444"}, {"info","#3b82f6"} };
+    var iconMap = new Dictionary<string,string> { {"success","✅"}, {"warning","⚠️"}, {"danger","🚨"}, {"info","📢"} };
+    var bgMap = new Dictionary<string,string> { {"success","rgba(34,197,94,0.06)"}, {"warning","rgba(245,158,11,0.06)"}, {"danger","rgba(239,68,68,0.06)"}, {"info","rgba(59,130,246,0.06)"} };
+}
+
+<style>
+.ann-page{max-width:900px;margin:0 auto;padding:24px 20px 60px;}
+.ann-page-title{font-size:1.8rem;font-weight:800;text-align:center;margin-bottom:8px;}
+.ann-page-sub{text-align:center;color:#8b949e;margin-bottom:32px;font-size:0.9rem;}
+.ann-card{background:#161b22;border:1px solid #30363d;border-radius:14px;margin-bottom:20px;overflow:hidden;transition:border-color .2s;}
+.ann-card:hover{border-color:#58a6ff;}
+.ann-card-header{padding:20px 24px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.ann-card-icon{font-size:1.3rem;}
+.ann-card-pin{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);border-radius:4px;padding:1px 7px;font-size:0.72rem;font-weight:700;}
+.ann-card-title{font-weight:700;font-size:1.1rem;}
+.ann-card-date{color:#8b949e;font-size:0.78rem;margin-left:auto;}
+.ann-card-preview{padding:12px 24px;color:#c9d1d9;font-size:0.9rem;line-height:1.7;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.ann-card-full{padding:0 24px;color:#c9d1d9;font-size:0.9rem;line-height:1.8;display:none;}
+.ann-card-footer{padding:12px 24px 16px;display:flex;justify-content:flex-end;}
+.ann-read-btn{background:none;border:1px solid #30363d;border-radius:8px;color:#58a6ff;padding:6px 16px;font-size:0.82rem;cursor:pointer;transition:all .2s;font-family:inherit;}
+.ann-read-btn:hover{background:rgba(88,166,255,0.1);border-color:#58a6ff;}
+.ann-back{display:inline-flex;align-items:center;gap:6px;color:#58a6ff;text-decoration:none;font-size:0.9rem;margin-bottom:20px;padding:8px 16px;border:1px solid #30363d;border-radius:8px;transition:all .2s;}
+.ann-back:hover{background:rgba(88,166,255,0.08);border-color:#58a6ff;}
+</style>
+
+<div class="ann-page">
+    <a href="/" class="ann-back">← 回首頁</a>
+    <h1 class="ann-page-title">📋 公告列表</h1>
+    <p class="ann-page-sub">平台最新功能更新與重要通知</p>
+
+    @if (!Model.Any())
+    {
+        <div style="text-align:center;color:#8b949e;padding:60px 0;">目前沒有公告</div>
+    }
+
+    @foreach (var ann in Model)
+    {
+        var color = typeMap.GetValueOrDefault(ann.Type, "#3b82f6");
+        var icon = iconMap.GetValueOrDefault(ann.Type, "📢");
+        var bg = bgMap.GetValueOrDefault(ann.Type, "rgba(59,130,246,0.06)");
+        <div class="ann-card" id="ann-@ann.Id" style="border-left:3px solid @color;background:@bg;">
+            <div class="ann-card-header">
+                <span class="ann-card-icon">@icon</span>
+                @if (ann.IsPinned) { <span class="ann-card-pin">📌 置頂</span> }
+                <span class="ann-card-title" style="color:@color;">@ann.Title</span>
+                <span class="ann-card-date">@ann.CreatedAt.ToString("yyyy/MM/dd HH:mm")</span>
+            </div>
+            <div class="ann-card-preview" id="preview-@ann.Id">@ann.Content</div>
+            <div class="ann-card-full" id="full-@ann.Id">@ann.Content</div>
+            <div class="ann-card-footer">
+                <button class="ann-read-btn" id="btn-@ann.Id" onclick="toggleAnn(@ann.Id)">閱讀更多 ↓</button>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+function toggleAnn(id) {
+    var preview = document.getElementById('preview-' + id);
+    var full = document.getElementById('full-' + id);
+    var btn = document.getElementById('btn-' + id);
+    if (full.style.display === 'block') {
+        full.style.display = 'none';
+        preview.style.display = '-webkit-box';
+        btn.textContent = '閱讀更多 ↓';
+    } else {
+        full.style.display = 'block';
+        preview.style.display = 'none';
+        btn.textContent = '收起 ↑';
+    }
+}
+
+// Auto-expand if URL has #ann-ID hash
+(function(){
+    var hash = window.location.hash;
+    if (hash && hash.startsWith('#ann-')) {
+        var id = hash.replace('#ann-', '');
+        var el = document.getElementById('ann-' + id);
+        if (el) {
+            setTimeout(function(){
+                el.scrollIntoView({behavior:'smooth', block:'center'});
+                toggleAnn(id);
+                el.style.transition = 'box-shadow 0.3s';
+                el.style.boxShadow = '0 0 0 2px #58a6ff';
+                setTimeout(function(){ el.style.boxShadow = ''; }, 2000);
+            }, 300);
+        }
+    }
+})();
+</script>
