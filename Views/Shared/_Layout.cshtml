@@ -11,6 +11,32 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
 </head>
 <body>
+    <!-- Promotion Marquee Banner -->
+    <style>
+        @@keyframes marqueeScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-100%)} }
+    </style>
+    <div id="promoMarquee" style="
+        background:linear-gradient(90deg,#f59e0b,#ef4444,#f59e0b);
+        color:#fff;font-size:13px;font-weight:700;
+        padding:6px 0;overflow:hidden;white-space:nowrap;
+        position:relative;z-index:1001;">
+        <div style="display:inline-block;animation:marqueeScroll 30s linear infinite;padding-left:100%;">
+            &#x2615; NEW! &#x5B8C;&#x6210;&#x65B0;&#x624B;&#x4EFB;&#x52D9;&#x5373;&#x53EF;&#x53C3;&#x52A0;&#x62BD;&#x734E;&#xFF01;LINE &#x661F;&#x5DF4;&#x514B;&#x79AE;&#x5238;&#x7B49;&#x4F60;&#x62FF;&#xFF0C;&#x540D;&#x984D;&#x6709;&#x9650;&#xFF01;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            &#x1F389; &#x63A8;&#x5EE3;&#x6D3B;&#x52D5;&#xFF1A;&#x9080;&#x8ACB;&#x597D;&#x53CB;&#x8A3B;&#x518A; DevLearn&#xFF0C;&#x7D2F;&#x7A4D;&#x63A8;&#x85A6;&#x62BD; LINE &#x661F;&#x5DF4;&#x514B;&#x79AE;&#x5238;&#xFF01;
+            <a href="/Promotion" style="color:#fff;text-decoration:underline;margin-left:8px;">&#x6D3B;&#x52D5;&#x8A73;&#x60C5; &rarr;</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            &#x1F525; &#x6D3B;&#x52D5;&#x671F;&#x9593; 2026/4/1 - 5/31 &#xFF5C;&#x5DF2;&#x6709; <span id="marqueeCount">0</span> &#x4EBA;&#x53C3;&#x52A0;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </div>
+    </div>
+    <script>
+    fetch('/Promotion/TotalReferrals').then(r=>r.json()).then(d=>{
+        var el=document.getElementById('marqueeCount');
+        if(el) el.textContent=d.count||0;
+    });
+    </script>
+
     <!-- Top Navbar -->
     <nav class="topnav">
         <button class="hamburger" onclick="toggleMobileNav()" aria-label="選單">

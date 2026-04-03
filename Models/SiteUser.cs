@@ -18,4 +18,7 @@ public class SiteUser
     public string Role { get; set; } = "guest"; // guest/member/teacher/admin
     public bool IsBanned { get; set; } = false;
     public string BanReason { get; set; } = "";
+    public string ReferralCode { get; set; } = "";
+    public string? ReferredBy { get; set; }
+    public int ReferralCount { get; set; }
 }

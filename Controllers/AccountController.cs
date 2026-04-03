@@ -35,7 +35,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Register(string nickname, string email)
+    public async Task<IActionResult> Register(string nickname, string email, string? referralCode)
     {
         var anonId = GetAnonId();
         var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == anonId);
@@ -69,6 +69,21 @@ public class AccountController : Controller
         user.Email = email;
         user.IsRegistered = true;
         user.Role = "member";
+
+        // Generate referral code
+        user.ReferralCode = (user.Nickname.Length >= 4 ? user.Nickname[..4] : user.Nickname).ToUpper() + new Random().Next(1000, 9999);
+
+        // Handle referral
+        if (!string.IsNullOrWhiteSpace(referralCode))
+        {
+            var referrer = await _db.SiteUsers.FirstOrDefaultAsync(u => u.ReferralCode == referralCode);
+            if (referrer != null)
+            {
+                user.ReferredBy = referralCode;
+                referrer.ReferralCount++;
+            }
+        }
+
         await _db.SaveChangesAsync();
 
         // 註冊完導到登入頁，讓用戶重新登入

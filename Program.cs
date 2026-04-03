@@ -159,6 +159,9 @@ using (var scope = app.Services.CreateScope())
             ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""Role"" TEXT DEFAULT 'guest';
             ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""IsBanned"" BOOLEAN DEFAULT FALSE;
             ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""BanReason"" TEXT DEFAULT '';
+            ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""ReferralCode"" TEXT DEFAULT '';
+            ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""ReferredBy"" TEXT;
+            ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""ReferralCount"" INTEGER DEFAULT 0;
             CREATE TABLE IF NOT EXISTS ""TeacherPosts"" (
                 ""Id"" SERIAL PRIMARY KEY, ""TeacherId"" INTEGER DEFAULT 0, ""Title"" TEXT DEFAULT '',
                 ""Content"" TEXT DEFAULT '', ""Type"" TEXT DEFAULT 'article', ""VideoUrl"" TEXT DEFAULT '',
@@ -245,6 +248,20 @@ CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ChatReactions_Unique""
         Console.WriteLine("[DB] Chat reply & reaction migration done.");
     }
     catch (Exception ex) { Console.WriteLine($"[DB] Chat reply/reaction migration note: {ex.Message}"); }
+
+    // Clean up teacher demo data (one-time: only if demo teacher "Demo Teacher" exists)
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"DELETE FROM ""TeacherPostComments"";");
+        db.Database.ExecuteSqlRaw(@"DELETE FROM ""TeacherPosts"";");
+        db.Database.ExecuteSqlRaw(@"DELETE FROM ""Reviews"";");
+        db.Database.ExecuteSqlRaw(@"DELETE FROM ""Bookings"";");
+        db.Database.ExecuteSqlRaw(@"DELETE FROM ""TeacherSlots"";");
+        db.Database.ExecuteSqlRaw(@"DELETE FROM ""FavoriteTeachers"";");
+        db.Database.ExecuteSqlRaw(@"DELETE FROM ""Teachers"";");
+        Console.WriteLine("[DB] Cleaned up demo teacher data.");
+    }
+    catch (Exception ex) { Console.WriteLine($"[DB] Teacher cleanup note: {ex.Message}"); }
 
     // Fix chapter categories for Vue/React/Angular (move from 'frontend' to dedicated categories)
     try

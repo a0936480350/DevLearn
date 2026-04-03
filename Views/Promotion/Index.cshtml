@@ -1,0 +1,230 @@
+@{
+    ViewData["Title"] = "推廣活動";
+    var user = ViewBag.User as DotNetLearning.Models.SiteUser;
+    var topReferrers = ViewBag.TopReferrers as List<DotNetLearning.Models.SiteUser> ?? new List<DotNetLearning.Models.SiteUser>();
+}
+
+<style>
+    .promo-page { max-width: 800px; margin: 80px auto 40px; padding: 0 20px; }
+    .promo-title { font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 32px; }
+    .promo-card {
+        background: linear-gradient(135deg, #1c2333, #161b22);
+        border: 1px solid #30363d;
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 24px;
+    }
+    .promo-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 14px; color: #f0f6fc; }
+    .promo-card ul { list-style: none; padding: 0; }
+    .promo-card ul li { padding: 8px 0; font-size: 15px; color: #c9d1d9; border-bottom: 1px solid #21262d; }
+    .promo-card ul li:last-child { border-bottom: none; }
+    .prize-card {
+        background: linear-gradient(135deg, #2d1f00, #1c2333);
+        border: 1px solid #f59e0b44;
+    }
+    .prize-card h3 { color: #f59e0b; }
+    .prize-item { display: flex; justify-content: space-between; align-items: center; }
+    .prize-note { font-size: 12px; color: #8b949e; margin-top: 12px; text-align: center; }
+    .ref-code-box {
+        background: #0d1117;
+        border: 2px dashed #f59e0b;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        margin: 16px 0;
+    }
+    .ref-code-display {
+        font-size: 32px;
+        font-weight: 800;
+        color: #f59e0b;
+        letter-spacing: 4px;
+        margin: 8px 0;
+        font-family: 'JetBrains Mono', monospace;
+    }
+    .ref-link-box {
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 12px;
+        color: #8b949e;
+        word-break: break-all;
+        margin: 8px 0;
+        font-family: 'JetBrains Mono', monospace;
+    }
+    .copy-btn {
+        background: #f59e0b;
+        color: #000;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 20px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        margin: 6px 4px;
+        font-family: 'Noto Sans TC', sans-serif;
+        transition: background 0.2s;
+    }
+    .copy-btn:hover { background: #d97706; }
+    .line-share-btn {
+        background: #06c755;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 20px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        margin: 6px 4px;
+        font-family: 'Noto Sans TC', sans-serif;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .line-share-btn:hover { background: #05a647; }
+    .ref-count { font-size: 48px; font-weight: 800; color: #58a6ff; text-align: center; margin: 8px 0; }
+    .ref-count-label { font-size: 14px; color: #8b949e; text-align: center; }
+    .leaderboard-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+    }
+    .leaderboard-table th {
+        text-align: left;
+        padding: 10px 12px;
+        font-size: 13px;
+        color: #8b949e;
+        border-bottom: 1px solid #30363d;
+    }
+    .leaderboard-table td {
+        padding: 10px 12px;
+        font-size: 15px;
+        color: #c9d1d9;
+        border-bottom: 1px solid #21262d;
+    }
+    .leaderboard-table tr:hover td { background: #161b2266; }
+    .medal { font-size: 20px; margin-right: 6px; }
+    .not-logged-in {
+        text-align: center;
+        padding: 40px 20px;
+    }
+    .not-logged-in a {
+        display: inline-block;
+        background: #2299dd;
+        color: #fff;
+        padding: 12px 32px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 16px;
+        margin-top: 16px;
+    }
+    .not-logged-in a:hover { background: #1a7fc4; }
+    .rules-list { padding-left: 20px; }
+    .rules-list li { padding: 6px 0; font-size: 14px; color: #8b949e; }
+</style>
+
+<div class="promo-page">
+    <div class="promo-title">&#x1F389; &#x63A8;&#x5EE3;&#x6D3B;&#x52D5;&#xFF1A;&#x9080;&#x8ACB;&#x597D;&#x53CB;&#xFF0C;&#x4E00;&#x8D77;&#x5B78;&#x7A0B;&#x5F0F;&#xFF01;</div>
+
+    <!-- Activity Description -->
+    <div class="promo-card">
+        <h3>&#x1F4E3; &#x6D3B;&#x52D5;&#x8AAA;&#x660E;</h3>
+        <ul>
+            <li>&#x1F91D; &#x9080;&#x8ACB;&#x597D;&#x53CB;&#x52A0;&#x5165; DevLearn &#x4E26;&#x5B8C;&#x6210;&#x8A3B;&#x518A;</li>
+            <li>&#x1F3AF; &#x6BCF;&#x6210;&#x529F;&#x63A8;&#x85A6; 1 &#x4F4D;&#x597D;&#x53CB;&#xFF0C;&#x7372;&#x5F97; 1 &#x6B21;&#x62BD;&#x734E;&#x6A5F;&#x6703;</li>
+            <li>&#x1F4C8; &#x7D2F;&#x7A4D;&#x63A8;&#x85A6;&#x4EBA;&#x6578;&#x8D8A;&#x591A;&#xFF0C;&#x4E2D;&#x734E;&#x6A5F;&#x7387;&#x8D8A;&#x9AD8;&#xFF01;</li>
+        </ul>
+    </div>
+
+    <!-- Prizes -->
+    <div class="promo-card prize-card">
+        <h3>&#x1F381; &#x734E;&#x54C1;&#x4ECB;&#x7D39;</h3>
+        <ul>
+            <li class="prize-item"><span>&#x1F3C6; &#x5927;&#x734E;&#xFF1A;LINE &#x661F;&#x5DF4;&#x514B;&#x79AE;&#x5238; $500</span><span style="color:#f59e0b;font-weight:700;">1 &#x540D;</span></li>
+            <li class="prize-item"><span>&#x1F948; &#x4E8C;&#x734E;&#xFF1A;LINE &#x661F;&#x5DF4;&#x514B;&#x79AE;&#x5238; $200</span><span style="color:#c0c0c0;font-weight:700;">3 &#x540D;</span></li>
+            <li class="prize-item"><span>&#x1F949; &#x4E09;&#x734E;&#xFF1A;LINE &#x661F;&#x5DF4;&#x514B;&#x79AE;&#x5238; $100</span><span style="color:#cd7f32;font-weight:700;">5 &#x540D;</span></li>
+            <li class="prize-item"><span>&#x1F381; &#x53C3;&#x52A0;&#x734E;&#xFF1A;&#x5E73;&#x53F0;&#x5C08;&#x5C6C;&#x5FBD;&#x7AE0;</span><span style="color:#58a6ff;font-weight:700;">&#x6240;&#x6709;&#x63A8;&#x85A6; 1 &#x4EBA;&#x4EE5;&#x4E0A;&#x8005;</span></li>
+        </ul>
+        <div class="prize-note">&#x6D3B;&#x52D5;&#x671F;&#x9593; 2026/4/1 - 2026/5/31&#xFF0C;&#x540D;&#x984D;&#x6709;&#x9650;&#x9001;&#x5B8C;&#x70BA;&#x6B62;</div>
+    </div>
+
+    <!-- Your Referral Section -->
+    @if (user != null && user.IsRegistered)
+    {
+        <div class="promo-card" style="border-color:#f59e0b44;">
+            <h3>&#x1F517; &#x4F60;&#x7684;&#x63A8;&#x85A6;&#x8CC7;&#x8A0A;</h3>
+
+            <div style="text-align:center;margin-bottom:12px;font-size:14px;color:#8b949e;">&#x4F60;&#x7684;&#x63A8;&#x85A6;&#x78BC;</div>
+            <div class="ref-code-box">
+                <div class="ref-code-display" id="myRefCode">@user.ReferralCode</div>
+                <button class="copy-btn" onclick="copyText('@user.ReferralCode', this)">&#x1F4CB; &#x8907;&#x88FD;&#x63A8;&#x85A6;&#x78BC;</button>
+            </div>
+
+            <div style="text-align:center;margin:16px 0 8px;font-size:14px;color:#8b949e;">&#x63A8;&#x85A6;&#x9023;&#x7D50;</div>
+            <div class="ref-link-box" id="myRefLink">https://devlearn-dotnet.azurewebsites.net/Account/Register?ref=@user.ReferralCode</div>
+            <div style="text-align:center;margin-top:8px;">
+                <button class="copy-btn" onclick="copyText(document.getElementById('myRefLink').textContent.trim(), this)">&#x1F517; &#x8907;&#x88FD;&#x9023;&#x7D50;</button>
+                <a class="line-share-btn" href="https://social-plugins.line.me/lineit/share?url=https%3A%2F%2Fdevlearn-dotnet.azurewebsites.net%2FAccount%2FRegister%3Fref%3D@user.ReferralCode" target="_blank">LINE &#x5206;&#x4EAB;</a>
+            </div>
+
+            <div style="margin-top:24px;">
+                <div class="ref-count-label">&#x5DF2;&#x63A8;&#x85A6;&#x4EBA;&#x6578;</div>
+                <div class="ref-count">@user.ReferralCount</div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="promo-card not-logged-in">
+            <div style="font-size:48px;margin-bottom:12px;">&#x1F512;</div>
+            <div style="font-size:18px;font-weight:700;margin-bottom:8px;">&#x8ACB;&#x5148;&#x8A3B;&#x518A;&#xFF0F;&#x767B;&#x5165;&#x624D;&#x80FD;&#x53C3;&#x52A0;&#x63A8;&#x5EE3;&#x6D3B;&#x52D5;</div>
+            <a href="/Account/Register">&#x7ACB;&#x5373;&#x8A3B;&#x518A;</a>
+        </div>
+    }
+
+    <!-- Leaderboard -->
+    @if (topReferrers.Any())
+    {
+        <div class="promo-card">
+            <h3>&#x1F3C6; &#x63A8;&#x85A6;&#x6392;&#x884C;&#x699C; Top 10</h3>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr><th>#</th><th>&#x66B1;&#x7A31;</th><th>&#x63A8;&#x85A6;&#x4EBA;&#x6578;</th></tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < topReferrers.Count; i++)
+                    {
+                        var r = topReferrers[i];
+                        var medal = i == 0 ? "&#x1F947;" : i == 1 ? "&#x1F948;" : i == 2 ? "&#x1F949;" : "";
+                        <tr>
+                            <td><span class="medal">@Html.Raw(medal)</span>@(i + 1)</td>
+                            <td>@r.Nickname</td>
+                            <td style="font-weight:700;color:#f59e0b;">@r.ReferralCount</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <!-- Rules -->
+    <div class="promo-card">
+        <h3>&#x1F4DC; &#x6D3B;&#x52D5;&#x898F;&#x5247;</h3>
+        <ol class="rules-list">
+            <li>&#x88AB;&#x63A8;&#x85A6;&#x4EBA;&#x9808;&#x5B8C;&#x6210;&#x8A3B;&#x518A;&#x624D;&#x7B97;&#x6709;&#x6548;</li>
+            <li>&#x540C;&#x4E00; IP &#x91CD;&#x8907;&#x8A3B;&#x518A;&#x4E0D;&#x8A08;&#x5165;</li>
+            <li>&#x5E73;&#x53F0;&#x4FDD;&#x7559;&#x6700;&#x7D42;&#x89E3;&#x91CB;&#x6B0A;</li>
+            <li>&#x4E2D;&#x734E;&#x540D;&#x55AE;&#x5C07;&#x65BC;&#x6D3B;&#x52D5;&#x7D50;&#x675F;&#x5F8C;&#x516C;&#x4F48;</li>
+        </ol>
+    </div>
+</div>
+
+<script>
+function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(function() {
+        var orig = btn.textContent;
+        btn.textContent = '✅ 已複製！';
+        setTimeout(function() { btn.textContent = orig; }, 2000);
+    });
+}
+</script>
