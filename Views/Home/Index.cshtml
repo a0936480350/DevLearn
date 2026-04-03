@@ -91,37 +91,37 @@
 
     <!-- ══════════ 新手任務 ══════════ -->
     <style>
-    #newbieTaskCard{max-width:720px;margin:16px auto;padding:0;border-radius:14px;background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(0,184,148,0.10));border:1.5px solid transparent;background-clip:padding-box;position:relative;font-family:'Noto Sans TC',sans-serif;overflow:hidden}
-    #newbieTaskCard::before{content:'';position:absolute;inset:-1.5px;border-radius:15px;background:linear-gradient(135deg,#6366f1,#00b894);z-index:-1}
-    .task-progress-bar{height:3px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin:0}
-    .task-progress-bar .bar{height:100%;background:linear-gradient(90deg,#6366f1,#00b894);transition:width .5s ease;border-radius:3px}
+    #newbieTaskCard{max-width:720px;margin:16px auto;padding:0;border-radius:12px;background:#161b22;border:1px solid #30363d;overflow:hidden}
+    .task-progress-bar{height:3px;background:#21262d;margin:0}
+    .task-progress-bar .bar{height:100%;background:#22c55e;transition:width .5s ease}
     .task-header{display:flex;align-items:center;padding:12px 16px 8px;gap:10px}
-    .task-header>span:first-child{font-size:15px;font-weight:700;color:var(--text,#e6edf3)}
+    .task-header>span:first-child{font-size:14px;font-weight:700;color:#e6edf3}
     .task-header .task-progress{font-size:12px;color:#8b949e;margin-left:auto}
-    .task-header .task-dismiss{background:none;border:none;color:#8b949e;cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;border-radius:4px}
-    .task-header .task-dismiss:hover{color:#e6edf3;background:rgba(255,255,255,0.08)}
-    .task-list{display:flex;flex-direction:column;gap:2px;padding:4px 16px 12px}
-    .task-item{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;transition:background .2s}
-    .task-item:hover{background:rgba(255,255,255,0.04)}
-    .task-item .task-check{font-size:16px;flex-shrink:0;width:22px;text-align:center}
-    .task-item .task-label{flex:1;font-size:13px;color:var(--text,#e6edf3)}
-    .task-item.done .task-label{text-decoration:line-through;color:#8b949e}
-    .task-item .task-go{font-size:12px;color:#58a6ff;text-decoration:none;white-space:nowrap;font-weight:600}
-    .task-item .task-go:hover{text-decoration:underline}
+    .task-header .task-dismiss{background:none;border:none;color:#8b949e;cursor:pointer;font-size:16px;padding:2px 6px;line-height:1}
+    .task-list{display:flex;flex-direction:column;gap:1px;padding:4px 16px 10px}
+    .task-item{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:6px}
+    .task-item .task-check{font-size:15px;flex-shrink:0;width:20px;text-align:center}
+    .task-item .task-label{flex:1;font-size:13px;color:#c9d1d9}
+    .task-item.done .task-label{text-decoration:line-through;color:#6b7280}
+    .task-item .task-go{font-size:12px;color:#58a6ff;text-decoration:none;font-weight:600}
     .task-item.done .task-go{display:none}
-    .task-reward{text-align:center;padding:6px 16px 14px;font-size:12px;color:#8b949e}
-    .task-celebration{display:none;text-align:center;padding:20px;font-size:15px;color:#00b894;font-weight:700}
-    .task-celebration.show{display:block;animation:taskPop .5s ease}
-    @@keyframes taskPop{0%{transform:scale(0.8);opacity:0}100%{transform:scale(1);opacity:1}}
+    .task-reward{padding:8px 16px 14px;font-size:12px;color:#f59e0b;display:flex;align-items:center;gap:6px}
+    .task-celebration{display:none;text-align:center;padding:20px;font-size:15px;color:#22c55e;font-weight:700}
+    .task-celebration.show{display:block}
     </style>
     <div id="newbieTaskCard" style="display:none;">
         <div class="task-progress-bar"><div class="bar" id="taskBar" style="width:0%"></div></div>
         <div class="task-header">
-            <span>&#x1F3AF; 新手任務</span>
-            <span class="task-progress" id="taskProgressText">0 / 5 完成</span>
+            <span>新手任務</span>
+            <span class="task-progress" id="taskProgressText">0 / 6 完成</span>
             <button class="task-dismiss" onclick="dismissTasks()" title="關閉">&#x2715;</button>
         </div>
         <div class="task-list" id="taskList">
+            <div class="task-item" data-task="register">
+                <span class="task-check">&#x2610;</span>
+                <span class="task-label">註冊帳號</span>
+                <a href="/Account/Register" class="task-go">前往 &rarr;</a>
+            </div>
             <div class="task-item" data-task="profile">
                 <span class="task-check">&#x2610;</span>
                 <span class="task-label">設定你的暱稱</span>
@@ -142,19 +142,20 @@
                 <span class="task-label">玩一場遊戲</span>
                 <a href="/CodeTutor" class="task-go">前往 &rarr;</a>
             </div>
-            <div class="task-item" data-task="checkin">
+            <div class="task-item" data-task="line">
                 <span class="task-check">&#x2610;</span>
-                <span class="task-label">每日簽到一次</span>
-                <a href="/CheckIn" class="task-go">前往 &rarr;</a>
+                <span class="task-label">加入 LINE 討論群組（限量送星巴克禮券！）</span>
+                <a href="https://lin.ee/68vD9ZW" target="_blank" class="task-go">加入 &rarr;</a>
             </div>
         </div>
-        <div class="task-reward" id="taskReward">&#x2728; 完成所有任務可獲得「新手達人」成就！</div>
-        <div class="task-celebration" id="taskCelebration">&#x1F389; 恭喜完成所有新手任務！你是新手達人！</div>
+        <div class="task-reward" id="taskReward">&#x26A0;&#xFE0F; 完成所有任務並加入 LINE 群組，限量贈送 LINE 星巴克禮券（名額有限，送完為止）</div>
+        <div class="task-celebration" id="taskCelebration">&#x1F389; 恭喜完成所有新手任務！</div>
     </div>
     <script>
     (function(){
         var STORAGE_KEY='newbieTasks', DISMISS_KEY='newbieTasksDismissed';
-        var defaults={profile:false,chapter:false,quiz:false,game:false,checkin:false};
+        var TOTAL=6;
+        var defaults={register:false,profile:false,chapter:false,quiz:false,game:false,line:false};
         function load(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||Object.assign({},defaults);}catch(e){return Object.assign({},defaults);}}
         function save(t){localStorage.setItem(STORAGE_KEY,JSON.stringify(t));}
         function countDone(t){return Object.values(t).filter(Boolean).length;}
@@ -162,14 +163,10 @@
         // Auto-detect completed tasks
         function detect(tasks){
             var path=location.pathname.toLowerCase();
-            // Chapter visit
             if(path.indexOf('/home/chapter/')===0) tasks.chapter=true;
-            // Quiz visit
             if(path.indexOf('/quiz')===0) tasks.quiz=true;
-            // Game pages
             if(path==='/codetutor'||path==='/detective'||path==='/speed'||path==='/puzzle'||path==='/arena'||path==='/battle'||path==='/monopoly'||path==='/sqlgame') tasks.game=true;
-            // CheckIn
-            if(path==='/checkin') tasks.checkin=true;
+            if(path==='/checkin') tasks.game=true;
             return tasks;
         }
 
@@ -177,24 +174,24 @@
             var card=document.getElementById('newbieTaskCard');
             if(localStorage.getItem(DISMISS_KEY)){card.style.display='none';return;}
             var done=countDone(tasks);
-            if(done>=5){
+            if(done>=TOTAL){
                 document.getElementById('taskCelebration').classList.add('show');
                 document.getElementById('taskReward').style.display='none';
                 document.getElementById('taskList').style.display='none';
                 document.getElementById('taskBar').style.width='100%';
-                document.getElementById('taskProgressText').textContent='5 / 5 完成';
+                document.getElementById('taskProgressText').textContent=TOTAL+' / '+TOTAL+' 完成';
                 card.style.display='block';
                 setTimeout(function(){card.style.display='none';localStorage.setItem(DISMISS_KEY,'true');},4000);
                 return;
             }
-            document.getElementById('taskBar').style.width=(done/5*100)+'%';
-            document.getElementById('taskProgressText').textContent=done+' / 5 完成';
+            document.getElementById('taskBar').style.width=(done/TOTAL*100)+'%';
+            document.getElementById('taskProgressText').textContent=done+' / '+TOTAL+' 完成';
             document.querySelectorAll('.task-item').forEach(function(el){
                 var key=el.dataset.task;
                 if(tasks[key]){
                     el.classList.add('done');
                     el.querySelector('.task-check').textContent='\u2611';
-                    el.querySelector('.task-check').style.color='#00b894';
+                    el.querySelector('.task-check').style.color='#22c55e';
                 }else{
                     el.classList.remove('done');
                     el.querySelector('.task-check').textContent='\u2610';
@@ -209,7 +206,8 @@
 
         // Try to check profile via API
         fetch('/Account/Me').then(function(r){return r.ok?r.json():null;}).then(function(data){
-            if(data && data.nickname && data.nickname.trim()!=='') tasks.profile=true;
+            if(data && data.isRegistered) tasks.register=true;
+            if(data && data.nickname && data.nickname.trim()!=='' && data.nickname!=='匿名學習者') tasks.profile=true;
             save(tasks);render(tasks);
         }).catch(function(){save(tasks);render(tasks);});
 
