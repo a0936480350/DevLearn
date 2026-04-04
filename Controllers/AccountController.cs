@@ -206,7 +206,7 @@ public class AccountController : Controller
         await _db.SaveChangesAsync();
 
         // Admin email check
-        if (email == "1234@hotmail.com")
+        if (email == "admin@hotmail.com")
         {
             registered.Role = "admin";
             await _db.SaveChangesAsync();
@@ -271,7 +271,7 @@ public class AccountController : Controller
         }
         await _db.SaveChangesAsync();
 
-        if (email == "1234@hotmail.com")
+        if (email == "admin@hotmail.com")
         {
             registered.Role = "admin";
             await _db.SaveChangesAsync();
@@ -366,7 +366,7 @@ public class AccountController : Controller
         HttpContext.Session.SetString("sid", user.AnonymousId);
 
         // Admin check
-        if (user.Email == "1234@hotmail.com")
+        if (user.Email == "admin@hotmail.com")
         {
             user.Role = "admin";
             await _db.SaveChangesAsync();
@@ -427,18 +427,28 @@ public class AccountController : Controller
     public IActionResult ForgotPassword() => View();
 
     [HttpPost]
-    public async Task<IActionResult> ForgotPassword(string email)
+    public async Task<IActionResult> ForgotPassword(string email, string password, string passwordConfirm)
     {
+        if (string.IsNullOrWhiteSpace(email))
+        { ViewBag.Error = "請輸入 Email"; return View(); }
+
         var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.Email == email && u.IsRegistered);
-        if (user != null)
-        {
-            user.VerificationToken = Guid.NewGuid().ToString("N");
-            user.VerificationExpiry = DateTime.UtcNow.AddMinutes(1);
-            await _db.SaveChangesAsync();
-            await _email.SendPasswordResetEmailAsync(email, user.VerificationToken, $"{Request.Scheme}://{Request.Host}");
-        }
-        ViewBag.Message = "如果此 Email 已註冊，重設密碼信已發送。";
-        return View();
+        if (user == null)
+        { ViewBag.Error = "此 Email 尚未註冊"; return View(); }
+
+        if (password != passwordConfirm)
+        { ViewBag.Error = "兩次密碼不一致"; return View(); }
+
+        if (password.Length < 8 || !password.Any(char.IsUpper) || !password.Any(char.IsLower) || !password.Any(char.IsDigit))
+        { ViewBag.Error = "密碼需至少 8 字元，包含大小寫字母和數字"; return View(); }
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);
+        user.LoginMethod = "email";
+        user.EmailVerified = true;
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = "密碼已重設成功！請用新密碼登入。";
+        return RedirectToAction("Login");
     }
 
     // Reset Password

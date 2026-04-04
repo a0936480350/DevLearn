@@ -293,15 +293,18 @@ CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ChatReactions_Unique""
     catch (Exception ex) { Console.WriteLine($"[DB] Category migration note: {ex.Message}"); }
 
     // 確保 Admin 帳號存在
-    if (!db.SiteUsers.Any(u => u.Email == "1234@hotmail.com"))
+    if (!db.SiteUsers.Any(u => u.Email == "admin@hotmail.com"))
     {
         db.SiteUsers.Add(new DotNetLearning.Models.SiteUser
         {
             AnonymousId = "admin-master-001",
             Nickname = "admin",
-            Email = "1234@hotmail.com",
+            Email = "admin@hotmail.com",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("abcd1234"),
             IsRegistered = true,
-            Role = "admin"
+            Role = "admin",
+            LoginMethod = "email",
+            EmailVerified = true
         });
         db.SaveChanges();
         Console.WriteLine("[DB] Admin account created.");
@@ -375,8 +378,11 @@ CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ChatReactions_Unique""
     try
     {
         db.Database.ExecuteSqlRaw(@"UPDATE ""SiteUsers"" SET ""Role"" = 'member' WHERE ""IsRegistered"" = TRUE AND (""Role"" = 'guest' OR ""Role"" IS NULL OR ""Role"" = '');");
-        db.Database.ExecuteSqlRaw(@"UPDATE ""SiteUsers"" SET ""Role"" = 'admin' WHERE ""Email"" = '1234@hotmail.com';");
-        Console.WriteLine("[DB] Role migration completed.");
+        db.Database.ExecuteSqlRaw(@"UPDATE ""SiteUsers"" SET ""Role"" = 'admin' WHERE ""Email"" = 'admin@hotmail.com';");
+        // Migrate old admin email to new + set password
+        var adminPwHash = BCrypt.Net.BCrypt.HashPassword("abcd1234");
+        db.Database.ExecuteSqlRaw($@"UPDATE ""SiteUsers"" SET ""Email"" = 'admin@hotmail.com', ""PasswordHash"" = '{adminPwHash}', ""LoginMethod"" = 'email', ""EmailVerified"" = TRUE WHERE ""Email"" = 'admin@hotmail.com' OR ""Email"" = '1234@hotmail.com';");
+        Console.WriteLine("[DB] Role + admin migration completed.");
 
         // LoginMethod migration: set legacy for existing registered users
         db.Database.ExecuteSqlRaw(@"UPDATE ""SiteUsers"" SET ""LoginMethod"" = 'legacy' WHERE ""IsRegistered"" = TRUE AND (""LoginMethod"" IS NULL OR ""LoginMethod"" = '');");
