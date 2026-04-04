@@ -128,7 +128,7 @@ a:hover { color: var(--accent2); }
    TOP NAV
    ════════════════════════════════════════════════════════════ */
 .topnav {
-    position: fixed; top: var(--marquee-h); left: 0; right: 0; z-index: 200;
+    position: fixed; top: var(--marquee-h); left: 0; right: 0; z-index: 1003;
     height: var(--topnav-h);
     background: rgba(15, 17, 23, 0.95);
     backdrop-filter: blur(20px);
