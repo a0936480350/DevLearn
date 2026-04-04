@@ -1,14 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication;
 using DotNetLearning.Data;
 using DotNetLearning.Models;
+using DotNetLearning.Services;
 
 namespace DotNetLearning.Controllers;
 
 public class AccountController : Controller
 {
     private readonly AppDbContext _db;
-    public AccountController(AppDbContext db) => _db = db;
+    private readonly EmailService _email;
+    public AccountController(AppDbContext db, EmailService email) { _db = db; _email = email; }
 
     private string GetAnonId() => HttpContext.Session.GetString("SessionId") ?? "";
 
@@ -35,40 +38,52 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Register(string nickname, string email, string? referralCode)
+    public async Task<IActionResult> Register(string email, string password, string passwordConfirm, string? referralCode)
     {
-        var anonId = GetAnonId();
-        var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == anonId);
-        if (user == null) return RedirectToAction("Register");
-
-        // 保留字檢查
-        var reserved = new[] { "admin", "管理員", "系統", "system" };
-        if (reserved.Any(r => nickname.Equals(r, StringComparison.OrdinalIgnoreCase)))
+        // Validate email format
+        if (string.IsNullOrWhiteSpace(email) || !email.Contains('@') || !email.Contains('.'))
         {
-            ViewBag.Error = "此暱稱為系統保留，請換一個";
+            ViewBag.Error = "請輸入有效的 Email 地址";
             return View();
         }
 
-        // Check if nickname already taken
-        var nickTaken = await _db.SiteUsers.FirstOrDefaultAsync(u => u.Nickname == nickname && u.IsRegistered);
-        if (nickTaken != null && nickTaken.AnonymousId != anonId)
+        // Validate password match
+        if (password != passwordConfirm)
         {
-            ViewBag.Error = "此暱稱已被使用，請換一個";
+            ViewBag.Error = "密碼不一致";
             return View();
         }
 
-        // Check if email already registered
-        var existing = await _db.SiteUsers.FirstOrDefaultAsync(u => u.Email == email && u.IsRegistered);
-        if (existing != null && existing.AnonymousId != anonId)
+        // Validate password rules
+        if (password.Length < 8 || !password.Any(char.IsUpper) || !password.Any(char.IsLower) || !password.Any(char.IsDigit))
+        {
+            ViewBag.Error = "密碼需至少 8 字元，包含大寫、小寫字母和數字";
+            return View();
+        }
+
+        // Check email not already registered
+        if (await _db.SiteUsers.AnyAsync(u => u.Email == email && u.IsRegistered))
         {
             ViewBag.Error = "此 Email 已被註冊，請使用登入功能";
             return View();
         }
 
-        user.Nickname = nickname;
+        // Get current anonymous user via cookie
+        var anonId = GetAnonId();
+        var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == anonId);
+        if (user == null) return RedirectToAction("Register");
+
+        // Generate nickname from email
+        var nickname = email.Split('@')[0];
+        if (nickname.Length > 20) nickname = nickname[..20];
+
         user.Email = email;
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);
+        user.Nickname = nickname;
         user.IsRegistered = true;
         user.Role = "member";
+        user.LoginMethod = "email";
+        user.EmailVerified = false;
 
         // Generate referral code
         user.ReferralCode = (user.Nickname.Length >= 4 ? user.Nickname[..4] : user.Nickname).ToUpper() + new Random().Next(1000, 9999);
@@ -84,11 +99,17 @@ public class AccountController : Controller
             }
         }
 
+        // Generate verification token
+        var token = Guid.NewGuid().ToString("N");
+        user.VerificationToken = token;
+        user.VerificationExpiry = DateTime.UtcNow.AddMinutes(1);
+
         await _db.SaveChangesAsync();
 
-        // 註冊完導到登入頁，讓用戶重新登入
-        ViewBag.Success = "註冊成功！請使用暱稱和 Email 登入";
-        return RedirectToAction("Login");
+        // Send verification email
+        await _email.SendVerificationEmailAsync(email, token, $"{Request.Scheme}://{Request.Host}");
+
+        return View("VerifyEmailSent");
     }
 
     // 登入（用 Email 找回資料，合併到當前 cookie）
@@ -99,27 +120,63 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Login(string nickname, string email)
+    public async Task<IActionResult> Login(string email, string password)
     {
-        if (string.IsNullOrWhiteSpace(nickname) || string.IsNullOrWhiteSpace(email))
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
-            ViewBag.Error = "請輸入暱稱和 Email";
+            ViewBag.Error = "請輸入 Email 和密碼";
             return View();
         }
 
-        var registered = await _db.SiteUsers.FirstOrDefaultAsync(u =>
-            u.Email == email && u.Nickname == nickname && u.IsRegistered);
+        var registered = await _db.SiteUsers.FirstOrDefaultAsync(u => u.Email == email && u.IsRegistered);
         if (registered == null)
         {
-            ViewBag.Error = "暱稱或 Email 不正確，請確認後重試";
+            ViewBag.Error = "帳號不存在";
             return View();
         }
 
-        // 把當前 cookie 的匿名 ID 替換成已註冊用戶的 ID
+        // Google-only account
+        if (registered.LoginMethod == "google" && string.IsNullOrEmpty(registered.PasswordHash))
+        {
+            ViewBag.Error = "此帳號使用 Google 登入，請點擊 Google 按鈕";
+            return View();
+        }
+
+        // Legacy accounts (old nickname+email login)
+        if (registered.LoginMethod == "legacy")
+        {
+            if (!string.IsNullOrEmpty(registered.PasswordHash))
+            {
+                if (!BCrypt.Net.BCrypt.Verify(password, registered.PasswordHash))
+                {
+                    ViewBag.Error = "密碼錯誤";
+                    return View();
+                }
+            }
+            // else: legacy account without password — allow email-only match for backward compat
+            // Show hint to set password
+            TempData["Info"] = "建議您設定密碼以提升帳號安全性";
+        }
+
+        // Email login method
+        if (registered.LoginMethod == "email")
+        {
+            if (!registered.EmailVerified)
+            {
+                ViewBag.Message = "您的 Email 尚未驗證，請先完成驗證。";
+                return View("VerifyEmailSent");
+            }
+            if (!BCrypt.Net.BCrypt.Verify(password, registered.PasswordHash))
+            {
+                ViewBag.Error = "密碼錯誤";
+                return View();
+            }
+        }
+
+        // --- Common login flow (set cookies, session, role-based redirect) ---
         var currentAnonId = GetAnonId();
         var currentUser = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == currentAnonId);
 
-        // 更新 cookie 指向已註冊的 anonymousId
         Response.Cookies.Append("DotNetLearner", registered.AnonymousId, new CookieOptions
         {
             HttpOnly = true,
@@ -131,17 +188,14 @@ public class AccountController : Controller
         HttpContext.Session.SetString("SessionId", registered.AnonymousId);
         HttpContext.Session.SetString("sid", registered.AnonymousId);
 
-        // Update LastActiveAt on login
         registered.LastActiveAt = DateTime.Now;
 
-        // Delete the orphaned anonymous record (if different)
         if (currentUser != null && currentUser.Id != registered.Id && !currentUser.IsRegistered)
         {
             _db.SiteUsers.Remove(currentUser);
         }
         await _db.SaveChangesAsync();
 
-        // 統一登入：判斷角色導向
         // Admin email check
         if (email == "1234@hotmail.com")
         {
@@ -166,6 +220,246 @@ public class AccountController : Controller
         }
 
         return RedirectToAction("Profile");
+    }
+
+    // Legacy login (backward compat for old nickname+email accounts)
+    [HttpPost]
+    public async Task<IActionResult> LegacyLogin(string nickname, string email)
+    {
+        if (string.IsNullOrWhiteSpace(nickname) || string.IsNullOrWhiteSpace(email))
+        {
+            ViewBag.Error = "請輸入暱稱和 Email";
+            return View("Login");
+        }
+
+        var registered = await _db.SiteUsers.FirstOrDefaultAsync(u =>
+            u.Email == email && u.Nickname == nickname && u.IsRegistered && u.LoginMethod == "legacy");
+        if (registered == null)
+        {
+            ViewBag.Error = "暱稱或 Email 不正確，請確認後重試";
+            return View("Login");
+        }
+
+        var currentAnonId = GetAnonId();
+        var currentUser = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == currentAnonId);
+
+        Response.Cookies.Append("DotNetLearner", registered.AnonymousId, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax,
+            MaxAge = TimeSpan.FromDays(365),
+            Path = "/"
+        });
+        HttpContext.Session.SetString("SessionId", registered.AnonymousId);
+        HttpContext.Session.SetString("sid", registered.AnonymousId);
+
+        registered.LastActiveAt = DateTime.Now;
+
+        if (currentUser != null && currentUser.Id != registered.Id && !currentUser.IsRegistered)
+        {
+            _db.SiteUsers.Remove(currentUser);
+        }
+        await _db.SaveChangesAsync();
+
+        if (email == "1234@hotmail.com")
+        {
+            registered.Role = "admin";
+            await _db.SaveChangesAsync();
+            HttpContext.Response.Cookies.Append("AdminAuth", "pxmart-admin-verified-2026", new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTimeOffset.Now.AddHours(8),
+                SameSite = SameSiteMode.Strict
+            });
+            return Redirect("/Admin/Dashboard");
+        }
+
+        var teacher = await _db.Teachers.FirstOrDefaultAsync(t => t.SiteUserId == registered.Id && t.IsApproved);
+        if (teacher != null)
+        {
+            registered.Role = "teacher";
+            await _db.SaveChangesAsync();
+            return Redirect("/Teacher/Dashboard");
+        }
+
+        return RedirectToAction("Profile");
+    }
+
+    // Google OAuth Login
+    [HttpGet]
+    public IActionResult GoogleLogin(string? returnUrl = null)
+    {
+        var props = new AuthenticationProperties
+        {
+            RedirectUri = Url.Action("GoogleCallback", new { returnUrl })
+        };
+        return Challenge(props, "Google");
+    }
+
+    // Google OAuth Callback
+    [HttpGet]
+    public async Task<IActionResult> GoogleCallback(string? returnUrl = null)
+    {
+        var result = await HttpContext.AuthenticateAsync("Google");
+        if (!result.Succeeded) return RedirectToAction("Login");
+
+        var claims = result.Principal!.Claims;
+        var googleId = claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var gEmail = claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+        var name = claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Name)?.Value;
+        var picture = claims.FirstOrDefault(c => c.Type == "urn:google:picture")?.Value
+                      ?? claims.FirstOrDefault(c => c.Type == "picture")?.Value;
+
+        if (string.IsNullOrEmpty(googleId) || string.IsNullOrEmpty(gEmail))
+            return RedirectToAction("Login");
+
+        // Find existing user by GoogleId or Email
+        var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.GoogleId == googleId)
+                   ?? await _db.SiteUsers.FirstOrDefaultAsync(u => u.Email == gEmail && u.IsRegistered);
+
+        if (user == null)
+        {
+            // Create new user from current anonymous user
+            var anonId = HttpContext.Request.Cookies["DotNetLearner"] ?? Guid.NewGuid().ToString("N");
+            user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == anonId);
+            if (user == null)
+            {
+                user = new SiteUser { AnonymousId = anonId };
+                _db.SiteUsers.Add(user);
+            }
+            user.Email = gEmail;
+            user.Nickname = name ?? gEmail.Split('@')[0];
+            user.IsRegistered = true;
+            user.Role = "member";
+            user.LoginMethod = "google";
+            user.EmailVerified = true;
+            user.GoogleId = googleId;
+            if (!string.IsNullOrEmpty(picture)) user.AvatarUrl = picture;
+            user.ReferralCode = (user.Nickname.Length >= 4 ? user.Nickname[..4] : user.Nickname).ToUpper() + new Random().Next(1000, 9999);
+        }
+        else
+        {
+            // Link Google account to existing user
+            user.GoogleId = googleId;
+            if (string.IsNullOrEmpty(user.AvatarUrl) && !string.IsNullOrEmpty(picture))
+                user.AvatarUrl = picture;
+            user.LoginMethod = "google";
+            user.EmailVerified = true;
+        }
+
+        user.LastActiveAt = DateTime.Now;
+        await _db.SaveChangesAsync();
+
+        // Set cookies
+        HttpContext.Response.Cookies.Append("DotNetLearner", user.AnonymousId, new CookieOptions { MaxAge = TimeSpan.FromDays(365), HttpOnly = true, SameSite = SameSiteMode.Lax });
+        HttpContext.Session.SetString("SessionId", user.AnonymousId);
+        HttpContext.Session.SetString("sid", user.AnonymousId);
+
+        // Admin check
+        if (user.Email == "1234@hotmail.com")
+        {
+            user.Role = "admin";
+            await _db.SaveChangesAsync();
+            HttpContext.Response.Cookies.Append("AdminAuth", "pxmart-admin-verified-2026", new CookieOptions { MaxAge = TimeSpan.FromHours(8), HttpOnly = true });
+            return Redirect("/Admin/Dashboard");
+        }
+
+        // Teacher check
+        var teacher = await _db.Teachers.FirstOrDefaultAsync(t => t.SiteUserId == user.Id && t.IsApproved);
+        if (teacher != null) { user.Role = "teacher"; await _db.SaveChangesAsync(); return Redirect("/Teacher/Dashboard"); }
+
+        return Redirect(returnUrl ?? "/Account/Profile");
+    }
+
+    // Email Verification
+    [HttpGet]
+    public async Task<IActionResult> VerifyEmail(string token)
+    {
+        var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.VerificationToken == token && u.VerificationExpiry > DateTime.UtcNow);
+        if (user == null)
+        {
+            ViewBag.Error = "驗證連結已過期或無效，請重新發送驗證信。";
+            return View("VerifyEmailSent");
+        }
+        user.EmailVerified = true;
+        user.VerificationToken = null;
+        user.VerificationExpiry = null;
+        await _db.SaveChangesAsync();
+        TempData["Success"] = "Email 驗證成功！請登入。";
+        return RedirectToAction("Login");
+    }
+
+    // Verify Email Sent page
+    [HttpGet]
+    public IActionResult VerifyEmailSent()
+    {
+        return View();
+    }
+
+    // Resend Verification
+    [HttpPost]
+    public async Task<IActionResult> ResendVerification(string email)
+    {
+        var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.Email == email && u.IsRegistered && !u.EmailVerified);
+        if (user != null)
+        {
+            user.VerificationToken = Guid.NewGuid().ToString("N");
+            user.VerificationExpiry = DateTime.UtcNow.AddMinutes(1);
+            await _db.SaveChangesAsync();
+            await _email.SendVerificationEmailAsync(email, user.VerificationToken, $"{Request.Scheme}://{Request.Host}");
+        }
+        ViewBag.Message = "如果此 Email 已註冊，驗證信已重新發送。";
+        return View("VerifyEmailSent");
+    }
+
+    // Forgot Password
+    [HttpGet]
+    public IActionResult ForgotPassword() => View();
+
+    [HttpPost]
+    public async Task<IActionResult> ForgotPassword(string email)
+    {
+        var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.Email == email && u.IsRegistered);
+        if (user != null)
+        {
+            user.VerificationToken = Guid.NewGuid().ToString("N");
+            user.VerificationExpiry = DateTime.UtcNow.AddMinutes(1);
+            await _db.SaveChangesAsync();
+            await _email.SendPasswordResetEmailAsync(email, user.VerificationToken, $"{Request.Scheme}://{Request.Host}");
+        }
+        ViewBag.Message = "如果此 Email 已註冊，重設密碼信已發送。";
+        return View();
+    }
+
+    // Reset Password
+    [HttpGet]
+    public async Task<IActionResult> ResetPassword(string token)
+    {
+        var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.VerificationToken == token && u.VerificationExpiry > DateTime.UtcNow);
+        if (user == null) { TempData["Error"] = "連結已過期，請重新申請。"; return RedirectToAction("ForgotPassword"); }
+        ViewBag.Token = token;
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ResetPassword(string token, string password, string passwordConfirm)
+    {
+        if (password != passwordConfirm) { ViewBag.Error = "密碼不一致"; ViewBag.Token = token; return View(); }
+        if (password.Length < 8 || !password.Any(char.IsUpper) || !password.Any(char.IsLower) || !password.Any(char.IsDigit))
+        { ViewBag.Error = "密碼需至少 8 字元，包含大小寫和數字"; ViewBag.Token = token; return View(); }
+
+        var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.VerificationToken == token && u.VerificationExpiry > DateTime.UtcNow);
+        if (user == null) { TempData["Error"] = "連結已過期"; return RedirectToAction("ForgotPassword"); }
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);
+        user.LoginMethod = "email";
+        user.EmailVerified = true;
+        user.VerificationToken = null;
+        user.VerificationExpiry = null;
+        await _db.SaveChangesAsync();
+        TempData["Success"] = "密碼已重設，請登入。";
+        return RedirectToAction("Login");
     }
 
     // 登出

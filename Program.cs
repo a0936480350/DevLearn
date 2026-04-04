@@ -34,6 +34,20 @@ builder.Services.AddSession(opt => {
 });
 builder.Services.AddSignalR();
 
+// Authentication: Google OAuth + Cookie
+builder.Services.AddAuthentication(options => {
+    options.DefaultScheme = "Cookies";
+    options.DefaultChallengeScheme = "Google";
+})
+.AddCookie("Cookies")
+.AddGoogle("Google", options => {
+    options.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID") ?? "placeholder";
+    options.ClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET") ?? "placeholder";
+    options.CallbackPath = "/signin-google";
+});
+
+builder.Services.AddSingleton<DotNetLearning.Services.EmailService>();
+
 var app = builder.Build();
 
 // Seed database
@@ -162,6 +176,11 @@ using (var scope = app.Services.CreateScope())
             ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""ReferralCode"" TEXT DEFAULT '';
             ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""ReferredBy"" TEXT;
             ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""ReferralCount"" INTEGER DEFAULT 0;
+            ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""GoogleId"" TEXT;
+            ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""EmailVerified"" BOOLEAN DEFAULT FALSE;
+            ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""VerificationToken"" TEXT;
+            ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""VerificationExpiry"" TIMESTAMP;
+            ALTER TABLE ""SiteUsers"" ADD COLUMN IF NOT EXISTS ""LoginMethod"" TEXT DEFAULT 'legacy';
             CREATE TABLE IF NOT EXISTS ""TeacherPosts"" (
                 ""Id"" SERIAL PRIMARY KEY, ""TeacherId"" INTEGER DEFAULT 0, ""Title"" TEXT DEFAULT '',
                 ""Content"" TEXT DEFAULT '', ""Type"" TEXT DEFAULT 'article', ""VideoUrl"" TEXT DEFAULT '',
@@ -358,6 +377,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ChatReactions_Unique""
         db.Database.ExecuteSqlRaw(@"UPDATE ""SiteUsers"" SET ""Role"" = 'member' WHERE ""IsRegistered"" = TRUE AND (""Role"" = 'guest' OR ""Role"" IS NULL OR ""Role"" = '');");
         db.Database.ExecuteSqlRaw(@"UPDATE ""SiteUsers"" SET ""Role"" = 'admin' WHERE ""Email"" = '1234@hotmail.com';");
         Console.WriteLine("[DB] Role migration completed.");
+
+        // LoginMethod migration: set legacy for existing registered users
+        db.Database.ExecuteSqlRaw(@"UPDATE ""SiteUsers"" SET ""LoginMethod"" = 'legacy' WHERE ""IsRegistered"" = TRUE AND (""LoginMethod"" IS NULL OR ""LoginMethod"" = '');");
+        Console.WriteLine("[DB] LoginMethod migration completed.");
     }
     catch (Exception ex) { Console.WriteLine($"[DB] Role migration note: {ex.Message}"); }
 
@@ -431,6 +454,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 app.UseSession();
+app.UseAuthentication();
 
 // 匿名 ID 系統：Cookie 持久化（365天）+ 自動建立資料庫記錄
 // Throttle LastActiveAt writes: only update DB at most once every 5 minutes per user

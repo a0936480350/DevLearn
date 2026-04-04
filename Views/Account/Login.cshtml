@@ -45,6 +45,22 @@
             font-family: 'Noto Sans TC', sans-serif; transition: background 0.2s; margin-top: 8px;
         }
         .btn-submit:hover { background: #1a7fc4; }
+        .btn-google {
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #30363d;
+            background: #fff; color: #3c4043; font-size: 15px; font-weight: 600; cursor: pointer;
+            font-family: 'Noto Sans TC', sans-serif; transition: background 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            text-decoration: none;
+        }
+        .btn-google:hover { background: #f1f3f4; }
+        .btn-google svg { width: 20px; height: 20px; }
+        .divider {
+            display: flex; align-items: center; margin: 24px 0; color: #484f58; font-size: 13px;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; height: 1px; background: #30363d;
+        }
+        .divider span { padding: 0 12px; }
         .error-msg {
             background: rgba(248, 81, 73, 0.15); color: #f85149; border: 1px solid rgba(248, 81, 73, 0.3);
             border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; text-align: center;
@@ -56,77 +72,113 @@
         .links { text-align: center; margin-top: 20px; font-size: 14px; }
         .links a { color: #58a6ff; text-decoration: none; }
         .links a:hover { text-decoration: underline; }
-        .home-link { color: #2299dd; text-decoration: none; display: block; margin-bottom: 20px; font-size: 14px; }
+        .forgot-link { display: block; text-align: right; font-size: 13px; margin-top: -12px; margin-bottom: 16px; }
+        .forgot-link a { color: #58a6ff; text-decoration: none; }
+        .forgot-link a:hover { text-decoration: underline; }
+        .pw-wrapper { position: relative; }
+        .pw-wrapper input { padding-right: 40px; }
+        .pw-toggle {
+            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; font-size: 18px; cursor: pointer; color: #8b949e;
+            padding: 4px;
+        }
+        .legacy-section {
+            margin-top: 20px; border-top: 1px solid #30363d; padding-top: 16px;
+        }
+        .legacy-toggle {
+            background: none; border: none; color: #484f58; font-size: 13px; cursor: pointer;
+            width: 100%; text-align: center; padding: 8px;
+        }
+        .legacy-toggle:hover { color: #8b949e; }
+        .legacy-form { display: none; margin-top: 12px; }
+        .legacy-form.show { display: block; }
     </style>
 </head>
 <body>
     @await Html.PartialAsync("_Navbar")
     <div class="form-card">
-        <a href="/" class="home-link" data-i18n="login-home">🏠 ← 回首頁</a>
-        <div class="form-title" data-i18n="login-title">🔑 登入</div>
-        <div class="form-subtitle" data-i18n="login-subtitle">輸入暱稱和 Email 登入你的帳號</div>
+        <a href="/" style="color:#2299dd;text-decoration:none;display:block;margin-bottom:20px;font-size:14px;">&#x1F3E0; &#x2190; 回首頁</a>
+        <div class="form-title">登入</div>
+        <div class="form-subtitle">登入你的帳號繼續學習</div>
 
         @if (ViewBag.Error != null)
         {
             <div class="error-msg">@ViewBag.Error</div>
         }
-        @if (ViewBag.Success != null)
+        @if (TempData["Success"] != null)
         {
-            <div class="success-msg">@ViewBag.Success</div>
+            <div class="success-msg">@TempData["Success"]</div>
         }
+        @if (TempData["Error"] != null)
+        {
+            <div class="error-msg">@TempData["Error"]</div>
+        }
+
+        <!-- Google Login Button -->
+        <a href="/Account/GoogleLogin" class="btn-google">
+            <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            使用 Google 帳號登入
+        </a>
+
+        <div class="divider"><span>或使用 Email 登入</span></div>
 
         <form method="post" action="/Account/Login" autocomplete="off">
             <div class="form-group">
-                <label data-i18n="login-nickname">暱稱</label>
-                <input type="text" name="nickname" placeholder="輸入你的暱稱" required autocomplete="off" data-i18n-placeholder="login-ph-nickname" />
+                <label>Email</label>
+                <input type="email" name="email" placeholder="輸入您的 Email" required />
             </div>
             <div class="form-group">
-                <label data-i18n="login-email">Email</label>
-                <div style="position:relative;">
-                    <input type="password" name="email" placeholder="輸入您的 Email（已隱藏保護）" required autocomplete="new-password" style="padding-right:40px;" data-i18n-placeholder="login-ph-email" />
-                    <button type="button" onclick="toggleEmail(this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;cursor:pointer;">👁️</button>
+                <label>密碼</label>
+                <div class="pw-wrapper">
+                    <input type="password" name="password" placeholder="輸入密碼" required />
+                    <button type="button" class="pw-toggle" onclick="togglePw(this)">&#x1F441;</button>
                 </div>
-                <div style="font-size:12px;color:#8b949e;margin-top:6px;" data-i18n="login-email-hint">💡 Email 作為您的身份驗證，已隱藏保護</div>
             </div>
-            <button type="submit" class="btn-submit" data-i18n="login-btn">登入</button>
+            <div class="forgot-link">
+                <a href="/Account/ForgotPassword">忘記密碼?</a>
+            </div>
+            <button type="submit" class="btn-submit">登入</button>
         </form>
-        <script>
-        function toggleEmail(btn) {
-            var input = btn.parentElement.querySelector('input');
-            if (input.type === 'password') {
-                input.type = 'email';
-                btn.textContent = '🙈';
-            } else {
-                input.type = 'password';
-                btn.textContent = '👁️';
-            }
-        }
-        </script>
 
         <div class="links">
-            <span data-i18n="login-no-account">還沒帳號？</span><a href="/Account/Register" data-i18n="login-register">註冊</a>
+            還沒帳號？<a href="/Account/Register">註冊</a>
             &nbsp;|&nbsp;
-            <a href="/" data-i18n="login-home">回首頁</a>
+            <a href="/">回首頁</a>
+        </div>
+
+        <!-- Legacy login section for backward compatibility -->
+        <div class="legacy-section">
+            <button class="legacy-toggle" onclick="document.getElementById('legacyForm').classList.toggle('show')">
+                &#x25BC; 舊帳號登入（暱稱+Email）
+            </button>
+            <div id="legacyForm" class="legacy-form">
+                <form method="post" action="/Account/LegacyLogin" autocomplete="off">
+                    <div class="form-group">
+                        <label>暱稱</label>
+                        <input type="text" name="nickname" placeholder="輸入你的暱稱" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="email" placeholder="輸入您的 Email" required />
+                    </div>
+                    <button type="submit" class="btn-submit" style="background:#30363d;">舊帳號登入</button>
+                </form>
+            </div>
         </div>
     </div>
 
     <script src="/js/site.js"></script>
     <script>
-    function clearLoginForm() {
-        document.querySelectorAll('form input').forEach(function(el) {
-            el.value = '';
-            el.removeAttribute('value');
-        });
+    function togglePw(btn) {
+        var input = btn.parentElement.querySelector('input');
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = '\u{1F648}';
+        } else {
+            input.type = 'password';
+            btn.textContent = '\u{1F441}';
+        }
     }
-    // 立即清空
-    clearLoginForm();
-    // 延遲再清一次（應對瀏覽器晚期 autofill）
-    setTimeout(clearLoginForm, 50);
-    setTimeout(clearLoginForm, 300);
-    // 防止返回快取殘留（pageshow 涵蓋 bfcache）
-    window.addEventListener('pageshow', function(e) {
-        clearLoginForm();
-    });
     </script>
 </body>
 </html>

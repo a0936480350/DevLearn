@@ -1,0 +1,99 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>驗證 Email — .NET 學習平台</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 60px;
+        }
+        .form-card {
+            background: linear-gradient(135deg, #161b22, #1c2333);
+            border: 1px solid #30363d;
+            border-radius: 16px;
+            padding: 40px 32px;
+            width: 100%;
+            max-width: 420px;
+            margin: 20px;
+            text-align: center;
+        }
+        .form-title { font-size: 24px; font-weight: 800; margin-bottom: 16px; }
+        .message {
+            font-size: 15px; color: #8b949e; margin-bottom: 24px; line-height: 1.6;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group input {
+            width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #30363d;
+            background: #0d1117; color: #e6edf3; font-size: 15px; font-family: 'Noto Sans TC', sans-serif;
+            outline: none; transition: border-color 0.2s;
+        }
+        .form-group input:focus { border-color: #2299dd; }
+        .btn-submit {
+            width: 100%; padding: 12px; border-radius: 10px; border: none; background: #2299dd;
+            color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
+            font-family: 'Noto Sans TC', sans-serif; transition: background 0.2s; margin-top: 8px;
+        }
+        .btn-submit:hover { background: #1a7fc4; }
+        .error-msg {
+            background: rgba(248, 81, 73, 0.15); color: #f85149; border: 1px solid rgba(248, 81, 73, 0.3);
+            border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; text-align: center;
+        }
+        .success-msg {
+            background: rgba(56, 189, 114, 0.15); color: #38bd72; border: 1px solid rgba(56, 189, 114, 0.3);
+            border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; text-align: center;
+        }
+        .links { text-align: center; margin-top: 20px; font-size: 14px; }
+        .links a { color: #58a6ff; text-decoration: none; }
+        .links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    @await Html.PartialAsync("_Navbar")
+    <div class="form-card">
+        <div class="form-title">驗證你的 Email</div>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="error-msg">@ViewBag.Error</div>
+        }
+        @if (ViewBag.Message != null)
+        {
+            <div class="success-msg">@ViewBag.Message</div>
+        }
+        else
+        {
+            <div class="message">
+                驗證信已發送到你的 Email！<br />
+                請在 1 分鐘內點擊信中的連結完成驗證。<br />
+                <span style="font-size:13px;color:#484f58;">沒收到？請檢查垃圾郵件資料夾</span>
+            </div>
+        }
+
+        <form method="post" action="/Account/ResendVerification">
+            <div class="form-group">
+                <input type="email" name="email" placeholder="輸入您註冊的 Email" required />
+            </div>
+            <button type="submit" class="btn-submit">重新發送驗證信</button>
+        </form>
+
+        <div class="links">
+            <a href="/Account/Login">返回登入</a>
+        </div>
+    </div>
+
+    <script src="/js/site.js"></script>
+</body>
+</html>

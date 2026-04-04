@@ -21,4 +21,9 @@ public class SiteUser
     public string ReferralCode { get; set; } = "";
     public string? ReferredBy { get; set; }
     public int ReferralCount { get; set; }
+    public string? GoogleId { get; set; }
+    public bool EmailVerified { get; set; }
+    public string? VerificationToken { get; set; }
+    public DateTime? VerificationExpiry { get; set; }
+    public string LoginMethod { get; set; } = "legacy";
 }
