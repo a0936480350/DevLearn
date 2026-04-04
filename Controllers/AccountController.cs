@@ -106,8 +106,17 @@ public class AccountController : Controller
 
         await _db.SaveChangesAsync();
 
-        // Send verification email
-        await _email.SendVerificationEmailAsync(email, token, $"{Request.Scheme}://{Request.Host}");
+        // Send verification email — if SMTP not configured, auto-verify
+        var sent = await _email.SendVerificationEmailAsync(email, token, $"{Request.Scheme}://{Request.Host}");
+        if (!sent)
+        {
+            user.EmailVerified = true;
+            user.VerificationToken = null;
+            user.VerificationExpiry = null;
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "註冊成功！請登入。";
+            return RedirectToAction("Login");
+        }
 
         return View("VerifyEmailSent");
     }
