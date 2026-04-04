@@ -52,6 +52,7 @@
     --cat-interview:#FF5722;
 
     --sidebar-w: 290px;
+    --marquee-h: 30px;
     --topnav-h:  56px;
     --radius:    10px;
     --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
@@ -95,7 +96,7 @@
 
 /* ── Reset ─────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; scroll-padding-top: calc(var(--topnav-h) + 16px); }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--topnav-h) + var(--marquee-h) + 16px); }
 body {
     background: var(--bg);
     color: var(--text);
@@ -103,7 +104,7 @@ body {
     font-size: 0.95rem;
     line-height: 1.6;
     min-height: 100vh;
-    padding-top: var(--topnav-h);
+    padding-top: calc(var(--topnav-h) + var(--marquee-h));
 }
 /* 微動畫：頁面載入淡入 */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
@@ -127,7 +128,7 @@ a:hover { color: var(--accent2); }
    TOP NAV
    ════════════════════════════════════════════════════════════ */
 .topnav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    position: fixed; top: var(--marquee-h); left: 0; right: 0; z-index: 200;
     height: var(--topnav-h);
     background: rgba(15, 17, 23, 0.95);
     backdrop-filter: blur(20px);
@@ -1709,7 +1710,7 @@ a:hover { color: var(--accent2); }
     .nav-search input { font-size: .8rem; padding: 6px 10px 6px 30px; }
     .nav-right {
         display: none;
-        position: fixed; top: var(--topnav-h); left: 0; right: 0;
+        position: fixed; top: calc(var(--topnav-h) + var(--marquee-h)); left: 0; right: 0;
         background: var(--bg2); border-bottom: 1px solid var(--border);
         padding: .8rem 1rem;
         flex-direction: column; gap: .5rem; z-index: 199;
