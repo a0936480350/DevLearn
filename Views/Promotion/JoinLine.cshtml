@@ -1,0 +1,79 @@
+@{
+    ViewData["Title"] = "加入 LINE 群組";
+    var user = ViewBag.User as DotNetLearning.Models.SiteUser;
+    var refCode = ViewBag.RefCode as string;
+    var lineUrl = "https://lin.ee/68vD9ZW";
+}
+
+<style>
+.join-page{max-width:560px;margin:0 auto;padding:40px 20px 60px;text-align:center;}
+.join-card{background:#161b22;border:1px solid #30363d;border-radius:16px;padding:40px 32px;margin-bottom:24px;}
+.join-icon{font-size:4rem;margin-bottom:16px;}
+.join-title{font-size:1.5rem;font-weight:800;color:#e6edf3;margin-bottom:12px;}
+.join-desc{color:#8b949e;font-size:0.92rem;line-height:1.7;margin-bottom:24px;}
+.join-btn{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#06C755,#04B44C);color:#fff;padding:14px 36px;border-radius:30px;font-size:1.1rem;font-weight:700;text-decoration:none;box-shadow:0 4px 20px rgba(6,199,85,0.3);transition:transform 0.2s;}
+.join-btn:hover{transform:scale(1.05);}
+.join-steps{text-align:left;margin-top:24px;}
+.join-step{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #21262d;color:#c9d1d9;font-size:0.88rem;}
+.join-step:last-child{border-bottom:none;}
+.join-step-num{background:#21262d;color:#58a6ff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;}
+.join-note{color:#6b7280;font-size:0.78rem;margin-top:16px;line-height:1.6;}
+.join-countdown{color:#f59e0b;font-size:1rem;font-weight:700;margin:16px 0;}
+.join-user{background:rgba(88,166,255,0.08);border:1px solid rgba(88,166,255,0.2);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:0.85rem;color:#c9d1d9;}
+</style>
+
+<div class="join-page">
+    <div class="join-card">
+        <div class="join-icon">💬</div>
+        <h1 class="join-title">加入 DevLearn LINE 討論群組</h1>
+        <p class="join-desc">
+            和其他學習者一起討論程式、分享心得！<br>
+            加入即可參加抽獎活動，有機會獲得 LINE 星巴克禮券！
+        </p>
+
+        @if (user != null && user.IsRegistered)
+        {
+            <div class="join-user">
+                你好，<strong>@user.Nickname</strong>！你的推薦碼是 <strong>@user.ReferralCode</strong>
+            </div>
+        }
+
+        <div class="join-countdown" id="countdown">即將跳轉到 LINE... <span id="countSec">5</span> 秒</div>
+
+        <a href="@lineUrl" class="join-btn" id="joinBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+            立即加入 LINE 群組
+        </a>
+
+        <div class="join-steps">
+            <div class="join-step"><span class="join-step-num">1</span><span>點擊上方按鈕加入 LINE 群組</span></div>
+            <div class="join-step"><span class="join-step-num">2</span><span>在群組內發送你的推薦碼（如有）</span></div>
+            <div class="join-step"><span class="join-step-num">3</span><span>完成新手任務即可參加抽獎</span></div>
+        </div>
+
+        <p class="join-note">
+            * 此頁面已記錄你的加入請求<br>
+            * 抽獎時將在 LINE 群組內公佈中獎名單，中獎者須在群組內回應確認<br>
+            * 活動期間 2026/4/1 - 5/31，名額有限送完為止
+        </p>
+    </div>
+
+    <a href="/" style="color:#58a6ff;text-decoration:none;font-size:0.9rem;">← 回首頁</a>
+</div>
+
+<script>
+// Auto countdown and redirect
+(function(){
+    var sec = 5;
+    var el = document.getElementById('countSec');
+    var timer = setInterval(function(){
+        sec--;
+        if (el) el.textContent = sec;
+        if (sec <= 0) {
+            clearInterval(timer);
+            window.open('@lineUrl', '_blank');
+            document.getElementById('countdown').textContent = '已開啟 LINE，如未跳轉請點擊上方按鈕';
+        }
+    }, 1000);
+})();
+</script>
