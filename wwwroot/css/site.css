@@ -1,5 +1,5 @@
 /* === NAVBAR EMERGENCY FIX === */
-.topnav { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; background-color: #2C1810; overflow-x: auto; overflow-y: visible; }
+.topnav { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; background-color: #2C1810; overflow: visible !important; }
 .topnav > * { flex-shrink: 0; }
 .dropdown-content, .nav-dropdown-menu { display: none !important; position: absolute !important; z-index: 9999; }
 .dropdown:hover > .dropdown-content, .dropdown:hover > .nav-dropdown-menu { display: block !important; }
