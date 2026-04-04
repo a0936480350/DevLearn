@@ -379,9 +379,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ChatReactions_Unique""
     {
         db.Database.ExecuteSqlRaw(@"UPDATE ""SiteUsers"" SET ""Role"" = 'member' WHERE ""IsRegistered"" = TRUE AND (""Role"" = 'guest' OR ""Role"" IS NULL OR ""Role"" = '');");
         db.Database.ExecuteSqlRaw(@"UPDATE ""SiteUsers"" SET ""Role"" = 'admin' WHERE ""Email"" = 'admin@hotmail.com';");
-        // Migrate old admin email to new + set password
-        var adminPwHash = BCrypt.Net.BCrypt.HashPassword("abcd1234");
-        db.Database.ExecuteSqlRaw($@"UPDATE ""SiteUsers"" SET ""Email"" = 'admin@hotmail.com', ""PasswordHash"" = '{adminPwHash}', ""LoginMethod"" = 'email', ""EmailVerified"" = TRUE WHERE ""Email"" = 'admin@hotmail.com' OR ""Email"" = '1234@hotmail.com';");
+        // Migrate old admin email to new + set password (pre-computed BCrypt hash for "abcd1234")
+        db.Database.ExecuteSqlRaw(
+            @"UPDATE ""SiteUsers"" SET ""Email"" = 'admin@hotmail.com', ""LoginMethod"" = 'email', ""EmailVerified"" = TRUE WHERE ""Email"" = 'admin@hotmail.com' OR ""Email"" = '1234@hotmail.com'");
+        // Set admin password if not already set
+        var adminUser = db.SiteUsers.FirstOrDefault(u => u.Email == "admin@hotmail.com");
+        if (adminUser != null && string.IsNullOrEmpty(adminUser.PasswordHash))
+        {
+            adminUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword("abcd1234");
+            db.SaveChanges();
+        }
         Console.WriteLine("[DB] Role + admin migration completed.");
 
         // LoginMethod migration: set legacy for existing registered users
