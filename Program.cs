@@ -47,6 +47,7 @@ builder.Services.AddAuthentication(options => {
 });
 
 builder.Services.AddSingleton<DotNetLearning.Services.EmailService>();
+builder.Services.AddHostedService<DotNetLearning.Services.ErrorScannerService>();
 
 var app = builder.Build();
 
@@ -356,8 +357,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ChatReactions_Unique""
             Type = "warning", CreatedAt = new DateTime(2026, 3, 29)
         },
         new DotNetLearning.Models.Announcement {
-            Title = "🤖 AI 自動 BUG 修復排程啟動",
-            Content = "系統每 5 分鐘自動掃描前端錯誤日誌，AI 分析並嘗試自動修復，修復後自動部署。Admin 後台可查看 AI 工作紀錄。",
+            Title = "🤖 自動錯誤掃描服務啟動",
+            Content = "系統每 6 小時自動掃描錯誤日誌，自動清除瀏覽器/網路類非真正 Bug，分類統計真正需要修復的錯誤。Admin 後台可查看掃描紀錄。",
             Type = "info", CreatedAt = new DateTime(2026, 3, 28)
         },
         new DotNetLearning.Models.Announcement {

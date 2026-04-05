@@ -411,6 +411,52 @@
             }
         </div>
 
+        <!-- Error Scanner Status -->
+        @{
+            int autoResolvedErrors = (int)(ViewBag.AutoResolvedErrors ?? 0);
+            var lastScanLog = ViewBag.LastScanLog as DotNetLearning.Models.AIWorkLog;
+        }
+        <div style="background:#0f3460;border:1px solid rgba(88,166,255,0.2);border-radius:14px;padding:20px 24px;margin-bottom:24px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 style="margin:0;font-size:1.1rem;color:#58a6ff;">&#x1F50D; &#x932F;&#x8AA4;&#x638C;&#x63CF;&#x72C0;&#x614B;</h3>
+                <div style="display:flex;gap:12px;">
+                    <a href="/Admin/ErrorLogs" style="color:#58a6ff;font-size:0.85rem;text-decoration:none;">&#x1F6A8; &#x932F;&#x8AA4;&#x65E5;&#x8A8C; &rarr;</a>
+                    <a href="/Admin/AIWorkLogs" style="color:#a78bfa;font-size:0.85rem;text-decoration:none;">&#x1F916; &#x638C;&#x63CF;&#x6B77;&#x53F2; &rarr;</a>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+                <div style="background:rgba(26,26,46,0.6);border-radius:10px;padding:14px;text-align:center;border:1px solid rgba(248,81,73,0.2);">
+                    <div style="font-size:24px;font-weight:800;color:#f85149;">@unresolvedErrors</div>
+                    <div style="font-size:12px;color:#8b949e;">&#x274C; &#x672A;&#x89E3;&#x6C7A;&#x932F;&#x8AA4;&#x6578;</div>
+                </div>
+                <div style="background:rgba(26,26,46,0.6);border-radius:10px;padding:14px;text-align:center;border:1px solid rgba(56,189,114,0.2);">
+                    <div style="font-size:24px;font-weight:800;color:#38bd72;">@autoResolvedErrors</div>
+                    <div style="font-size:12px;color:#8b949e;">&#x2705; &#x81EA;&#x52D5;&#x6E05;&#x9664;&#x6578;</div>
+                </div>
+                <div style="background:rgba(26,26,46,0.6);border-radius:10px;padding:14px;text-align:center;border:1px solid rgba(139,92,246,0.2);">
+                    @if (lastScanLog != null)
+                    {
+                        var scanTimeAgo = (DateTime.Now - (lastScanLog.CompletedAt ?? lastScanLog.StartedAt));
+                        var scanTimeStr = scanTimeAgo.TotalMinutes < 60 ? $"{(int)scanTimeAgo.TotalMinutes} &#x5206;&#x9418;&#x524D;"
+                            : scanTimeAgo.TotalHours < 24 ? $"{(int)scanTimeAgo.TotalHours} &#x5C0F;&#x6642;&#x524D;"
+                            : $"{(int)scanTimeAgo.TotalDays} &#x5929;&#x524D;";
+                        <div style="font-size:16px;font-weight:700;color:#a78bfa;">@scanTimeStr</div>
+                        <div style="font-size:12px;color:#8b949e;margin-top:2px;">&#x1F552; &#x4E0A;&#x6B21;&#x638C;&#x63CF;&#x6642;&#x9593;</div>
+                        @if (!string.IsNullOrEmpty(lastScanLog.Result))
+                        {
+                            var resultPreview = lastScanLog.Result.Length > 50 ? lastScanLog.Result.Substring(0, 50) + "..." : lastScanLog.Result;
+                            <div style="font-size:11px;color:#8b949e;margin-top:6px;padding:4px 8px;background:rgba(255,255,255,0.04);border-radius:4px;" title="@lastScanLog.Result">@resultPreview</div>
+                        }
+                    }
+                    else
+                    {
+                        <div style="font-size:16px;font-weight:700;color:#8b949e;">&#x2014;</div>
+                        <div style="font-size:12px;color:#8b949e;margin-top:2px;">&#x1F552; &#x5C1A;&#x672A;&#x57F7;&#x884C;&#x638C;&#x63CF;</div>
+                    }
+                </div>
+            </div>
+        </div>
+
         <!-- Platform Stats Row -->
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px;">
             <div style="background:#0f3460;border:1px solid rgba(34,153,221,0.15);border-radius:10px;padding:14px;text-align:center;">

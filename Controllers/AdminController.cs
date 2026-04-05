@@ -179,6 +179,14 @@ public class AdminController : Controller
             .Take(5)
             .ToListAsync();
 
+        // Error Scanner stats
+        ViewBag.UnresolvedErrors = await _db.ErrorLogs.CountAsync(e => !e.IsResolved);
+        ViewBag.AutoResolvedErrors = await _db.ErrorLogs.CountAsync(e => e.IsResolved && e.ResolvedBy == "AutoScanner");
+        ViewBag.LastScanLog = await _db.AIWorkLogs
+            .Where(w => w.TaskType == "ErrorScan")
+            .OrderByDescending(w => w.CompletedAt)
+            .FirstOrDefaultAsync();
+
         // 客戶回報統計
         ViewBag.TotalTickets = await _db.SupportTickets.CountAsync();
         ViewBag.PendingTickets = await _db.SupportTickets.CountAsync(t => t.Status == "pending");
