@@ -278,9 +278,11 @@ CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ChatReactions_Unique""
         db.Database.ExecuteSqlRaw(@"DELETE FROM ""TeacherSlots"";");
         db.Database.ExecuteSqlRaw(@"DELETE FROM ""FavoriteTeachers"";");
         db.Database.ExecuteSqlRaw(@"DELETE FROM ""Teachers"";");
-        Console.WriteLine("[DB] Cleaned up demo teacher data.");
+        // Clean up fake leaderboard data
+        db.Database.ExecuteSqlRaw(@"DELETE FROM ""UserProfiles"";");
+        Console.WriteLine("[DB] Cleaned up demo teacher + leaderboard data.");
     }
-    catch (Exception ex) { Console.WriteLine($"[DB] Teacher cleanup note: {ex.Message}"); }
+    catch (Exception ex) { Console.WriteLine($"[DB] Cleanup note: {ex.Message}"); }
 
     // Fix chapter categories for Vue/React/Angular (move from 'frontend' to dedicated categories)
     try
