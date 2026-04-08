@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DotNetLearning.Data;
+using DotNetLearning.Filters;
 using System.Text;
 
 namespace DotNetLearning.Controllers;
 
+[RequireRegistration]
 public class NoteController : Controller
 {
     private readonly AppDbContext _db;

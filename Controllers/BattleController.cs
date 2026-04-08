@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using DotNetLearning.Data;
+using DotNetLearning.Filters;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNetLearning.Controllers;
 
+[RequireRegistration]
 public class BattleController : Controller
 {
     private readonly AppDbContext _db;

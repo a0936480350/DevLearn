@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using DotNetLearning.Data;
 using DotNetLearning.Models;
+using DotNetLearning.Filters;
 using Markdig;
 
 namespace DotNetLearning.Controllers;
@@ -134,6 +135,7 @@ public class HomeController : Controller
     }
 
     [HttpPost]
+    [RequireRegistration]
     public async Task<IActionResult> MarkComplete([FromBody] MarkCompleteRequest req)
     {
         var sessionId = HttpContext.Session.GetString("SessionId") ?? req.SessionId;

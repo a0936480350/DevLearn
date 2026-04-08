@@ -3,9 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using DotNetLearning.Data;
 using DotNetLearning.Models;
 using System.Text.Json;
+using DotNetLearning.Filters;
 
 namespace DotNetLearning.Controllers;
 
+[RequireRegistration]
 public class QuizController : Controller
 {
     private readonly AppDbContext _db;

@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DotNetLearning.Data;
 using DotNetLearning.Models;
+using DotNetLearning.Filters;
 
 namespace DotNetLearning.Controllers;
 
+[RequireRegistration]
 public class ArenaController : Controller
 {
     private readonly AppDbContext _db;

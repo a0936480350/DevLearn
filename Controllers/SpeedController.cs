@@ -2,10 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DotNetLearning.Data;
 using DotNetLearning.Models;
+using DotNetLearning.Filters;
 using System.Text.Json;
 
 namespace DotNetLearning.Controllers;
 
+[RequireRegistration]
 public class SpeedController : Controller
 {
     private readonly AppDbContext _db;

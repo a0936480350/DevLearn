@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DotNetLearning.Data;
 using DotNetLearning.Models;
+using DotNetLearning.Filters;
 
 namespace DotNetLearning.Controllers;
 
@@ -31,6 +32,7 @@ public class LeaderboardController : Controller
     }
 
     [HttpPost]
+    [RequireRegistration]
     public async Task<IActionResult> SetNickname([FromBody] SetNicknameRequest req)
     {
         var sessionId = GetSessionId();
@@ -71,6 +73,7 @@ public class LeaderboardController : Controller
     }
 
     [HttpPost]
+    [RequireRegistration]
     public async Task<IActionResult> AddScore([FromBody] AddScoreRequest req)
     {
         var sessionId = GetSessionId();

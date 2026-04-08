@@ -2346,5 +2346,64 @@ function processVoiceCommand(rawText) {
 })();
 </script>
 
+<!-- ══════════ Registration Gate Modal ══════════ -->
+<style>
+#regGateOverlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:99999;align-items:center;justify-content:center;font-family:'Noto Sans TC',sans-serif}
+#regGateOverlay.active{display:flex}
+#regGateBox{background:linear-gradient(135deg,#161b22,#1c2333);border:1px solid rgba(99,102,241,0.5);border-radius:18px;padding:36px 32px;max-width:400px;width:90%;text-align:center;box-shadow:0 12px 48px rgba(0,0,0,.6)}
+#regGateBox .rg-icon{font-size:48px;margin-bottom:12px}
+#regGateBox .rg-title{font-size:20px;font-weight:700;color:#e6edf3;margin-bottom:10px}
+#regGateBox .rg-desc{font-size:14px;color:#8b949e;line-height:1.7;margin-bottom:24px}
+#regGateBox .rg-btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#00b894);color:#fff;border:none;border-radius:10px;padding:12px 32px;font-size:16px;font-weight:600;cursor:pointer;text-decoration:none;transition:transform .2s}
+#regGateBox .rg-btn:hover{transform:scale(1.05)}
+#regGateBox .rg-login{display:block;margin-top:14px;font-size:13px;color:#8b949e;text-decoration:none}
+#regGateBox .rg-login:hover{color:#c9d1d9}
+#regGateBox .rg-close{position:absolute;top:12px;right:16px;background:none;border:none;color:#8b949e;font-size:20px;cursor:pointer}
+</style>
+<div id="regGateOverlay">
+    <div id="regGateBox" style="position:relative">
+        <button class="rg-close" onclick="closeRegGate()">&times;</button>
+        <div class="rg-icon">🔒</div>
+        <div class="rg-title">需要註冊才能使用此功能</div>
+        <div class="rg-desc">註冊帳號即可解鎖測驗、遊戲、簽到、筆記下載等所有功能，完全免費！</div>
+        <a href="/Account/Register" class="rg-btn">免費註冊</a>
+        <a href="/Account/Login" class="rg-login">已有帳號？登入</a>
+    </div>
+</div>
+<script>
+(function(){
+    // Global fetch interceptor: detect { requireRegistration: true } from API responses
+    var _origFetch = window.fetch;
+    window.fetch = function(){
+        return _origFetch.apply(this, arguments).then(function(response){
+            if(!response.ok) return response;
+            var ct = response.headers.get('content-type') || '';
+            if(!ct.includes('json')) return response;
+            // Clone to read body without consuming
+            var cloned = response.clone();
+            cloned.json().then(function(data){
+                if(data && data.requireRegistration){
+                    showRegGate();
+                }
+            }).catch(function(){});
+            return response;
+        });
+    };
+
+    window.showRegGate = function(){
+        document.getElementById('regGateOverlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+    window.closeRegGate = function(){
+        document.getElementById('regGateOverlay').classList.remove('active');
+        document.body.style.overflow = '';
+    };
+    // Click overlay to close
+    document.getElementById('regGateOverlay').addEventListener('click', function(e){
+        if(e.target === this) closeRegGate();
+    });
+})();
+</script>
+
 </body>
 </html>
