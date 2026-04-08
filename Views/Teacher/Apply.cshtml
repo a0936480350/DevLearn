@@ -56,6 +56,10 @@
         display: none; margin-top: 8px; font-size: 13px; color: var(--accent);
         text-align: center;
     }
+    .diploma-preview {
+        max-width: 280px; max-height: 200px; border-radius: 12px; object-fit: contain;
+        display: none; margin: 10px auto 0; border: 2px solid var(--accent);
+    }
 
     /* Skill checkboxes */
     .skill-checkboxes { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -171,6 +175,7 @@
                 <div class="fu-hint" data-i18n="teacher-apply-diploma-hint">支援 JPG、PNG、PDF 格式</div>
                 <input type="file" name="diploma" accept="image/*,.pdf" required id="diplomaInput" onchange="showDiplomaName(this)" />
             </div>
+            <img class="diploma-preview" id="diplomaPreview" />
             <div class="diploma-filename" id="diplomaFilename"></div>
         </div>
 
@@ -238,9 +243,22 @@
 
     function showDiplomaName(input) {
         if (input.files && input.files[0]) {
+            var file = input.files[0];
             var el = document.getElementById('diplomaFilename');
-            el.textContent = '&#x2705; ' + input.files[0].name;
+            el.textContent = '\u2705 ' + file.name;
             el.style.display = 'block';
+
+            var preview = document.getElementById('diplomaPreview');
+            if (file.type.startsWith('image/')) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
         }
     }
 
