@@ -43,6 +43,7 @@ public static class SeedData
         chapters.AddRange(SeedChapters_Vue.GetChapters());
         chapters.AddRange(SeedChapters_Microservices.GetChapters());
         chapters.AddRange(SeedChapters_Redis.GetChapters());
+        chapters.AddRange(SeedChapters_IPAS.GetChapters());
 
         // 只新增不存在的章節（不砍舊資料）— 用參數化 raw SQL 確保 Id 被寫入
         var newChapters = chapters.Where(c => !existingChapterIds.Contains(c.Id)).ToList();
@@ -76,6 +77,17 @@ public static class SeedData
             db.Questions.AddRange(questions);
             db.SaveChanges();
             Console.WriteLine($"[Seed] Added {questions.Count} new questions");
+        }
+
+        // IPAS AI 測驗題
+        var ipasQuestions = SeedQuestions_IPAS.GetQuestions()
+            .Where(q => !existingQuestionIds.Contains(q.Id))
+            .ToList();
+        if (ipasQuestions.Count > 0)
+        {
+            db.Questions.AddRange(ipasQuestions);
+            db.SaveChanges();
+            Console.WriteLine($"[Seed] Added {ipasQuestions.Count} IPAS AI questions");
         }
 
         // IoT 測驗題
