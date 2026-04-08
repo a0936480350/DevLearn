@@ -61,7 +61,7 @@ public class QuizController : Controller
         foreach (var q in questions)
         {
             submission.Answers.TryGetValue(q.Id.ToString(), out var answer);
-            bool isCorrect = string.Equals(answer?.Trim(), q.CorrectAnswer.Trim(), StringComparison.OrdinalIgnoreCase);
+            bool isCorrect = CheckAnswer(answer, q.CorrectAnswer, q.OptionsJson);
             if (isCorrect) correct++;
             details.Add(new {
                 questionText = q.QuestionText,
@@ -161,7 +161,7 @@ public class QuizController : Controller
         foreach (var q in questions)
         {
             submission.Answers.TryGetValue(q.Id.ToString(), out var answer);
-            bool isCorrect = string.Equals(answer?.Trim(), q.CorrectAnswer.Trim(), StringComparison.OrdinalIgnoreCase);
+            bool isCorrect = CheckAnswer(answer, q.CorrectAnswer, q.OptionsJson);
             if (isCorrect) correct++;
             details.Add(new {
                 questionText = q.QuestionText,
@@ -252,6 +252,27 @@ public class QuizController : Controller
     public async Task<IActionResult> Submit([FromBody] QuizSubmission submission)
     {
         return await SubmitChapterQuiz(submission);
+    }
+
+    // Smart answer matching: supports both full option text ("B. Microsoft") and letter-only ("B")
+    private static bool CheckAnswer(string? userAnswer, string correctAnswer, string? optionsJson)
+    {
+        if (string.IsNullOrWhiteSpace(userAnswer)) return false;
+        var ua = userAnswer.Trim();
+        var ca = correctAnswer.Trim();
+
+        // Direct match (old-style: full text match)
+        if (string.Equals(ua, ca, StringComparison.OrdinalIgnoreCase)) return true;
+
+        // User sent full option text like "D. xxx", correct is just "D"
+        if (ca.Length == 1 && ua.Length > 1 && ua[1] is '.' or ' ' or '、'
+            && char.ToUpper(ua[0]) == char.ToUpper(ca[0])) return true;
+
+        // User sent just "D", correct is full text "D. something"
+        if (ua.Length == 1 && ca.Length > 1 && ca[1] is '.' or ' ' or '、'
+            && char.ToUpper(ca[0]) == char.ToUpper(ua[0])) return true;
+
+        return false;
     }
 }
 

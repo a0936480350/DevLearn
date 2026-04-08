@@ -63,10 +63,7 @@ public class SpeedController : Controller
             var q = questions.FirstOrDefault(x => x.Id == ans.QuestionId);
             if (q == null) continue;
 
-            bool isCorrect = string.Equals(
-                ans.Answer?.Trim(),
-                q.CorrectAnswer.Trim(),
-                StringComparison.OrdinalIgnoreCase);
+            bool isCorrect = SmartAnswerMatch(ans.Answer, q.CorrectAnswer);
 
             if (isCorrect) correct++;
 
@@ -136,6 +133,19 @@ public class SpeedController : Controller
             .ToListAsync();
 
         return Json(runs);
+    }
+
+    private static bool SmartAnswerMatch(string? userAnswer, string correctAnswer)
+    {
+        if (string.IsNullOrWhiteSpace(userAnswer)) return false;
+        var ua = userAnswer.Trim();
+        var ca = correctAnswer.Trim();
+        if (string.Equals(ua, ca, StringComparison.OrdinalIgnoreCase)) return true;
+        if (ca.Length == 1 && ua.Length > 1 && ua[1] is '.' or ' ' or '、'
+            && char.ToUpper(ua[0]) == char.ToUpper(ca[0])) return true;
+        if (ua.Length == 1 && ca.Length > 1 && ca[1] is '.' or ' ' or '、'
+            && char.ToUpper(ca[0]) == char.ToUpper(ua[0])) return true;
+        return false;
     }
 }
 

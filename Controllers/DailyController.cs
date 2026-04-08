@@ -108,10 +108,7 @@ public class DailyController : Controller
         if (question == null)
             return Json(new { error = "Question not found" });
 
-        bool correct = string.Equals(
-            submission.Answer?.Trim(),
-            question.CorrectAnswer.Trim(),
-            StringComparison.OrdinalIgnoreCase);
+        bool correct = SmartAnswerMatch(submission.Answer, question.CorrectAnswer);
 
         // Calculate streak before saving
         var previousStreak = await CalculateStreak(sessionId);
@@ -230,6 +227,19 @@ public class DailyController : Controller
         }
 
         return streak;
+    }
+
+    private static bool SmartAnswerMatch(string? userAnswer, string correctAnswer)
+    {
+        if (string.IsNullOrWhiteSpace(userAnswer)) return false;
+        var ua = userAnswer.Trim();
+        var ca = correctAnswer.Trim();
+        if (string.Equals(ua, ca, StringComparison.OrdinalIgnoreCase)) return true;
+        if (ca.Length == 1 && ua.Length > 1 && ua[1] is '.' or ' ' or '、'
+            && char.ToUpper(ua[0]) == char.ToUpper(ca[0])) return true;
+        if (ua.Length == 1 && ca.Length > 1 && ca[1] is '.' or ' ' or '、'
+            && char.ToUpper(ca[0]) == char.ToUpper(ua[0])) return true;
+        return false;
     }
 }
 
