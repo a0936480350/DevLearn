@@ -2269,7 +2269,24 @@ function processVoiceCommand(rawText) {
 </div>
 <script>
 (function(){
-    if(localStorage.getItem('onboardingDone')) return;
+    // Logged-in users: never show tour
+    // Guests: show tour once per 15-day session (cookie-based)
+    function getCookie(n){var m=document.cookie.match(new RegExp('(^| )'+n+'=([^;]+)'));return m?m[2]:null;}
+    function setCookie(n,v,days){var d=new Date();d.setTime(d.getTime()+days*86400000);document.cookie=n+'='+v+';expires='+d.toUTCString()+';path=/;SameSite=Lax';}
+
+    if(getCookie('onboardingDone')) return;
+
+    // Check login status — if registered, skip tour permanently
+    fetch('/Account/Me').then(function(r){return r.ok?r.json():null;}).then(function(data){
+        if(data && data.isRegistered){
+            setCookie('onboardingDone','1',365);
+            return;
+        }
+        // Guest: start tour, set 15-day cookie after
+        startTour();
+    }).catch(function(){ startTour(); });
+
+    function startTour(){
     var steps=[
         {el:null, text:"\uD83D\uDC4B \u6B61\u8FCE\u4F86\u5230 DevLearn\uFF01\u8B93\u6211\u5E36\u4F60\u5FEB\u901F\u8A8D\u8B58\u9019\u500B\u5E73\u53F0", pos:"center"},
         {el:"#globalSearch", text:"\uD83D\uDD0D \u641C\u5C0B\u529F\u80FD\uFF1A\u8F38\u5165\u95DC\u9375\u5B57\u5FEB\u901F\u627E\u5230\u4EFB\u4F55\u7AE0\u7BC0", pos:"below"},
@@ -2316,7 +2333,7 @@ function processVoiceCommand(rawText) {
     };
     window.tourEnd=function(){
         overlay.classList.remove('active');
-        localStorage.setItem('onboardingDone','true');
+        setCookie('onboardingDone','1',15);
     };
     overlay.addEventListener('click',function(e){
         if(e.target===overlay||e.target===spotlight) tourNext();
@@ -2325,6 +2342,7 @@ function processVoiceCommand(rawText) {
         overlay.classList.add('active');
         showStep(0);
     },500);
+    } // end startTour
 })();
 </script>
 
