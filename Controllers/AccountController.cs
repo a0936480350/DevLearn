@@ -189,7 +189,7 @@ public class AccountController : Controller
         Response.Cookies.Append("DotNetLearner", registered.AnonymousId, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
+            Secure = false,
             SameSite = SameSiteMode.Lax,
             MaxAge = TimeSpan.FromDays(365),
             Path = "/"
@@ -255,7 +255,7 @@ public class AccountController : Controller
         Response.Cookies.Append("DotNetLearner", registered.AnonymousId, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
+            Secure = false,
             SameSite = SameSiteMode.Lax,
             MaxAge = TimeSpan.FromDays(365),
             Path = "/"

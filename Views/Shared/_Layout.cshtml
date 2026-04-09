@@ -2347,6 +2347,32 @@ function processVoiceCommand(rawText) {
 })();
 </script>
 
+<!-- ══════════ Scroll Reveal ══════════ -->
+<script>
+(function(){
+    var observer = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+            if(e.isIntersecting){
+                e.target.classList.add('visible');
+            }
+        });
+    }, {threshold: 0.1, rootMargin: '0px 0px -40px 0px'});
+
+    // Auto-apply reveal to key sections
+    document.querySelectorAll('.section-block, .category-card, .path-node, .hero-stats .stat, .info-card').forEach(function(el, i){
+        el.classList.add('reveal');
+        el.style.transitionDelay = (i % 4) * 0.1 + 's';
+        observer.observe(el);
+    });
+    // Feature nav cards
+    document.querySelectorAll('.home-layout section > div[style*="display:grid"] > a').forEach(function(el, i){
+        el.classList.add('reveal');
+        el.style.transitionDelay = i * 0.08 + 's';
+        observer.observe(el);
+    });
+})();
+</script>
+
 <!-- ══════════ Registration Gate Modal ══════════ -->
 <style>
 #regGateOverlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:99999;align-items:center;justify-content:center;font-family:'Noto Sans TC',sans-serif}
