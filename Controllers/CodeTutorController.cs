@@ -19,7 +19,7 @@ public class CodeTutorController : Controller
     {
         // Return predefined lessons
         var lessons = GetAllLessons();
-        return Json(lessons.Select(l => new { l.Id, l.Title, l.Difficulty, l.Description }));
+        return Json(lessons.Select(l => new { l.Id, l.Title, l.Category, l.Difficulty, l.Description }));
     }
 
     [HttpGet]
@@ -33,9 +33,9 @@ public class CodeTutorController : Controller
 
     private List<CodeLesson> GetAllLessons()
     {
-        return new List<CodeLesson>
+        var lessons = new List<CodeLesson>
         {
-            new() { Id = 1, Title = "Hello World", Difficulty = "beginner", Description = "你的第一個 C# 程式",
+            new() { Id = 1, Category = "csharp", Title = "Hello World", Difficulty = "beginner", Description = "你的第一個 C# 程式",
                 Lines = new List<CodeLine> {
                     new() { Comment = "// 引入 System 命名空間，這樣才能使用 Console", Code = "using System;", Explanation = "💡 using 是 C# 的引入指令，類似 Python 的 import。System 命名空間包含了 Console、Math 等基礎類別。沒有 using System，你就要寫 System.Console.WriteLine() 全名。" },
                     new() { Comment = "// 定義一個類別，C# 的程式碼都要放在類別裡面", Code = "class Program {", Explanation = "💡 C# 是物件導向語言，所有程式碼都必須放在 class（類別）裡面。Program 是慣例名稱，你也可以叫其他名字。大括號 { } 定義了類別的範圍。" },
@@ -45,7 +45,7 @@ public class CodeTutorController : Controller
                     new() { Comment = "// 關閉 Program 類別的大括號", Code = "}" },
                 }
             },
-            new() { Id = 2, Title = "變數與型別", Difficulty = "beginner", Description = "宣告變數並使用不同資料型別",
+            new() { Id = 2, Category = "csharp", Title = "變數與型別", Difficulty = "beginner", Description = "宣告變數並使用不同資料型別",
                 Lines = new List<CodeLine> {
                     new() { Comment = "// 引入必要的命名空間", Code = "using System;", Explanation = "💡 每個 C# 檔案開頭通常都會有 using 語句。System 是最基礎的命名空間，幾乎每個程式都需要它。這跟 Java 的 import java.lang.* 概念類似。" },
                     new() { Comment = "// 建立程式的主類別", Code = "class Program {", Explanation = "💡 class 是 C# 的基本組織單位。即使是簡單的程式也需要一個類別。在 C# 10+ 可以用「頂層語句」省略 class，但學習時建議先寫完整結構。" },
@@ -60,7 +60,7 @@ public class CodeTutorController : Controller
                     new() { Code = "}" },
                 }
             },
-            new() { Id = 3, Title = "if / else 條件判斷", Difficulty = "beginner", Description = "學習條件分支邏輯",
+            new() { Id = 3, Category = "csharp", Title = "if / else 條件判斷", Difficulty = "beginner", Description = "學習條件分支邏輯",
                 Lines = new List<CodeLine> {
                     new() { Code = "using System;", Explanation = "💡 using System; 讓我們可以直接使用 Console 類別。如果省略這行，每次都要寫 System.Console.WriteLine()，非常冗長。" },
                     new() { Code = "class Program {", Explanation = "💡 所有 C# 程式碼都必須在類別中。Program 是主程式類別的慣例名稱。" },
@@ -79,7 +79,7 @@ public class CodeTutorController : Controller
                     new() { Code = "}" },
                 }
             },
-            new() { Id = 4, Title = "for 迴圈", Difficulty = "beginner", Description = "用迴圈重複執行程式碼",
+            new() { Id = 4, Category = "csharp", Title = "for 迴圈", Difficulty = "beginner", Description = "用迴圈重複執行程式碼",
                 Lines = new List<CodeLine> {
                     new() { Code = "using System;", Explanation = "💡 引入 System 命名空間，提供 Console 等基本功能。" },
                     new() { Code = "class Program {", Explanation = "💡 C# 程式的基本結構：所有程式碼都放在類別裡。" },
@@ -96,7 +96,7 @@ public class CodeTutorController : Controller
                     new() { Code = "}" },
                 }
             },
-            new() { Id = 5, Title = "陣列與 foreach", Difficulty = "intermediate", Description = "使用陣列存放多筆資料",
+            new() { Id = 5, Category = "csharp", Title = "陣列與 foreach", Difficulty = "intermediate", Description = "使用陣列存放多筆資料",
                 Lines = new List<CodeLine> {
                     new() { Code = "using System;", Explanation = "💡 引入 System 命名空間。Array.Sort() 也在 System 裡面。" },
                     new() { Code = "class Program {", Explanation = "💡 主程式類別。" },
@@ -112,7 +112,7 @@ public class CodeTutorController : Controller
                     new() { Code = "}" },
                 }
             },
-            new() { Id = 6, Title = "方法（函式）", Difficulty = "intermediate", Description = "把程式碼包成可重複使用的方法",
+            new() { Id = 6, Category = "csharp", Title = "方法（函式）", Difficulty = "intermediate", Description = "把程式碼包成可重複使用的方法",
                 Lines = new List<CodeLine> {
                     new() { Code = "using System;", Explanation = "💡 引入 System 命名空間。" },
                     new() { Code = "class Program {", Explanation = "💡 所有方法都必須定義在類別裡面，這是 C# 的規則（不像 Python 可以在檔案層級定義函式）。" },
@@ -130,7 +130,7 @@ public class CodeTutorController : Controller
                     new() { Code = "}" },
                 }
             },
-            new() { Id = 7, Title = "類別與物件", Difficulty = "intermediate", Description = "OOP 物件導向基礎",
+            new() { Id = 7, Category = "csharp", Title = "類別與物件", Difficulty = "intermediate", Description = "OOP 物件導向基礎",
                 Lines = new List<CodeLine> {
                     new() { Code = "using System;", Explanation = "💡 引入 System 命名空間。" },
                     new() { Comment = "// 定義一個 Dog 類別", Code = "class Dog {", Explanation = "💡 類別（class）是物件的藍圖/模板。Dog 類別描述了「狗」應該有什麼屬性和行為。一個檔案可以有多個類別。類似 Python 的 class Dog:。" },
@@ -151,7 +151,7 @@ public class CodeTutorController : Controller
                     new() { Code = "}" },
                 }
             },
-            new() { Id = 8, Title = "LINQ 查詢", Difficulty = "advanced", Description = "用 LINQ 優雅地處理資料集合",
+            new() { Id = 8, Category = "csharp", Title = "LINQ 查詢", Difficulty = "advanced", Description = "用 LINQ 優雅地處理資料集合",
                 Lines = new List<CodeLine> {
                     new() { Code = "using System;", Explanation = "💡 引入 System 命名空間，提供基礎類別。" },
                     new() { Comment = "// 引入 LINQ 命名空間", Code = "using System.Linq;", Explanation = "💡 LINQ（Language Integrated Query）是 C# 最強大的功能之一！它讓你用類似 SQL 的語法查詢任何集合。必須引入 System.Linq 才能使用 Where、Select、OrderBy 等方法。" },
@@ -170,7 +170,7 @@ public class CodeTutorController : Controller
                 }
             },
             // ===== JavaScript =====
-            new() { Id = 9, Title = "JavaScript 基礎", Difficulty = "beginner", Description = "認識 JavaScript 的基本語法與函式",
+            new() { Id = 9, Category = "javascript", Title = "JavaScript 基礎", Difficulty = "beginner", Description = "認識 JavaScript 的基本語法與函式",
                 Lines = new List<CodeLine> {
                     new() { Comment = "// 用 console.log 在主控台印出訊息", Code = "console.log(\"Hello JavaScript!\");", Explanation = "console.log 是 JS 最常用的除錯工具，類似 C# 的 Console.WriteLine。括號內放要印出的內容。" },
                     new() { Comment = "// 用 let 宣告可變變數", Code = "let name = \"Mike\";", Explanation = "let 宣告的變數可以重新賦值。ES6 之後建議用 let 取代 var，因為 let 有區塊作用域，不容易產生 bug。" },
@@ -186,7 +186,7 @@ public class CodeTutorController : Controller
                     new() { Comment = "// 呼叫箭頭函式", Code = "console.log(multiply(4, 6));", Explanation = "箭頭函式的呼叫方式和一般函式相同，只是定義方式不同。" },
                 }
             },
-            new() { Id = 10, Title = "JS DOM 操作", Difficulty = "intermediate", Description = "用 JavaScript 操作網頁元素",
+            new() { Id = 10, Category = "javascript", Title = "JS DOM 操作", Difficulty = "intermediate", Description = "用 JavaScript 操作網頁元素",
                 Lines = new List<CodeLine> {
                     new() { Comment = "// 用 getElementById 取得指定 id 的元素", Code = "let title = document.getElementById(\"title\");", Explanation = "getElementById 是最快的 DOM 查詢方法，傳入元素的 id 字串。如果找不到會回傳 null，使用前最好先檢查。" },
                     new() { Comment = "// 用 querySelector 取得第一個符合的元素", Code = "let btn = document.querySelector(\".btn-primary\");", Explanation = "querySelector 接受 CSS 選擇器語法，比 getElementById 更靈活。只回傳第一個符合的元素，要全部用 querySelectorAll。" },
@@ -201,7 +201,7 @@ public class CodeTutorController : Controller
                     new() { Comment = "// 用 appendChild 把新元素加到頁面中", Code = "document.body.appendChild(newDiv);", Explanation = "appendChild 將子元素加到父元素的最後面。如果要插入到特定位置，可以用 insertBefore 或 insertAdjacentElement。" },
                 }
             },
-            new() { Id = 11, Title = "JS 非同步：Promise 與 async/await", Difficulty = "advanced", Description = "掌握 JavaScript 非同步程式設計",
+            new() { Id = 11, Category = "javascript", Title = "JS 非同步：Promise 與 async/await", Difficulty = "advanced", Description = "掌握 JavaScript 非同步程式設計",
                 Lines = new List<CodeLine> {
                     new() { Comment = "// setTimeout 延遲執行（非同步的基礎）", Code = "setTimeout(() => console.log(\"2秒後執行\"), 2000);", Explanation = "setTimeout 是最基本的非同步操作，第一個參數是要執行的函式，第二個是毫秒數。它不會阻塞後續程式碼的執行。" },
                     new() { Comment = "// 建立一個 Promise 物件", Code = "const myPromise = new Promise((resolve, reject) => {", Explanation = "Promise 代表一個非同步操作的最終結果。resolve 表示成功，reject 表示失敗。建立後立即開始執行。" },
@@ -222,7 +222,7 @@ public class CodeTutorController : Controller
                 }
             },
             // ===== jQuery =====
-            new() { Id = 13, Title = "jQuery 入門", Difficulty = "beginner", Description = "學習 jQuery 簡化 DOM 操作",
+            new() { Id = 13, Category = "javascript", Title = "jQuery 入門", Difficulty = "beginner", Description = "學習 jQuery 簡化 DOM 操作",
                 Lines = new List<CodeLine> {
                     new() { Comment = "// 等 DOM 載入完成後再執行", Code = "$(document).ready(function() {", Explanation = "$(document).ready 確保 DOM 完全載入後才執行程式碼。可以簡寫成 $(function(){})。這是 jQuery 程式的標準起手式。" },
                     new() { Comment = "// 用 $() 選取元素（類似 CSS 選擇器）", Code = "    let title = $(\"#title\");", Explanation = "$() 是 jQuery 的核心函式，接受 CSS 選擇器字串。# 選 id、. 選 class。回傳的是 jQuery 物件，不是原生 DOM 元素。" },
@@ -243,7 +243,7 @@ public class CodeTutorController : Controller
                 }
             },
             // ===== HTML =====
-            new() { Id = 14, Title = "HTML 基礎結構", Difficulty = "beginner", Description = "學習 HTML 網頁的基本架構與常用標籤",
+            new() { Id = 14, Category = "html", Title = "HTML 基礎結構", Difficulty = "beginner", Description = "學習 HTML 網頁的基本架構與常用標籤",
                 Lines = new List<CodeLine> {
                     new() { Comment = "<!-- 宣告文件類型為 HTML5 -->", Code = "<!DOCTYPE html>", Explanation = "<!DOCTYPE html> 告訴瀏覽器這是 HTML5 文件。必須放在最前面，不區分大小寫。少了它瀏覽器可能進入怪異模式 (quirks mode)。" },
                     new() { Comment = "<!-- html 是整個網頁的根元素 -->", Code = "<html lang=\"zh-TW\">", Explanation = "lang 屬性設定網頁語言，幫助搜尋引擎和螢幕閱讀器判斷內容語言。zh-TW 是繁體中文。" },
@@ -269,7 +269,7 @@ public class CodeTutorController : Controller
                 }
             },
             // ===== CSS =====
-            new() { Id = 15, Title = "CSS 樣式基礎", Difficulty = "beginner", Description = "學習 CSS 選擇器與常用樣式屬性",
+            new() { Id = 15, Category = "html", Title = "CSS 樣式基礎", Difficulty = "beginner", Description = "學習 CSS 選擇器與常用樣式屬性",
                 Lines = new List<CodeLine> {
                     new() { Comment = "/* 選取 body 元素設定全域樣式 */", Code = "body {", Explanation = "CSS 規則由選擇器和宣告區塊組成。body 選擇器套用到整個頁面，常用來設定預設字型和背景色。" },
                     new() { Code = "    color: #333;", Explanation = "color 設定文字顏色。#333 是深灰色的十六進位色碼。也可以用 rgb()、hsl() 或顏色名稱。" },
@@ -294,7 +294,7 @@ public class CodeTutorController : Controller
                 }
             },
             // ===== Vue 3 =====
-            new() { Id = 16, Title = "Vue 3 快速入門", Difficulty = "intermediate", Description = "學習 Vue 3 Composition API 的核心概念",
+            new() { Id = 16, Category = "vue", Title = "Vue 3 快速入門", Difficulty = "intermediate", Description = "學習 Vue 3 Composition API 的核心概念",
                 Lines = new List<CodeLine> {
                     new() { Comment = "// 從 vue 匯入必要的函式", Code = "import { createApp, ref, computed, watch } from 'vue';", Explanation = "Vue 3 的 Composition API 透過 import 匯入需要的功能。ref 管理響應式資料，computed 計算屬性，watch 監聽變化。" },
                     new() { Comment = "// 建立 Vue 應用程式", Code = "const app = createApp({", Explanation = "createApp 是 Vue 3 建立應用程式的入口。取代了 Vue 2 的 new Vue()。傳入一個元件選項物件。" },
@@ -318,7 +318,7 @@ public class CodeTutorController : Controller
                 }
             },
             // ===== React =====
-            new() { Id = 17, Title = "React 快速入門", Difficulty = "intermediate", Description = "學習 React 函式元件與 Hooks",
+            new() { Id = 17, Category = "react", Title = "React 快速入門", Difficulty = "intermediate", Description = "學習 React 函式元件與 Hooks",
                 Lines = new List<CodeLine> {
                     new() { Comment = "// 從 react 匯入必要的 Hooks", Code = "import React, { useState, useEffect } from 'react';", Explanation = "React 用 Hooks 管理元件狀態和副作用。useState 管理狀態，useEffect 處理副作用（API 呼叫、計時器等）。" },
                     new() { Comment = "// 定義函式元件", Code = "function Counter() {", Explanation = "React 元件是回傳 JSX 的函式。函式名稱必須大寫開頭，這是 React 區分元件和 HTML 元素的方式。" },
@@ -341,7 +341,7 @@ public class CodeTutorController : Controller
                 }
             },
             // ===== Angular =====
-            new() { Id = 18, Title = "Angular 快速入門", Difficulty = "intermediate", Description = "學習 Angular 元件的基本結構",
+            new() { Id = 18, Category = "angular", Title = "Angular 快速入門", Difficulty = "intermediate", Description = "學習 Angular 元件的基本結構",
                 Lines = new List<CodeLine> {
                     new() { Comment = "// 匯入 Angular 核心裝飾器和介面", Code = "import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';", Explanation = "Angular 用 TypeScript 開發。Component 裝飾器定義元件，Input/Output 處理父子元件通訊，OnInit 是生命週期介面。" },
                     new() { Comment = "// @Component 裝飾器定義元件的中繼資料", Code = "@Component({", Explanation = "@Component 是 Angular 最重要的裝飾器。它告訴 Angular 這個 class 是一個元件，並設定模板、樣式和選擇器。" },
@@ -370,7 +370,7 @@ public class CodeTutorController : Controller
                 }
             },
             // ===== SQL =====
-            new() { Id = 19, Title = "SQL 基礎查詢", Difficulty = "beginner", Description = "學習 SQL 的基本查詢語法",
+            new() { Id = 19, Category = "sql", Title = "SQL 基礎查詢", Difficulty = "beginner", Description = "學習 SQL 的基本查詢語法",
                 Lines = new List<CodeLine> {
                     new() { Comment = "-- 從 students 表格選取所有欄位", Code = "SELECT * FROM students;", Explanation = "SELECT * 選取所有欄位，FROM 指定表格。實務上建議明確列出需要的欄位，避免用 * 以提升效能和可讀性。" },
                     new() { Comment = "-- 只選取特定欄位", Code = "SELECT name, age, grade FROM students;", Explanation = "列出欄位名稱用逗號分隔。只取需要的欄位可以減少資料傳輸量，尤其在表格欄位很多時效果明顯。" },
@@ -384,7 +384,7 @@ public class CodeTutorController : Controller
                     new() { Comment = "-- 用 AS 設定別名讓結果更易讀", Code = "SELECT name AS 姓名, age AS 年齡 FROM students;", Explanation = "AS 可以為欄位或表格設定別名。中文別名讓結果更易讀。表格別名在 JOIN 時特別有用，可以簡化語法。" },
                 }
             },
-            new() { Id = 20, Title = "SQL 進階：JOIN 與子查詢", Difficulty = "intermediate", Description = "學習多表格查詢與資料操作",
+            new() { Id = 20, Category = "sql", Title = "SQL 進階：JOIN 與子查詢", Difficulty = "intermediate", Description = "學習多表格查詢與資料操作",
                 Lines = new List<CodeLine> {
                     new() { Comment = "-- INNER JOIN：取兩表交集", Code = "SELECT s.name, c.course_name FROM students s INNER JOIN courses c ON s.id = c.student_id;", Explanation = "INNER JOIN 只回傳兩個表格都有匹配的資料。s 和 c 是表格別名，ON 指定關聯條件。這是最常用的 JOIN 類型。" },
                     new() { Comment = "-- LEFT JOIN：保留左表所有資料", Code = "SELECT s.name, c.course_name FROM students s LEFT JOIN courses c ON s.id = c.student_id;", Explanation = "LEFT JOIN 保留左表（students）所有資料，右表沒匹配的欄位填 NULL。適合找「有/沒有選課的學生」。" },
@@ -398,6 +398,9 @@ public class CodeTutorController : Controller
                 }
             },
         };
+        // 加入擴充課程
+        lessons.AddRange(CodeTutorLessons.GetAllLessons());
+        return lessons;
     }
 }
 
@@ -405,6 +408,7 @@ public class CodeLesson
 {
     public int Id { get; set; }
     public string Title { get; set; } = "";
+    public string Category { get; set; } = "csharp";
     public string Difficulty { get; set; } = "beginner";
     public string Description { get; set; } = "";
     public List<CodeLine> Lines { get; set; } = new();

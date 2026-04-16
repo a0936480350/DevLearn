@@ -44,6 +44,12 @@ public static class SeedData
         chapters.AddRange(SeedChapters_Microservices.GetChapters());
         chapters.AddRange(SeedChapters_Redis.GetChapters());
         chapters.AddRange(SeedChapters_IPAS.GetChapters());
+        chapters.AddRange(SeedChapters_SQL.GetChapters());
+        chapters.AddRange(SeedChapters_JavaScript.GetChapters());
+        chapters.AddRange(SeedChapters_HTML.GetChapters());
+        chapters.AddRange(SeedChapters_ConceptBackend.GetChapters());
+        chapters.AddRange(SeedChapters_ConceptArch.GetChapters());
+        chapters.AddRange(SeedChapters_ConceptFrontend.GetChapters());
 
         // 只新增不存在的章節（不砍舊資料）— 用參數化 raw SQL 確保 Id 被寫入
         var newChapters = chapters.Where(c => !existingChapterIds.Contains(c.Id)).ToList();

@@ -1,15 +1,69 @@
-publish/
-publish-azure/
-publish-out/
-publish-linux/
-deploy.zip
-deploy-linux.zip
-deploy-latest.zip
-deploy-v*.zip
-*.db
-azure-pub/
-azure-publish/
-azure-app.zip
-azure-deploy.zip
+# Build output
 bin/
 obj/
+publish/
+publish-*/
+pub-*/
+publish-out/
+azure-pub/
+azure-publish/
+
+# Deployment zips
+deploy*.zip
+*.zip
+azure-app.zip
+
+# Database files
+*.db
+*.db-journal
+*.sqlite
+
+# Secrets & local settings
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Local.json
+secrets.json
+.env
+.env.local
+
+# IDE & OS
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+Logs/
+logs/
+app-logs*.zip
+azure-logs*.zip
+
+# Node
+node_modules/
+package-lock.json
+
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# Temporary
+*.tmp
+*.bak
+*_backup/
+*-backup/
+
+# Local scripts with credentials
+seed_azure.py
+seed_extra.py
+seed_data.sql
+cleanup_fake_data.sql
+deploy.py
+
+# Claude / dev artifacts
+.claude/
+CLAUDE.md

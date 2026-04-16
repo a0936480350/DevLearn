@@ -12,6 +12,26 @@
         color: #e0e0e0;
     }
 
+    /* --- Category Filter --- */
+    .cat-btn {
+        padding: 8px 18px;
+        border-radius: 20px;
+        border: 1px solid #30363d;
+        background: #161b22;
+        color: #8b949e;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 600;
+    }
+    .cat-btn:hover { border-color: #58a6ff; color: #58a6ff; }
+    .cat-btn.active {
+        background: linear-gradient(135deg, #1a3a5c, #2a1a4e);
+        border-color: #58a6ff;
+        color: #58a6ff;
+        box-shadow: 0 0 12px rgba(88,166,255,0.2);
+    }
+
     /* --- Lobby --- */
     .tutor-lobby {
         text-align: center;
@@ -406,6 +426,10 @@
         <h1>🤖 AI 教你打程式</h1>
         <p class="subtitle">AI 一行一行教你寫，跟著打就能學會！</p>
 
+        <div class="category-filter" id="categoryFilter" style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:20px 0;">
+            <!-- filled by JS -->
+        </div>
+
         <div class="lesson-grid" id="lessonGrid">
             <!-- filled by JS -->
         </div>
@@ -528,16 +552,49 @@
     const explanationPanel = document.getElementById('explanationPanel');
     const explanationText = document.getElementById('explanationText');
 
+    // Category config
+    const categoryMap = {
+        all: { label: '📚 全部', color: '' },
+        csharp: { label: '🔷 C#', color: '#9B59B6' },
+        javascript: { label: '🟨 JavaScript', color: '#F7DF1E' },
+        html: { label: '📄 HTML/CSS', color: '#E44D26' },
+        sql: { label: '📘 SQL', color: '#336791' },
+        vue: { label: '💚 Vue', color: '#42B883' },
+        react: { label: '⚛️ React', color: '#61DAFB' },
+        angular: { label: '🅰️ Angular', color: '#DD0031' },
+        api: { label: '🌐 API', color: '#3498DB' },
+        java: { label: '☕ Java', color: '#ED8B00' },
+    };
+    let activeCategory = 'all';
+
     // Load lessons
     fetch('/CodeTutor/GetLessons')
         .then(r => r.json())
         .then(data => {
             lessons = data;
+            renderCategoryFilter();
             renderLessonGrid();
         });
 
+    function renderCategoryFilter() {
+        const filterEl = document.getElementById('categoryFilter');
+        // 只顯示有課程的分類
+        const cats = ['all', ...new Set(lessons.map(l => l.category))];
+        filterEl.innerHTML = cats.map(c => {
+            const info = categoryMap[c] || { label: c, color: '' };
+            return `<button class="cat-btn ${c === activeCategory ? 'active' : ''}"
+                            onclick="window._filterCategory('${c}')">${info.label}</button>`;
+        }).join('');
+    }
+    window._filterCategory = function(cat) {
+        activeCategory = cat;
+        renderCategoryFilter();
+        renderLessonGrid();
+    };
+
     function renderLessonGrid() {
-        lessonGrid.innerHTML = lessons.map(l => `
+        const filtered = activeCategory === 'all' ? lessons : lessons.filter(l => l.category === activeCategory);
+        lessonGrid.innerHTML = filtered.map(l => `
             <div class="lesson-card" onclick="window._startLesson(${l.id})">
                 <div class="lesson-title">${l.title}</div>
                 <div class="lesson-desc">${l.description}</div>

@@ -1309,6 +1309,12 @@ var translations = {
         'cat-iot': 'IoT & POS',
         'cat-interview': '面試',
         'cat-whiteboard': '白板題',
+        'cat-sql': 'SQL 查詢',
+        'cat-javascript': 'JavaScript',
+        'cat-html': 'HTML & CSS',
+        'cat-concept-backend': '後端概念深入',
+        'cat-concept-arch': '架構概念深入',
+        'cat-concept-frontend': '前端概念深入',
 
         // ── 路徑名稱/描述 ──
         'path-csharp-name': 'C# 基礎',
@@ -2619,6 +2625,12 @@ var translations = {
         'cat-iot': 'IoT & POS',
         'cat-interview': 'Interview',
         'cat-whiteboard': 'Whiteboard',
+        'cat-sql': 'SQL Queries',
+        'cat-javascript': 'JavaScript',
+        'cat-html': 'HTML & CSS',
+        'cat-concept-backend': 'Backend Concepts',
+        'cat-concept-arch': 'Architecture Concepts',
+        'cat-concept-frontend': 'Frontend Concepts',
 
         // ── Path names/descs ──
         'path-csharp-name': 'C# Basics',
@@ -3929,6 +3941,12 @@ var translations = {
         'cat-iot': 'IoT & POS',
         'cat-interview': '面接',
         'cat-whiteboard': 'ホワイトボード',
+        'cat-sql': 'SQLクエリ',
+        'cat-javascript': 'JavaScript',
+        'cat-html': 'HTML & CSS',
+        'cat-concept-backend': 'バックエンド概念',
+        'cat-concept-arch': 'アーキテクチャ概念',
+        'cat-concept-frontend': 'フロントエンド概念',
 
         // ── パス名/説明 ──
         'path-csharp-name': 'C# 基礎',
