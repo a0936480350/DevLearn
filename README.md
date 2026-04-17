@@ -215,7 +215,7 @@ class QuestionManager {
 
 ### 3. Azure Free Tier 冷啟動
 **問題**：閒置 20 分鐘後重啟要 1-3 分鐘  
-**解法**：實作 `/Warmup` 端點 + GitHub Actions 每 15 分鐘 ping 一次
+**解法**：GitHub Actions Cron Job 每 10 分鐘自動 ping 一次（`keep-alive.yml`）
 
 ### 4. SignalR 連線管理
 **問題**：使用者開多個分頁時，訊息會重複發送  
@@ -224,6 +224,46 @@ class QuestionManager {
 ### 5. 部署時的資料保護
 **問題**：部署新版時要保留正式資料，但 schema 有變動  
 **解法**：Migration 自動執行，SeedData 只補不存在的資料（`ON CONFLICT DO NOTHING`）
+
+---
+
+## 🤖 CI/CD 自動化
+
+使用 **GitHub Actions** 建立完整的 CI/CD pipeline：
+
+### 🚀 Auto Deploy（`.github/workflows/deploy.yml`）
+```
+git push main
+    ↓
+GitHub Actions 自動觸發
+    ├── ⬇️ Checkout code
+    ├── 🛠️ Setup .NET 8
+    ├── 📦 Restore + Build
+    ├── 📤 Publish
+    └── 🚀 Deploy to Azure App Service
+         ↓
+    正式站 3 分鐘內更新完成 ✅
+```
+
+**核心機制**：
+- 使用 `azure/webapps-deploy@v3` action 透過 Azure Publish Profile 部署
+- 敏感資訊（publish profile）存於 GitHub Secrets（`AZURE_PUBLISH_PROFILE`）
+- 支援手動觸發（`workflow_dispatch`）
+
+### ☕ Keep-Alive Cron（`.github/workflows/keep-alive.yml`）
+```yaml
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # 每 10 分鐘
+```
+解決 Azure Free Tier 閒置 20 分鐘冷啟動問題。
+
+### 成果
+| 過去（手動） | 現在（CI/CD） |
+|------------|--------------|
+| 本機 `dotnet publish` → zip → `python deploy.py` → 等 5 分鐘 | `git push` → ☕ → 自動部署完成 |
+| 5 分鐘人工操作 | 0 分鐘（全自動） |
+| 有遺漏步驟風險 | 每次流程 100% 一致 |
 
 ---
 
