@@ -239,6 +239,21 @@ using (var scope = app.Services.CreateScope())
                 ""StartedAt"" TIMESTAMP,
                 ""CompletedAt"" TIMESTAMP
             );
+            CREATE TABLE IF NOT EXISTS ""SharedFiles"" (
+                ""Id"" SERIAL PRIMARY KEY,
+                ""Title"" TEXT NOT NULL DEFAULT '',
+                ""Description"" TEXT NOT NULL DEFAULT '',
+                ""FileName"" TEXT NOT NULL DEFAULT '',
+                ""StoragePath"" TEXT NOT NULL DEFAULT '',
+                ""FileSize"" BIGINT NOT NULL DEFAULT 0,
+                ""MimeType"" TEXT NOT NULL DEFAULT '',
+                ""Category"" TEXT NOT NULL DEFAULT 'general',
+                ""UploadedBy"" TEXT NOT NULL DEFAULT 'admin',
+                ""CreatedAt"" TIMESTAMP NOT NULL DEFAULT NOW(),
+                ""DownloadCount"" INTEGER NOT NULL DEFAULT 0,
+                ""IsPublic"" BOOLEAN NOT NULL DEFAULT true,
+                ""Tags"" TEXT
+            );
         ");
         Console.WriteLine("[DB] All tables ensured.");
     }
