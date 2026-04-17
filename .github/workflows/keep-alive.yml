@@ -1,0 +1,21 @@
+name: ☕ Keep Azure Alive
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # 每 10 分鐘跑一次（避免 Free Tier 冷啟動）
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📡 Ping DevLearn
+        run: |
+          echo "Pinging DevLearn..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://devlearn-dotnet.azurewebsites.net/)
+          echo "HTTP Status: $response"
+          if [ "$response" -eq "200" ] || [ "$response" -eq "301" ] || [ "$response" -eq "302" ]; then
+            echo "✅ Site is alive!"
+          else
+            echo "⚠️ Site returned status $response"
+          fi
