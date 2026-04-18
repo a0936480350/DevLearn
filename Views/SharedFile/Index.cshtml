@@ -1,0 +1,187 @@
+@model List<DotNetLearning.Models.SharedFile>
+@{
+    ViewData["Title"] = "檔案分享";
+    var isAdmin = Context.Request.Cookies.ContainsKey("AdminAuth")
+        && Context.Request.Cookies["AdminAuth"] == "pxmart-admin-verified-2026";
+}
+
+<style>
+    .sf-wrap { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+    .sf-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 12px; }
+    .sf-title { font-size: 32px; font-weight: 800; color: #e6edf3; margin: 0; }
+    .sf-subtitle { color: #8b949e; font-size: 14px; margin-top: 4px; }
+    .sf-upload-btn {
+        background: linear-gradient(135deg, #238636, #2ea043);
+        color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none;
+        font-weight: 600; display: inline-flex; align-items: center; gap: 8px;
+        box-shadow: 0 4px 12px rgba(35,134,54,0.3);
+    }
+    .sf-upload-btn:hover { transform: translateY(-2px); }
+    .sf-toolbar {
+        background: #161b22; border: 1px solid #30363d; border-radius: 12px;
+        padding: 16px; margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap;
+    }
+    .sf-search {
+        flex: 1; min-width: 200px; padding: 10px 14px; border: 1px solid #30363d;
+        background: #0d1117; color: #e6edf3; border-radius: 8px; font-size: 14px;
+    }
+    .sf-cat-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+    .sf-cat {
+        padding: 8px 16px; border-radius: 20px; border: 1px solid #30363d;
+        background: #0d1117; color: #8b949e; text-decoration: none; font-size: 13px;
+        transition: all 0.2s;
+    }
+    .sf-cat:hover, .sf-cat.active { background: #1a3a5c; color: #58a6ff; border-color: #58a6ff; }
+    .sf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .sf-card {
+        background: #161b22; border: 1px solid #30363d; border-radius: 12px;
+        overflow: hidden; transition: all 0.2s;
+        display: flex; flex-direction: column;
+    }
+    .sf-card:hover { transform: translateY(-4px); border-color: #58a6ff; box-shadow: 0 12px 30px rgba(88,166,255,0.15); }
+    .sf-card-icon {
+        padding: 30px; text-align: center; font-size: 64px;
+        background: linear-gradient(135deg, #1a2332, #0d1117);
+        border-bottom: 1px solid #30363d;
+    }
+    .sf-card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
+    .sf-card-title {
+        font-size: 16px; font-weight: 700; color: #e6edf3;
+        margin-bottom: 6px; line-height: 1.4;
+    }
+    .sf-card-desc {
+        color: #8b949e; font-size: 12px; line-height: 1.5; margin-bottom: 12px;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        overflow: hidden; flex: 1;
+    }
+    .sf-meta { display: flex; gap: 10px; flex-wrap: wrap; color: #6e7681; font-size: 11px; margin-bottom: 12px; }
+    .sf-meta-item { display: inline-flex; align-items: center; gap: 4px; }
+    .sf-actions { display: flex; gap: 8px; border-top: 1px solid #30363d; padding-top: 12px; }
+    .sf-btn {
+        flex: 1; padding: 8px 12px; border-radius: 6px; text-align: center;
+        text-decoration: none; font-size: 13px; font-weight: 600;
+        transition: all 0.2s; cursor: pointer; border: none;
+    }
+    .sf-btn-view { background: #1a3a5c; color: #58a6ff; }
+    .sf-btn-view:hover { background: #2a4a6c; }
+    .sf-btn-download { background: #1a4a2e; color: #3fb950; }
+    .sf-btn-download:hover { background: #2a5a3e; }
+    .sf-btn-del { background: #4a1a1a; color: #f85149; border: none; }
+    .sf-empty {
+        grid-column: 1 / -1; text-align: center; padding: 80px 20px;
+        color: #6e7681;
+    }
+    .sf-empty h2 { font-size: 24px; color: #8b949e; margin-bottom: 10px; }
+    .sf-tag { display:inline-block; background:#21262d; color:#8b949e; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-right: 4px; }
+    .sf-alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-weight: 500; }
+    .sf-alert-success { background: #0f2d1e; color: #3fb950; border: 1px solid #238636; }
+    .sf-alert-error { background: #2d0f0f; color: #f85149; border: 1px solid #da3633; }
+</style>
+
+<div class="sf-wrap">
+    <div class="sf-header">
+        <div>
+            <h1 class="sf-title">📚 檔案分享</h1>
+            <div class="sf-subtitle">筆記、PPT、PDF、截圖 — 下載或線上預覽</div>
+        </div>
+        @if (isAdmin)
+        {
+            <a href="/SharedFile/Upload" class="sf-upload-btn">📤 上傳新檔案</a>
+        }
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="sf-alert sf-alert-success">✅ @TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="sf-alert sf-alert-error">❌ @TempData["Error"]</div>
+    }
+
+    <form method="get" class="sf-toolbar">
+        <input type="text" name="search" value="@ViewBag.Search" placeholder="🔍 搜尋標題或描述..." class="sf-search">
+        <div class="sf-cat-pills">
+            <a href="/SharedFile" class="sf-cat @(ViewBag.Category == null ? "active" : "")">全部</a>
+            <a href="/SharedFile?category=tutorial" class="sf-cat @(ViewBag.Category == "tutorial" ? "active" : "")">📖 教學</a>
+            <a href="/SharedFile?category=notes" class="sf-cat @(ViewBag.Category == "notes" ? "active" : "")">📝 筆記</a>
+            <a href="/SharedFile?category=slides" class="sf-cat @(ViewBag.Category == "slides" ? "active" : "")">🎨 投影片</a>
+            <a href="/SharedFile?category=general" class="sf-cat @(ViewBag.Category == "general" ? "active" : "")">📁 一般</a>
+        </div>
+    </form>
+
+    <div class="sf-grid">
+        @if (!Model.Any())
+        {
+            <div class="sf-empty">
+                <h2>🗂️ 還沒有任何檔案</h2>
+                @if (isAdmin)
+                {
+                    <p>按右上角「上傳新檔案」開始分享</p>
+                }
+                else
+                {
+                    <p>管理員還沒上傳內容</p>
+                }
+            </div>
+        }
+        else
+        {
+            foreach (var f in Model)
+            {
+                var ext = System.IO.Path.GetExtension(f.FileName).ToLowerInvariant();
+                string icon;
+                if (ext == ".pdf") icon = "📕";
+                else if (ext == ".docx" || ext == ".doc") icon = "📘";
+                else if (ext == ".pptx" || ext == ".ppt") icon = "🎨";
+                else if (ext == ".xlsx" || ext == ".xls") icon = "📊";
+                else if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".webp") icon = "🖼️";
+                else if (ext == ".zip" || ext == ".7z") icon = "📦";
+                else if (ext == ".txt" || ext == ".md") icon = "📄";
+                else icon = "📎";
+                var canPreview = ext == ".pdf" || ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".webp" || ext == ".txt" || ext == ".md";
+                string sizeStr;
+                if (f.FileSize < 1024) sizeStr = $"{f.FileSize} B";
+                else if (f.FileSize < 1024 * 1024) sizeStr = $"{f.FileSize / 1024.0:F1} KB";
+                else sizeStr = $"{f.FileSize / 1024.0 / 1024:F1} MB";
+                <div class="sf-card">
+                    <div class="sf-card-icon">@icon</div>
+                    <div class="sf-card-body">
+                        <div class="sf-card-title">@f.Title</div>
+                        @if (!string.IsNullOrEmpty(f.Description))
+                        {
+                            <div class="sf-card-desc">@f.Description</div>
+                        }
+                        <div class="sf-meta">
+                            <span class="sf-meta-item">📏 @sizeStr</span>
+                            <span class="sf-meta-item">⬇️ @f.DownloadCount</span>
+                            <span class="sf-meta-item">📅 @f.CreatedAt.ToString("yyyy/MM/dd")</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(f.Tags))
+                        {
+                            <div style="margin-bottom: 8px;">
+                                @foreach (var t in f.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    <span class="sf-tag">#@t.Trim()</span>
+                                }
+                            </div>
+                        }
+                        <div class="sf-actions">
+                            @if (canPreview)
+                            {
+                                <a href="/SharedFile/Preview/@f.Id" target="_blank" class="sf-btn sf-btn-view">👁️ 預覽</a>
+                            }
+                            <a href="/SharedFile/Download/@f.Id" class="sf-btn sf-btn-download">⬇️ 下載</a>
+                            @if (isAdmin)
+                            {
+                                <form method="post" action="/SharedFile/Delete/@f.Id" style="flex: 0;" onsubmit="return confirm('確定刪除？');">
+                                    <button type="submit" class="sf-btn sf-btn-del" style="padding: 8px 12px;">🗑</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
