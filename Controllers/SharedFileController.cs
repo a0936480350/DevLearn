@@ -58,22 +58,32 @@ public class SharedFileController : Controller
         return Path.Combine(GetStorageRoot(), cleaned);
     }
 
-    // 公開列表：大家都能看
-    public async Task<IActionResult> Index(string? category = null, string? search = null)
+    // 舊的列表頁已整合到首頁 idea-wall，導回首頁對應錨點
+    public IActionResult Index()
     {
-        var query = _db.SharedFiles.Where(f => f.IsPublic);
+        return Redirect("/#idea-wall");
+    }
 
-        if (!string.IsNullOrEmpty(category))
-            query = query.Where(f => f.Category == category);
-
-        if (!string.IsNullOrEmpty(search))
-            query = query.Where(f => f.Title.Contains(search) || f.Description.Contains(search));
-
-        var files = await query.OrderByDescending(f => f.CreatedAt).ToListAsync();
-
-        ViewBag.Category = category;
-        ViewBag.Search = search;
-        return View(files);
+    // 給首頁的 fetch 用：JSON 檔案列表
+    [HttpGet]
+    public async Task<IActionResult> List()
+    {
+        var files = await _db.SharedFiles
+            .Where(f => f.IsPublic)
+            .OrderByDescending(f => f.CreatedAt)
+            .Select(f => new {
+                id = f.Id,
+                title = f.Title,
+                description = f.Description,
+                fileName = f.FileName,
+                fileSize = f.FileSize,
+                uploadedBy = f.UploadedBy,
+                downloadCount = f.DownloadCount,
+                category = f.Category,
+                createdAt = f.CreatedAt
+            })
+            .ToListAsync();
+        return Json(files);
     }
 
     // 下載（公開，會計次）
