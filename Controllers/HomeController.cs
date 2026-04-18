@@ -123,6 +123,18 @@ public class HomeController : Controller
         ViewBag.DoneCount = doneCount;
         ViewBag.BestScore = bestAttempt != null ? (int)(bestAttempt.Score * 100.0 / bestAttempt.Total) : -1;
 
+        // ─── SEO per-page ───
+        ViewData["Title"] = chapter.Title;
+        // Strip markdown to first 150 chars for description
+        var plain = System.Text.RegularExpressions.Regex.Replace(chapter.Content ?? "", @"[#*`\[\]_>\-\n\r]+", " ");
+        plain = System.Text.RegularExpressions.Regex.Replace(plain, @"\s+", " ").Trim();
+        if (plain.Length > 155) plain = plain.Substring(0, 155) + "…";
+        ViewData["Description"] = string.IsNullOrWhiteSpace(plain)
+            ? $"DevLearn {chapter.Title} — {chapter.Category} {chapter.Level} 免費中文教學"
+            : plain;
+        ViewData["Keywords"] = $"{chapter.Title}, {chapter.Category}, {chapter.Level}, .NET 教學, 程式教學, 中文";
+        ViewData["OgType"] = "article";
+
         return View(chapter);
     }
 

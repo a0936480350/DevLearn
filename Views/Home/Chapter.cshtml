@@ -2,6 +2,34 @@
 @{
     ViewData["Title"] = Model.Title;
     var allChapters = ViewBag.AllChapters as List<DotNetLearning.Models.Chapter> ?? new();
+
+    // ─── SEO: JSON-LD Course schema (rich snippet in Google) ───
+    var pageUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
+    var chapterDesc = ViewData["Description"] as string ?? "";
+}
+@section Head {
+    <script type="application/ld+json">
+    {
+      "@@context": "https://schema.org",
+      "@@type": "LearningResource",
+      "name": @Html.Raw(Json.Serialize(Model.Title)),
+      "description": @Html.Raw(Json.Serialize(chapterDesc)),
+      "url": @Html.Raw(Json.Serialize(pageUrl)),
+      "inLanguage": "zh-Hant-TW",
+      "learningResourceType": "Tutorial",
+      "educationalLevel": @Html.Raw(Json.Serialize(Model.Level)),
+      "teaches": @Html.Raw(Json.Serialize(Model.Category)),
+      "provider": {
+        "@@type": "EducationalOrganization",
+        "name": "DevLearn .NET 學習平台",
+        "url": "https://devlearn-dotnet.azurewebsites.net"
+      },
+      "isAccessibleForFree": true,
+      "dateModified": "@DateTime.UtcNow.ToString("yyyy-MM-dd")"
+    }
+    </script>
+}
+@{
     var completed = ViewBag.CompletedChapters as List<int> ?? new();
     int bestScore = ViewBag.BestScore ?? -1;
     var categories = new Dictionary<string, string>

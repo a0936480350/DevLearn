@@ -1,15 +1,79 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant-TW">
+@{
+    // ─── SEO 基底 ─────────────────────────────
+    var pageTitle = ViewData["Title"] as string;
+    var fullTitle = string.IsNullOrWhiteSpace(pageTitle)
+        ? "DevLearn · .NET 學習平台｜C# / ASP.NET Core / SQL 中文教學"
+        : $"{pageTitle}｜DevLearn .NET 學習平台";
+
+    var pageDescription = ViewData["Description"] as string
+        ?? "DevLearn 是免費的中文 .NET 學習平台，涵蓋 C# / ASP.NET Core / EF Core / SQL / JavaScript / Vue 共 232 章節 + 8 款程式闖關小遊戲，還有老師 1-on-1 預約、知識分享牆、面試考題。";
+
+    var pageKeywords = ViewData["Keywords"] as string
+        ?? ".NET 教學, C# 中文, ASP.NET Core 教學, EF Core, SQL 教學, JavaScript, Vue, 程式面試, 軟體工程師, 線上課程";
+
+    var canonicalUrl = ViewData["CanonicalUrl"] as string
+        ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
+
+    var ogImage = ViewData["OgImage"] as string
+        ?? $"{Context.Request.Scheme}://{Context.Request.Host}/images/og-default.png";
+
+    var ogType = ViewData["OgType"] as string ?? "website";
+}
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] — .NET 學習平台</title>
+
+    <!-- Primary SEO -->
+    <title>@fullTitle</title>
+    <meta name="description" content="@pageDescription" />
+    <meta name="keywords" content="@pageKeywords" />
+    <meta name="author" content="Mike · DevLearn" />
+    <link rel="canonical" href="@canonicalUrl" />
+
+    <!-- OpenGraph (FB / LINE / 台灣主流社群) -->
+    <meta property="og:site_name" content="DevLearn .NET 學習平台" />
+    <meta property="og:title" content="@fullTitle" />
+    <meta property="og:description" content="@pageDescription" />
+    <meta property="og:url" content="@canonicalUrl" />
+    <meta property="og:type" content="@ogType" />
+    <meta property="og:image" content="@ogImage" />
+    <meta property="og:locale" content="zh_TW" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@fullTitle" />
+    <meta name="twitter:description" content="@pageDescription" />
+    <meta name="twitter:image" content="@ogImage" />
+
+    <!-- Preferred language indicators -->
+    <meta http-equiv="Content-Language" content="zh-Hant-TW" />
+
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/ui-upgrade.css" asp-append-version="true" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+
+    <!-- Organization JSON-LD (shown on all pages) -->
+    <script type="application/ld+json">
+    {
+      "@@context": "https://schema.org",
+      "@@type": "EducationalOrganization",
+      "name": "DevLearn .NET 學習平台",
+      "url": "https://devlearn-dotnet.azurewebsites.net",
+      "description": "免費中文 .NET 工程師學習平台，232 章節 + 8 款程式小遊戲 + 老師 1-on-1",
+      "inLanguage": "zh-Hant-TW",
+      "logo": "https://devlearn-dotnet.azurewebsites.net/images/og-default.png",
+      "sameAs": [
+        "https://github.com/a0936480350/DevLearn"
+      ]
+    }
+    </script>
+
+    @await RenderSectionAsync("Head", required: false)
 </head>
 <body>
     <!-- Promotion Marquee Banner -->
