@@ -25,6 +25,39 @@ public class SharedFileController : Controller
         _env = env;
     }
 
+    // 取得可寫入的儲存根目錄。
+    // Azure App Service 啟用 WEBSITE_RUN_FROM_PACKAGE=1 後，wwwroot 是唯讀，
+    // 需要寫到 %HOME%\data\（永久儲存；跨部署保留）。
+    // 本機 dev 時 %HOME% 不存在，fallback 到 ContentRoot/App_Data。
+    private string GetStorageRoot()
+    {
+        var home = Environment.GetEnvironmentVariable("HOME"); // Azure: D:\home
+        string root;
+        if (!string.IsNullOrEmpty(home) && Directory.Exists(home))
+        {
+            root = Path.Combine(home, "data", "shared");
+        }
+        else
+        {
+            root = Path.Combine(_env.ContentRootPath, "App_Data", "shared");
+        }
+        Directory.CreateDirectory(root);
+        return root;
+    }
+
+    // 解析舊/新格式的 StoragePath：
+    //  新格式 = "20260418xxx_xxxx.pdf"   → {GetStorageRoot()}/{name}
+    //  舊格式 = "uploads/shared/xxx.pdf" → {WebRoot}/uploads/shared/xxx.pdf（向下相容）
+    private string ResolveStoragePath(string storagePath)
+    {
+        var cleaned = storagePath.TrimStart('/', '\\');
+        if (cleaned.Contains('/') || cleaned.Contains('\\'))
+        {
+            return Path.Combine(_env.WebRootPath, cleaned);
+        }
+        return Path.Combine(GetStorageRoot(), cleaned);
+    }
+
     // 公開列表：大家都能看
     public async Task<IActionResult> Index(string? category = null, string? search = null)
     {
@@ -49,7 +82,7 @@ public class SharedFileController : Controller
         var file = await _db.SharedFiles.FindAsync(id);
         if (file == null || !file.IsPublic) return NotFound();
 
-        var fullPath = Path.Combine(_env.WebRootPath, file.StoragePath.TrimStart('/'));
+        var fullPath = ResolveStoragePath(file.StoragePath);
         if (!System.IO.File.Exists(fullPath)) return NotFound("檔案已不存在");
 
         // 計數
@@ -66,7 +99,7 @@ public class SharedFileController : Controller
         var file = await _db.SharedFiles.FindAsync(id);
         if (file == null || !file.IsPublic) return NotFound();
 
-        var fullPath = Path.Combine(_env.WebRootPath, file.StoragePath.TrimStart('/'));
+        var fullPath = ResolveStoragePath(file.StoragePath);
         if (!System.IO.File.Exists(fullPath)) return NotFound();
 
         var bytes = await System.IO.File.ReadAllBytesAsync(fullPath);
@@ -117,9 +150,8 @@ public class SharedFileController : Controller
             return View();
         }
 
-        // 儲存到 wwwroot/uploads/shared/
-        var uploadDir = Path.Combine(_env.WebRootPath, "uploads", "shared");
-        Directory.CreateDirectory(uploadDir);
+        // 儲存到 Azure 可寫入路徑（%HOME%\data\shared）或本機 App_Data\shared
+        var uploadDir = GetStorageRoot();
 
         var safeFileName = $"{DateTime.UtcNow:yyyyMMddHHmmss}_{Guid.NewGuid():N}{ext}";
         var fullPath = Path.Combine(uploadDir, safeFileName);
@@ -134,7 +166,7 @@ public class SharedFileController : Controller
             Title = string.IsNullOrWhiteSpace(title) ? Path.GetFileNameWithoutExtension(file.FileName) : title,
             Description = description ?? "",
             FileName = file.FileName,
-            StoragePath = $"uploads/shared/{safeFileName}",
+            StoragePath = safeFileName,
             FileSize = file.Length,
             MimeType = GetMimeType(ext),
             Category = string.IsNullOrWhiteSpace(category) ? "general" : category,
@@ -159,7 +191,7 @@ public class SharedFileController : Controller
         if (file == null) return NotFound();
 
         // 實體檔案也刪除
-        var fullPath = Path.Combine(_env.WebRootPath, file.StoragePath.TrimStart('/'));
+        var fullPath = ResolveStoragePath(file.StoragePath);
         if (System.IO.File.Exists(fullPath))
         {
             try { System.IO.File.Delete(fullPath); } catch { }
