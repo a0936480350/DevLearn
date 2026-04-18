@@ -7,6 +7,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddMemoryCache();
 
+// CORS: 只開放 /api/integration/* 給外部衛星 App（LifeQuest 等）
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("IntegrationPolicy", p => p
+        .AllowAnyOrigin()           // Phase 1 先全開；之後應該換成 WithOrigins(...)
+        .AllowAnyMethod()
+        .AllowAnyHeader());
+});
+
 // 資料庫：有 DATABASE_URL 用 PostgreSQL（Railway），沒有用 SQLite（本機開發）
 var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 if (!string.IsNullOrEmpty(dbUrl))
@@ -484,6 +493,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseCors("IntegrationPolicy");
 app.UseSession();
 app.UseAuthentication();
 
@@ -555,6 +565,9 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Attribute-routed API controllers（例如 /api/integration/*）
+app.MapControllers();
 
 app.MapHub<ChatHub>("/chathub");
 app.MapHub<DotNetLearning.Hubs.BattleHub>("/battleHub");
