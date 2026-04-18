@@ -1,0 +1,117 @@
+@{
+    ViewData["Title"] = "我的訂閱";
+    var sub = ViewBag.Subscription as DotNetLearning.Models.TeacherSubscription;
+    var history = ViewBag.History as List<DotNetLearning.Models.Payment> ?? new List<DotNetLearning.Models.Payment>();
+    var monthlyPrice = (int)ViewBag.MonthlyPrice;
+    var isSandbox = (bool)ViewBag.IsSandbox;
+    var isActive = sub?.IsActive ?? false;
+    Layout = "_Layout";
+}
+
+<div style="max-width:900px;margin:40px auto;padding:20px;">
+    <h1 style="color:#e6edf3;font-size:30px;font-weight:800;margin-bottom:8px;">💼 我的老師訂閱</h1>
+    <p style="color:#8b949e;margin-bottom:28px;">DevLearn Premium 老師帳號可以：設定課程 / 接受學生預約 / 發布文章 / 收取課程費用</p>
+
+    @if (isSandbox)
+    {
+        <div style="margin-bottom:20px;padding:12px 16px;background:#4a3a1a;border:1px solid #996515;border-radius:10px;color:#f0c674;font-size:13px;">
+            ⚠️ 目前是 <strong>沙箱測試模式</strong>，所有付款都不會真的扣款。測試卡號：4311-9522-2222-2222 / CVC 222
+        </div>
+    }
+
+    <!-- 訂閱狀態卡 -->
+    <div style="background:#161b22;border:1px solid #30363d;border-radius:14px;padding:28px;margin-bottom:24px;">
+        @if (isActive)
+        {
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
+                <div>
+                    <div style="display:inline-block;padding:4px 12px;background:linear-gradient(135deg,#3fb950,#2ea043);border-radius:20px;color:white;font-size:12px;font-weight:700;margin-bottom:10px;">
+                        ✅ 已啟用
+                    </div>
+                    <h2 style="color:#e6edf3;margin:0 0 6px;font-size:24px;">Premium @(sub!.Tier == "yearly" ? "年費" : "月費") 老師</h2>
+                    <div style="color:#8b949e;font-size:14px;">
+                        有效期限：<span style="color:#3fb950;font-weight:600;">@(sub.ActiveUntil?.ToLocalTime().ToString("yyyy年MM月dd日") ?? "-")</span>
+                    </div>
+                    <div style="color:#6e7681;font-size:13px;margin-top:4px;">
+                        累積支付：NT$ @sub.TotalPaidAmount
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <a href="/Payment/SubscribeTeacher" style="display:inline-block;padding:10px 20px;background:#21262d;color:#58a6ff;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">續費一個月</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div style="text-align:center;padding:20px 0;">
+                <div style="font-size:48px;margin-bottom:12px;">📚</div>
+                <h2 style="color:#e6edf3;margin:0 0 10px;">成為 DevLearn Premium 老師</h2>
+                <p style="color:#8b949e;margin-bottom:28px;line-height:1.7;">
+                    訂閱後即可建立課程、接受學生預約、發布教學文章。<br>
+                    月費 <span style="color:#3fb950;font-size:22px;font-weight:800;">NT$ @monthlyPrice</span> / 月 · 可隨時取消
+                </p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:24px 0;">
+                    <div style="padding:14px;background:#0d1117;border-radius:10px;">
+                        <div style="font-size:24px;margin-bottom:6px;">🗓️</div>
+                        <div style="color:#e6edf3;font-weight:600;font-size:14px;">接受學生預約</div>
+                    </div>
+                    <div style="padding:14px;background:#0d1117;border-radius:10px;">
+                        <div style="font-size:24px;margin-bottom:6px;">💬</div>
+                        <div style="color:#e6edf3;font-weight:600;font-size:14px;">發布教學文章</div>
+                    </div>
+                    <div style="padding:14px;background:#0d1117;border-radius:10px;">
+                        <div style="font-size:24px;margin-bottom:6px;">⭐</div>
+                        <div style="color:#e6edf3;font-weight:600;font-size:14px;">學生評價系統</div>
+                    </div>
+                    <div style="padding:14px;background:#0d1117;border-radius:10px;">
+                        <div style="font-size:24px;margin-bottom:6px;">💰</div>
+                        <div style="color:#e6edf3;font-weight:600;font-size:14px;">自訂課程費用</div>
+                    </div>
+                </div>
+                <a href="/Payment/SubscribeTeacher" style="display:inline-block;padding:14px 36px;background:linear-gradient(135deg,#238636,#2ea043);color:white;text-decoration:none;border-radius:10px;font-weight:700;font-size:16px;box-shadow:0 4px 14px rgba(35,134,54,0.3);">
+                    🚀 立即訂閱（NT$ @monthlyPrice / 月）
+                </a>
+            </div>
+        }
+    </div>
+
+    <!-- 付款歷史 -->
+    @if (history.Any())
+    {
+        <h3 style="color:#e6edf3;font-size:18px;margin:24px 0 14px;">付款紀錄</h3>
+        <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;overflow:hidden;">
+            <table style="width:100%;border-collapse:collapse;color:#c9d1d9;font-size:14px;">
+                <thead>
+                    <tr style="background:#0d1117;">
+                        <th style="padding:12px 14px;text-align:left;color:#8b949e;font-weight:600;border-bottom:1px solid #30363d;">日期</th>
+                        <th style="padding:12px 14px;text-align:left;color:#8b949e;font-weight:600;border-bottom:1px solid #30363d;">訂單</th>
+                        <th style="padding:12px 14px;text-align:left;color:#8b949e;font-weight:600;border-bottom:1px solid #30363d;">商品</th>
+                        <th style="padding:12px 14px;text-align:right;color:#8b949e;font-weight:600;border-bottom:1px solid #30363d;">金額</th>
+                        <th style="padding:12px 14px;text-align:center;color:#8b949e;font-weight:600;border-bottom:1px solid #30363d;">狀態</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var p in history)
+                {
+                    var (label, color) = p.Status switch
+                    {
+                        "paid" => ("已付款", "#3fb950"),
+                        "pending" => ("處理中", "#f0c674"),
+                        "failed" => ("失敗", "#f85149"),
+                        "refunded" => ("已退款", "#8b949e"),
+                        "expired" => ("逾期", "#6e7681"),
+                        _ => (p.Status, "#8b949e")
+                    };
+                    <tr style="border-bottom:1px solid #21262d;">
+                        <td style="padding:12px 14px;">@p.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
+                        <td style="padding:12px 14px;font-family:Consolas,monospace;font-size:12px;color:#8b949e;">@p.OrderId</td>
+                        <td style="padding:12px 14px;">@p.ProductName</td>
+                        <td style="padding:12px 14px;text-align:right;">NT$ @p.Amount</td>
+                        <td style="padding:12px 14px;text-align:center;"><span style="color:@color;font-weight:600;">@label</span></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

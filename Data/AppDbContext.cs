@@ -67,6 +67,10 @@ public class AppDbContext : DbContext
     // Claude 任務佇列
     public DbSet<ClaudeTask> ClaudeTasks => Set<ClaudeTask>();
 
+    // 金流（ECPay 老師 Premium 訂閱）
+    public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<TeacherSubscription> TeacherSubscriptions => Set<TeacherSubscription>();
+
     // 檔案分享（筆記、PPT、PDF）
     public DbSet<SharedFile> SharedFiles => Set<SharedFile>();
 

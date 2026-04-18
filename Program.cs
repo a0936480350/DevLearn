@@ -56,6 +56,7 @@ builder.Services.AddAuthentication(options => {
 });
 
 builder.Services.AddSingleton<DotNetLearning.Services.EmailService>();
+builder.Services.AddSingleton<DotNetLearning.Services.EcpayService>();
 builder.Services.AddHostedService<DotNetLearning.Services.ErrorScannerService>();
 
 var app = builder.Build();
@@ -263,6 +264,33 @@ using (var scope = app.Services.CreateScope())
                 ""IsPublic"" BOOLEAN NOT NULL DEFAULT true,
                 ""Tags"" TEXT
             );
+            CREATE TABLE IF NOT EXISTS ""Payments"" (
+                ""Id"" SERIAL PRIMARY KEY,
+                ""OrderId"" TEXT NOT NULL DEFAULT '',
+                ""EcpayTradeNo"" TEXT,
+                ""UserAnonymousId"" TEXT NOT NULL DEFAULT '',
+                ""ProductType"" TEXT NOT NULL DEFAULT 'teacher_monthly',
+                ""ProductName"" TEXT NOT NULL DEFAULT '',
+                ""Amount"" INTEGER NOT NULL DEFAULT 0,
+                ""Status"" VARCHAR(20) NOT NULL DEFAULT 'pending',
+                ""PaymentMethod"" TEXT NOT NULL DEFAULT '',
+                ""CreatedAt"" TIMESTAMP NOT NULL DEFAULT NOW(),
+                ""PaidAt"" TIMESTAMP,
+                ""RawCallbackPayload"" TEXT NOT NULL DEFAULT '',
+                ""EffectiveFrom"" TIMESTAMP,
+                ""EffectiveUntil"" TIMESTAMP
+            );
+            CREATE UNIQUE INDEX IF NOT EXISTS ""IX_Payments_OrderId"" ON ""Payments"" (""OrderId"");
+            CREATE INDEX IF NOT EXISTS ""IX_Payments_UserAnonymousId"" ON ""Payments"" (""UserAnonymousId"");
+            CREATE TABLE IF NOT EXISTS ""TeacherSubscriptions"" (
+                ""Id"" SERIAL PRIMARY KEY,
+                ""UserAnonymousId"" TEXT NOT NULL DEFAULT '',
+                ""Tier"" VARCHAR(20) NOT NULL DEFAULT 'free',
+                ""ActiveUntil"" TIMESTAMP,
+                ""TotalPaidAmount"" INTEGER NOT NULL DEFAULT 0,
+                ""UpdatedAt"" TIMESTAMP NOT NULL DEFAULT NOW()
+            );
+            CREATE UNIQUE INDEX IF NOT EXISTS ""IX_TeacherSubscriptions_UserAnonymousId"" ON ""TeacherSubscriptions"" (""UserAnonymousId"");
         ");
         Console.WriteLine("[DB] All tables ensured.");
     }

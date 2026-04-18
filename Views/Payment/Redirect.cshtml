@@ -1,0 +1,40 @@
+@{
+    ViewData["Title"] = "前往付款";
+    var parameters = (Dictionary<string, string>)ViewBag.Params;
+    var paymentUrl = (string)ViewBag.PaymentUrl;
+    var isSandbox = (bool)ViewBag.IsSandbox;
+    Layout = "_Layout";
+}
+
+<div style="max-width:560px;margin:60px auto;padding:40px 30px;background:#161b22;border:1px solid #30363d;border-radius:14px;text-align:center;color:#e6edf3;">
+    <div style="font-size:48px;margin-bottom:10px;">💳</div>
+    <h2 style="margin:0 0 10px;color:#e6edf3;">正在為您導向綠界付款頁面...</h2>
+    @if (isSandbox)
+    {
+        <div style="margin:15px 0;padding:10px;background:#4a3a1a;border:1px solid #996515;border-radius:8px;color:#f0c674;font-size:13px;">
+            ⚠️ <strong>沙箱測試模式</strong><br>
+            測試卡號：<code style="color:#fff;background:#2d2d2d;padding:2px 6px;border-radius:4px;">4311 9522 2222 2222</code><br>
+            任意未來到期日，CVC: 222
+        </div>
+    }
+    <p style="color:#8b949e;margin-bottom:20px;">頁面 3 秒內自動跳轉，如未跳轉請點下方按鈕</p>
+
+    <form id="ecpayForm" method="post" action="@paymentUrl" target="_self">
+        @foreach (var kv in parameters)
+        {
+            <input type="hidden" name="@kv.Key" value="@kv.Value" />
+        }
+        <button type="submit" style="padding:14px 36px;background:linear-gradient(135deg,#238636,#2ea043);color:white;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(35,134,54,0.3);">
+            🚀 立即前往付款
+        </button>
+    </form>
+
+    <p style="margin-top:20px;color:#6e7681;font-size:12px;">
+        <a href="/Payment/MySubscription" style="color:#58a6ff;text-decoration:none;">取消，回我的訂閱</a>
+    </p>
+</div>
+
+<script>
+    // 自動提交
+    setTimeout(() => document.getElementById('ecpayForm').submit(), 1500);
+</script>
