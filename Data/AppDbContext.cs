@@ -67,9 +67,6 @@ public class AppDbContext : DbContext
     // Claude 任務佇列
     public DbSet<ClaudeTask> ClaudeTasks => Set<ClaudeTask>();
 
-    // 檔案分享（筆記、PPT、PDF）
-    public DbSet<SharedFile> SharedFiles => Set<SharedFile>();
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Allow explicit Id values for seeded data (disable SERIAL auto-generation)
