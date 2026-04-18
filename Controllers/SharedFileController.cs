@@ -109,7 +109,7 @@ public class SharedFileController : Controller
     }
 
     // ═══════════════════════════════════════════
-    //  Admin 功能（需登入 admin）
+    //  上傳 / 刪除（需登入的註冊者；admin 可刪除任何檔案）
     // ═══════════════════════════════════════════
 
     private bool IsAdmin()
@@ -118,9 +118,23 @@ public class SharedFileController : Controller
             && HttpContext.Request.Cookies["AdminAuth"] == "pxmart-admin-verified-2026";
     }
 
-    public IActionResult Upload()
+    // 目前登入的註冊者（透過 DotNetLearner cookie）；沒登入 or 匿名使用者 回傳 null
+    private async Task<DotNetLearning.Models.SiteUser?> GetLoggedInUserAsync()
     {
-        if (!IsAdmin()) return RedirectToAction("Login", "Admin");
+        var anonId = HttpContext.Request.Cookies["DotNetLearner"];
+        if (string.IsNullOrEmpty(anonId)) return null;
+        var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == anonId);
+        return (user != null && user.IsRegistered) ? user : null;
+    }
+
+    public async Task<IActionResult> Upload()
+    {
+        var user = await GetLoggedInUserAsync();
+        if (user == null && !IsAdmin())
+        {
+            TempData["Error"] = "請先登入後再上傳檔案";
+            return RedirectToAction("Login", "Account");
+        }
         return View();
     }
 
@@ -129,7 +143,13 @@ public class SharedFileController : Controller
     [RequestSizeLimit(MaxFileSize)]
     public async Task<IActionResult> Upload(IFormFile file, string title, string? description, string? category, string? tags)
     {
-        if (!IsAdmin()) return RedirectToAction("Login", "Admin");
+        var user = await GetLoggedInUserAsync();
+        var admin = IsAdmin();
+        if (user == null && !admin)
+        {
+            TempData["Error"] = "請先登入後再上傳檔案";
+            return RedirectToAction("Login", "Account");
+        }
 
         if (file == null || file.Length == 0)
         {
@@ -170,7 +190,7 @@ public class SharedFileController : Controller
             FileSize = file.Length,
             MimeType = GetMimeType(ext),
             Category = string.IsNullOrWhiteSpace(category) ? "general" : category,
-            UploadedBy = "admin",
+            UploadedBy = admin ? "admin" : (user?.Nickname ?? "user"),
             Tags = tags,
             IsPublic = true,
         };
@@ -185,10 +205,14 @@ public class SharedFileController : Controller
     [HttpPost]
     public async Task<IActionResult> Delete(int id)
     {
-        if (!IsAdmin()) return Forbid();
-
         var file = await _db.SharedFiles.FindAsync(id);
         if (file == null) return NotFound();
+
+        // 只有 admin 或「當初上傳者（對得上 Nickname）」可以刪除
+        var user = await GetLoggedInUserAsync();
+        var admin = IsAdmin();
+        var canDelete = admin || (user != null && file.UploadedBy == user.Nickname);
+        if (!canDelete) return Forbid();
 
         // 實體檔案也刪除
         var fullPath = ResolveStoragePath(file.StoragePath);

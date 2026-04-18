@@ -1,8 +1,17 @@
 @model List<DotNetLearning.Models.SharedFile>
+@inject DotNetLearning.Data.AppDbContext _db
 @{
     ViewData["Title"] = "檔案分享";
     var isAdmin = Context.Request.Cookies.ContainsKey("AdminAuth")
         && Context.Request.Cookies["AdminAuth"] == "pxmart-admin-verified-2026";
+    var anonId = Context.Request.Cookies["DotNetLearner"];
+    DotNetLearning.Models.SiteUser? loggedUser = null;
+    if (!string.IsNullOrEmpty(anonId))
+    {
+        loggedUser = _db.SiteUsers.FirstOrDefault(u => u.AnonymousId == anonId && u.IsRegistered);
+    }
+    var canUpload = isAdmin || loggedUser != null;
+    var myNick = loggedUser?.Nickname;
 }
 
 <style>
@@ -84,9 +93,13 @@
             <h1 class="sf-title">📚 檔案分享</h1>
             <div class="sf-subtitle">筆記、PPT、PDF、截圖 — 下載或線上預覽</div>
         </div>
-        @if (isAdmin)
+        @if (canUpload)
         {
             <a href="/SharedFile/Upload" class="sf-upload-btn">📤 上傳新檔案</a>
+        }
+        else
+        {
+            <a href="/Account/Login" class="sf-upload-btn" style="background:linear-gradient(135deg,#1f6feb,#388bfd);">🔐 登入後上傳</a>
         }
     </div>
 
@@ -153,6 +166,7 @@
                             <div class="sf-card-desc">@f.Description</div>
                         }
                         <div class="sf-meta">
+                            <span class="sf-meta-item">👤 @f.UploadedBy</span>
                             <span class="sf-meta-item">📏 @sizeStr</span>
                             <span class="sf-meta-item">⬇️ @f.DownloadCount</span>
                             <span class="sf-meta-item">📅 @f.CreatedAt.ToString("yyyy/MM/dd")</span>
@@ -172,7 +186,7 @@
                                 <a href="/SharedFile/Preview/@f.Id" target="_blank" class="sf-btn sf-btn-view">👁️ 預覽</a>
                             }
                             <a href="/SharedFile/Download/@f.Id" class="sf-btn sf-btn-download">⬇️ 下載</a>
-                            @if (isAdmin)
+                            @if (isAdmin || (myNick != null && f.UploadedBy == myNick))
                             {
                                 <form method="post" action="/SharedFile/Delete/@f.Id" style="flex: 0;" onsubmit="return confirm('確定刪除？');">
                                     <button type="submit" class="sf-btn sf-btn-del" style="padding: 8px 12px;">🗑</button>
