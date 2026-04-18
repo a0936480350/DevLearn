@@ -949,6 +949,102 @@ public class AdminController : Controller
         }
         return NotFound();
     }
+
+    // ════════════════════════════════════════════════════════
+    //  一次性：把 admin-master-001 設成 Mike 老師資料
+    //  呼叫方式（帶 AdminAuth cookie）：
+    //    POST /Admin/SetupMikeTeacher?photoUrl=/SharedFile/Preview/2
+    // ════════════════════════════════════════════════════════
+    [HttpPost]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> SetupMikeTeacher([FromQuery] string? photoUrl = null)
+    {
+        if (!IsAdmin()) return Unauthorized(new { error = "admin_only" });
+
+        // ───── 1. 修正 admin-master-001 的 SiteUser 欄位 ─────
+        var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == "admin-master-001");
+        if (user == null)
+        {
+            user = new SiteUser { AnonymousId = "admin-master-001" };
+            _db.SiteUsers.Add(user);
+        }
+        user.Nickname = "邱瀚賢 Mike";
+        user.Email = "a0936480350@hotmail.com";
+        user.IsRegistered = true;
+        user.EmailVerified = true;
+        user.Role = "admin";
+        user.LoginMethod = "email";
+        user.BadgeLevel = "master";
+        if (string.IsNullOrEmpty(user.PasswordHash))
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword("abcd1234");
+        await _db.SaveChangesAsync();
+
+        // ───── 2. 老師資料 ─────
+        var bio = @"在音樂、語言、程式三個領域橫跨十多年實戰，把學生一路帶到能自己獨立思考的程度，是我一貫的風格。
+
+【音樂教學｜2012 起，累積百位以上學生】
+• 電木吉他、烏克麗麗、爵士鼓、錄音工程、創作編曲
+• 文藻外語大學畢、日本 OSM 大阪音樂專門學校、東京国立音楽院
+• 師承：四分衛吉他手小郭、法蘭黛江鎮宇、日本 OSM 井上央一、菊田俊介、台灣 JAZZ 莊智淵
+• 教學據點：AmazingTalker 線上、文藻熱音社、吉他補給站、夢響佳音、多間補習班
+• 英國皇家樂理檢定五級
+
+【日文教學｜JLPT N1，文藻外語大學日文系畢業】
+• 日本工作 5 年（大阪 / 東京）、台灣純日商 4 年
+• N1 / N2 / N3 檢定準備、商務日文、日常會話、履歷面試輔導
+• 實際處理過日方客戶往來、社長翻譯、合約書信、會議同步
+• 日本工商販売士 3 級
+
+【程式教學｜2023 起投入，目前任職全聯資訊部全端工程師】
+• C# / ASP.NET Core MVC / Minimal API / WinForms / .NET MAUI
+• SQL Server / PostgreSQL / SQLite、EF Core、Redis
+• HTML / CSS / JavaScript / Vue 3 / jQuery
+• 實戰經驗：全聯 WMS 倉儲、ERP 模組、台灣萬事達金流（GOMYPAY / LinePay / Apple Pay 串接）
+• 本平台 DevLearn 就是我自己從零做出來的作品
+
+【教學風格】
+重視基本功 + 思考邏輯，不死背。24 小時內回覆課後問題。
+課程可客製化：從零開始、面試衝刺、證照班、深度專案陪跑都接。
+
+【授課方式】
+線上（Google Meet / Zoom）或實體（台北市可面授）。";
+
+        var teacher = await _db.Teachers.FirstOrDefaultAsync(t => t.SiteUserId == user.Id);
+        if (teacher == null)
+        {
+            teacher = new Teacher { SiteUserId = user.Id, CreatedAt = DateTime.Now };
+            _db.Teachers.Add(teacher);
+        }
+        teacher.Name = "邱瀚賢 Mike";
+        teacher.Title = "音樂／日文／程式 跨領域教師";
+        teacher.Bio = bio;
+        teacher.PhotoUrl = photoUrl ?? "";
+        teacher.VideoUrl = "https://www.youtube.com/watch?v=Ozm6jYHIctY";
+        teacher.SkillsJson = System.Text.Json.JsonSerializer.Serialize(new[] {
+            "電木吉他", "烏克麗麗", "爵士鼓", "樂理", "錄音工程", "創作編曲",
+            "日文 N1", "商務日文", "日檢輔導",
+            "C#", "ASP.NET Core", "SQL", "Vue", "全端開發", "金流串接"
+        });
+        teacher.ExperienceYears = 10;
+        teacher.Education = "文藻外語大學日文系 · 東京国立音楽院 総合音楽 · OSM 大阪音樂專門學校";
+        teacher.HourlyRate = 600;
+        teacher.TrialPrice = 400;
+        teacher.IsApproved = true;
+        teacher.IsActive = true;
+        teacher.PhotoFileName = "";
+        teacher.DiplomaFileName = "";
+        teacher.CustomSkills = "音樂教學10年, JLPT N1, 日本5年工作經驗, 全端工程師";
+        teacher.UpdatedAt = DateTime.Now;
+
+        await _db.SaveChangesAsync();
+
+        return Ok(new
+        {
+            success = true,
+            user = new { user.Id, user.AnonymousId, user.Nickname, user.Email, user.Role },
+            teacher = new { teacher.Id, teacher.Name, teacher.Title, teacher.HourlyRate, teacher.TrialPrice, teacher.IsApproved, teacher.PhotoUrl }
+        });
+    }
 }
 
 public record UpdateChapterReq(int Id, string? Title, string? Content, bool? IsPublished);

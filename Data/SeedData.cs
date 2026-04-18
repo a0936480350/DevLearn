@@ -107,12 +107,26 @@ public static class SeedData
             Console.WriteLine($"[Seed] Added {iotQuestions.Count} IoT questions");
         }
 
-        // 程式碼擂台挑戰（第二批）
-        if (db.ArenaChallenges.Count() < 8)
+        // 程式碼擂台挑戰（第二批）— 只加入還沒存在的 Id，避免 PK 衝突
+        try
         {
-            db.ArenaChallenges.AddRange(SeedArenaChallenges2.GetChallenges());
-            db.SaveChanges();
-            Console.WriteLine("[Seed] Added arena challenges batch 2");
+            if (db.ArenaChallenges.Count() < 8)
+            {
+                var existingIds = db.ArenaChallenges.Select(a => a.Id).ToHashSet();
+                var toAdd = SeedArenaChallenges2.GetChallenges()
+                    .Where(c => !existingIds.Contains(c.Id))
+                    .ToList();
+                if (toAdd.Count > 0)
+                {
+                    db.ArenaChallenges.AddRange(toAdd);
+                    db.SaveChanges();
+                    Console.WriteLine($"[Seed] Added arena challenges batch 2 ({toAdd.Count} new)");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Seed] Arena challenges batch 2 skipped: {ex.Message}");
         }
 
         // 程式碼填字遊戲（只在沒有時才加）
