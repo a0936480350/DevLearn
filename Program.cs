@@ -321,21 +321,26 @@ CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ChatReactions_Unique""
     }
     catch (Exception ex) { Console.WriteLine($"[DB] Chat reply/reaction migration note: {ex.Message}"); }
 
-    // Clean up teacher demo data (one-time: only if demo teacher "Demo Teacher" exists)
-    try
+    // ⚠️ REMOVED 2026-04-19:
+    //   舊的 "Clean up teacher demo data" block 本來是 one-time 清除，但放在
+    //   startup 等於每次重啟都會全刪 Teachers / Bookings / Reviews / UserProfiles。
+    //   Mike 上架自己的老師資料後每次 Azure 重啟都消失 → 改成只在 env var 打開時才跑。
+    if (Environment.GetEnvironmentVariable("CLEAN_DEMO_DATA_ON_STARTUP") == "true")
     {
-        db.Database.ExecuteSqlRaw(@"DELETE FROM ""TeacherPostComments"";");
-        db.Database.ExecuteSqlRaw(@"DELETE FROM ""TeacherPosts"";");
-        db.Database.ExecuteSqlRaw(@"DELETE FROM ""Reviews"";");
-        db.Database.ExecuteSqlRaw(@"DELETE FROM ""Bookings"";");
-        db.Database.ExecuteSqlRaw(@"DELETE FROM ""TeacherSlots"";");
-        db.Database.ExecuteSqlRaw(@"DELETE FROM ""FavoriteTeachers"";");
-        db.Database.ExecuteSqlRaw(@"DELETE FROM ""Teachers"";");
-        // Clean up fake leaderboard data
-        db.Database.ExecuteSqlRaw(@"DELETE FROM ""UserProfiles"";");
-        Console.WriteLine("[DB] Cleaned up demo teacher + leaderboard data.");
+        try
+        {
+            db.Database.ExecuteSqlRaw(@"DELETE FROM ""TeacherPostComments"";");
+            db.Database.ExecuteSqlRaw(@"DELETE FROM ""TeacherPosts"";");
+            db.Database.ExecuteSqlRaw(@"DELETE FROM ""Reviews"";");
+            db.Database.ExecuteSqlRaw(@"DELETE FROM ""Bookings"";");
+            db.Database.ExecuteSqlRaw(@"DELETE FROM ""TeacherSlots"";");
+            db.Database.ExecuteSqlRaw(@"DELETE FROM ""FavoriteTeachers"";");
+            db.Database.ExecuteSqlRaw(@"DELETE FROM ""Teachers"";");
+            db.Database.ExecuteSqlRaw(@"DELETE FROM ""UserProfiles"";");
+            Console.WriteLine("[DB] Cleaned up demo data (env var enabled).");
+        }
+        catch (Exception ex) { Console.WriteLine($"[DB] Cleanup note: {ex.Message}"); }
     }
-    catch (Exception ex) { Console.WriteLine($"[DB] Cleanup note: {ex.Message}"); }
 
     // Fix chapter categories for Vue/React/Angular (move from 'frontend' to dedicated categories)
     try
