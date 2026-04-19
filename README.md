@@ -1,7 +1,7 @@
 # 🎯 DevLearn — 程式設計學習平台
 
-> 一位開發者、六個月、232 章教學、8 款遊戲、60+ 資料表。  
-> 這不是一個 Todo App，這是一個真正有人在用的線上學習平台。
+> 一位開發者、六個月、232 章教學、8 款遊戲、60+ 資料表、金流 · SEO · 老師市集 · 跨平台 APP 整合。  
+> 這不是一個 Todo App，這是一個真正有人在用、天天打磨的線上學習平台。
 
 **🌐 立刻體驗**：[https://devlearn-dotnet.azurewebsites.net/](https://devlearn-dotnet.azurewebsites.net/)
 
@@ -10,17 +10,21 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![SignalR](https://img.shields.io/badge/SignalR-0078D4?style=for-the-badge&logo=microsoft&logoColor=white)
 ![Azure](https://img.shields.io/badge/Azure-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)
+![ECPay](https://img.shields.io/badge/ECPay_Payment-E6001F?style=for-the-badge&logoColor=white)
+![SEO](https://img.shields.io/badge/SEO_Optimized-4CAF50?style=for-the-badge&logoColor=white)
 
 ---
 
 ## 📑 快速導覽（面試官請點選）
 
 - [💡 為什麼做這個專案？](#-為什麼做這個專案)
+- [🆕 最近功能（2026-04）](#-最近功能)
 - [🎬 功能展示（5 分鐘體驗流程）](#-功能展示)
 - [🛠️ 技術決策與思考](#️-技術決策與思考)
 - [🔥 實作亮點（含程式碼）](#-實作亮點)
 - [🧗 我解決了哪些難題？](#-我解決了哪些難題)
 - [📊 專案規模](#-專案規模)
+- [📐 架構文件](./docs/ARCHITECTURE.md) · [ADRs](./docs/adr/)
 - [🚀 本地開發](#-本地開發)
 
 ---
@@ -35,6 +39,48 @@
 **所以我決定做一個自己也會想用的學習平台**，把一路踩過的坑、想通的概念、練過的語法，全部整理成互動式內容。
 
 過程中需要用到的每個技術（MVC、EF Core、SignalR、Phaser.js、Azure 部署...），都是在實際遇到需求時才學習，這樣每個知識點都有實戰應用，而不只是背誦。
+
+---
+
+## 🆕 最近功能
+
+> 這個區塊展示專案還在持續推進中，不是寫完就擺在那邊的 side project
+
+### 1. 老師市集 · 線上預約（2026-04）
+- 老師註冊 / 審核 / 上架流程
+- 時段管理 + 學生預約 + 評價
+- 檔案分享（PDF / PPT / 圖片，admin + 註冊者都能上傳）
+- 知識分享牆（整合檔案上傳到首頁 idea wall）
+- 第一位老師：Mike（吉他 / 日文 / 程式跨領域）→ [看老師介紹](https://devlearn-dotnet.azurewebsites.net/Teacher)
+
+### 2. ECPay 金流訂閱（2026-04）
+- 整合綠界 ECPay AioCheckOut v5
+- 自寫 `EcpayService`（SHA-256 CheckMacValue + URL encode 特殊字元還原）
+- 沙箱 / 正式環境 env var 自動切換（`ECPAY_MERCHANT_ID / HASH_KEY / HASH_IV`）
+- 老師 Premium 月費 NT$ 299（個人賣家申請中）
+- Server-to-server ReturnUrl 驗簽 + idempotent + `Payments` / `TeacherSubscriptions` 資料表
+- 詳見 [Services/EcpayService.cs](./Services/EcpayService.cs) + [Controllers/PaymentController.cs](./Controllers/PaymentController.cs)
+
+### 3. SEO 完整打底（2026-04）
+- 動態 `<title>` / `<meta description>` / `<link rel="canonical">`
+- OpenGraph + Twitter Card（FB / LINE 分享預覽）
+- EducationalOrganization JSON-LD（全站）+ LearningResource JSON-LD（每章）
+- `/robots.txt`（allow all, disallow admin/login/payment-callback）
+- `/sitemap.xml`（動態產生，243 URL：232 章節 + 老師 + 靜態頁）
+- Google Search Console 已驗證 ✅
+- 詳見 [Controllers/SeoController.cs](./Controllers/SeoController.cs)
+
+### 4. LifeQuest 衛星 APP 整合（2026-04）
+- 獨立 .NET MAUI 跨平台 APP 專案 → [github.com/a0936480350/LifeQuest](https://github.com/a0936480350/LifeQuest)
+- 透過 `/api/integration/*` 端點串接（`/me`, `/chapters`, `/chapters/progress`）
+- LifeQuest 把 DevLearn 章節變成 RPG Quest → 打卡完成拿金幣
+- 跨 repo JWT 身分整合（LifeQuest 端發 signed token，DevLearn 端 cookie auth）
+- 詳見 [Controllers/IntegrationController.cs](./Controllers/IntegrationController.cs)
+
+### 5. CI/CD 雙軌 + Keep-alive（2026-04）
+- GitHub Actions auto-deploy 到 Azure App Service（push main 自動部署）
+- Keep-alive cron 每 10 分鐘 ping `/health`（B2 tier 避免冷啟動）
+- CI path filter 避免 docs-only PR 觸發重部署
 
 ---
 
