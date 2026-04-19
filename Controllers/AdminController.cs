@@ -951,9 +951,20 @@ public class AdminController : Controller
     }
 
     // ════════════════════════════════════════════════════════
-    //  一次性：把 admin-master-001 設成 Mike 老師資料
+    //  一次性：建立「Mike 老師」帳號（與 admin 平台帳號分離）
     //  呼叫方式（帶 AdminAuth cookie）：
     //    POST /Admin/SetupMikeTeacher?photoUrl=/SharedFile/Preview/2
+    //
+    //  身分架構：
+    //    admin-master-001  → 平台管理者（純 admin 後台用，不是某個人）
+    //    mike-teacher      → Mike 的實際使用者身分（teacher role，可接受預約）
+    //                        Teacher record 掛在這個帳號下
+    //
+    //  Mike 日常使用：
+    //    /Admin/Login    → 帶 AdminAuth cookie 進後台
+    //    /Account/Login  → email=a0936480350@hotmail.com, password=abcd1234
+    //                       → 拿到 DotNetLearner cookie = mike-teacher 身分
+    //    兩個 cookie 同時帶 → 既是管理員也是 Mike 老師
     // ════════════════════════════════════════════════════════
     [HttpPost]
     [IgnoreAntiforgeryToken]
@@ -961,23 +972,51 @@ public class AdminController : Controller
     {
         if (!IsAdmin()) return Unauthorized(new { error = "admin_only" });
 
-        // ───── 1. 修正 admin-master-001 的 SiteUser 欄位 ─────
-        var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == "admin-master-001");
+        // ───── 1. 還原 admin-master-001 為純 admin（不是 Mike 本人） ─────
+        var adminAcc = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == "admin-master-001");
+        if (adminAcc == null)
+        {
+            adminAcc = new SiteUser { AnonymousId = "admin-master-001" };
+            _db.SiteUsers.Add(adminAcc);
+        }
+        adminAcc.Nickname = "Admin";
+        adminAcc.Email = "admin@hotmail.com";
+        adminAcc.IsRegistered = true;
+        adminAcc.EmailVerified = true;
+        adminAcc.Role = "admin";
+        adminAcc.LoginMethod = "legacy";
+        adminAcc.BadgeLevel = "master";
+        if (string.IsNullOrEmpty(adminAcc.PasswordHash))
+            adminAcc.PasswordHash = BCrypt.Net.BCrypt.HashPassword("abcd1234");
+
+        // ───── 2. 建立 / 更新 mike-teacher 帳號 ─────
+        var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == "mike-teacher" || u.Email == "mike@hotmail.com");
         if (user == null)
         {
-            user = new SiteUser { AnonymousId = "admin-master-001" };
+            user = new SiteUser { AnonymousId = "mike-teacher" };
             _db.SiteUsers.Add(user);
         }
+        user.AnonymousId = "mike-teacher";
         user.Nickname = "邱瀚賢 Mike";
-        user.Email = "a0936480350@hotmail.com";
+        user.Email = "mike@hotmail.com";
         user.IsRegistered = true;
         user.EmailVerified = true;
-        user.Role = "admin";
+        user.Role = "teacher";
         user.LoginMethod = "email";
         user.BadgeLevel = "master";
-        if (string.IsNullOrEmpty(user.PasswordHash))
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword("abcd1234");
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword("abcd1234");
         await _db.SaveChangesAsync();
+
+        // ───── 2.5 清掉舊的 admin 底下掛的 Teacher 紀錄（避免重複） ─────
+        if (adminAcc.Id != 0)
+        {
+            var orphanTeachers = await _db.Teachers.Where(t => t.SiteUserId == adminAcc.Id).ToListAsync();
+            if (orphanTeachers.Any())
+            {
+                _db.Teachers.RemoveRange(orphanTeachers);
+                await _db.SaveChangesAsync();
+            }
+        }
 
         // ───── 2. 老師資料 ─────
         var bio = @"在音樂、語言、程式三個領域橫跨十多年實戰，把學生一路帶到能自己獨立思考的程度，是我一貫的風格。
@@ -1041,8 +1080,10 @@ public class AdminController : Controller
         return Ok(new
         {
             success = true,
-            user = new { user.Id, user.AnonymousId, user.Nickname, user.Email, user.Role },
-            teacher = new { teacher.Id, teacher.Name, teacher.Title, teacher.HourlyRate, teacher.TrialPrice, teacher.IsApproved, teacher.PhotoUrl }
+            admin = new { adminAcc.Id, adminAcc.AnonymousId, adminAcc.Nickname, adminAcc.Email, adminAcc.Role },
+            teacher_account = new { user.Id, user.AnonymousId, user.Nickname, user.Email, user.Role, password = "abcd1234" },
+            teacher = new { teacher.Id, teacher.Name, teacher.Title, teacher.HourlyRate, teacher.TrialPrice, teacher.IsApproved, teacher.PhotoUrl },
+            login_url = "/Account/Login"
         });
     }
 }
