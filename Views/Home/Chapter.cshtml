@@ -1,9 +1,18 @@
 @model DotNetLearning.Models.Chapter
+@using DotNetLearning.Models
 @{
     var displayTitle = ViewBag.DisplayTitle as string ?? Model.Title;
     var currentLang = ViewBag.CurrentLang as string ?? "zh";
     ViewData["Title"] = displayTitle;
     var allChapters = ViewBag.AllChapters as List<DotNetLearning.Models.Chapter> ?? new();
+
+    // 依目前語言挑出每章節要顯示的標題（ContentJa/En 未翻時 fallback 繁中）
+    string TitleFor(DotNetLearning.Models.Chapter ch) => currentLang switch
+    {
+        "ja" when !string.IsNullOrWhiteSpace(ch.TitleJa) => ch.TitleJa!,
+        "en" when !string.IsNullOrWhiteSpace(ch.TitleEn) => ch.TitleEn!,
+        _ => ch.Title,
+    };
 
     // ─── SEO: JSON-LD Course schema (rich snippet in Google) ───
     var pageUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
@@ -35,15 +44,10 @@
 @{
     var completed = ViewBag.CompletedChapters as List<int> ?? new();
     int bestScore = ViewBag.BestScore ?? -1;
-    var categories = new Dictionary<string, string>
-    {
-        ["csharp"]="C# 基礎", ["aspnet"]="ASP.NET Core", ["database"]="資料庫",
-        ["frontend"]="前端基礎", ["git"]="Git", ["server"]="Server",
-        ["patterns"]="設計模式", ["infrastructure"]="快取&效能",
-        ["network"]="網路", ["security"]="資安", ["docker"]="Docker",
-        ["ai"]="AI 應用", ["aimodel"]="AI 模型", ["claudecode"]="Claude Code",
-        ["project"]="專案實戰"
-    };
+    // 側欄分類順序從 CategoryRegistry 拿 — 新增分類只要改 Models/CategoryInfo.cs，這裡會自動跟上
+    // DB 冒出註冊表沒寫的 category 也會自動 append（safety net）
+    var dbCats = allChapters.Select(c => c.Category).Distinct();
+    var sidebarCats = CategoryRegistry.OrderedForRender(dbCats);
     var sameCategory = allChapters.Where(c => c.Category == Model.Category).OrderBy(c => c.Order).ToList();
     var currentIdx = sameCategory.FindIndex(c => c.Id == Model.Id);
     var prevCh = currentIdx > 0 ? sameCategory[currentIdx - 1] : null;
@@ -64,14 +68,14 @@
             </div>
         </div>
         <nav class="sidebar-nav">
-            @foreach (var cat in categories)
+            @foreach (var cat in sidebarCats)
             {
                 var catChapters = allChapters.Where(c => c.Category == cat.Key).OrderBy(c => c.Order).ToList();
                 if (!catChapters.Any()) continue;
                 var isActive = catChapters.Any(c => c.Id == Model.Id);
                 <div class="nav-group @(isActive ? "open" : "")">
                     <button class="nav-group-toggle" onclick="toggleGroup(this)">
-                        <span data-i18n="@("cat-" + cat.Key)">@cat.Value</span>
+                        <span data-i18n="@("cat-" + cat.Key)">@cat.Icon @cat.Name</span>
                         <span class="toggle-icon">▼</span>
                     </button>
                     <ul class="nav-group-items">
@@ -83,7 +87,7 @@
                                 <a href="/Home/Chapter/@ch.Slug"
                                    class="nav-item @(isCurrent ? "active" : "") @(isDone ? "done" : "")">
                                     <span class="nav-check">@(isDone ? "✅" : "○")</span>
-                                    <span class="nav-title" data-i18n="@("ch-" + ch.Slug)">@ch.Title</span>
+                                    <span class="nav-title" data-i18n="@("ch-" + ch.Slug)">@TitleFor(ch)</span>
                                 </a>
                             </li>
                         }
@@ -98,7 +102,7 @@
         <!-- 章節標題列 -->
         <div class="chapter-toolbar">
             <div class="chapter-meta">
-                <span class="chapter-cat" data-i18n="@("cat-" + Model.Category)">@(categories.GetValueOrDefault(Model.Category, Model.Category))</span>
+                <span class="chapter-cat" data-i18n="@("cat-" + Model.Category)">@CategoryRegistry.Get(Model.Category).Name</span>
                 <span class="chapter-level level-@Model.Level" data-i18n="@("ch-level-" + Model.Level)">
                     @(Model.Level switch { "beginner"=>"初學","intermediate"=>"中級","advanced"=>"進階",_=>Model.Level })
                 </span>
@@ -142,12 +146,12 @@
         <div class="chapter-nav-footer">
             @if (prevCh != null)
             {
-                <a href="/Home/Chapter/@prevCh.Slug" class="nav-prev">← <span data-i18n="@("ch-" + prevCh.Slug)">@prevCh.Title</span></a>
+                <a href="/Home/Chapter/@prevCh.Slug" class="nav-prev">← <span data-i18n="@("ch-" + prevCh.Slug)">@TitleFor(prevCh)</span></a>
             }
             else { <span></span> }
             @if (nextCh != null)
             {
-                <a href="/Home/Chapter/@nextCh.Slug" class="nav-next"><span data-i18n="@("ch-" + nextCh.Slug)">@nextCh.Title</span> →</a>
+                <a href="/Home/Chapter/@nextCh.Slug" class="nav-next"><span data-i18n="@("ch-" + nextCh.Slug)">@TitleFor(nextCh)</span> →</a>
             }
         </div>
     </main>

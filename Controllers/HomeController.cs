@@ -22,10 +22,9 @@ public class HomeController : Controller
         _cache = cache;
     }
 
-    public async Task<IActionResult> Index()
-    {
-        // Cache the chapter list for the index page (only needed columns, no Content)
-        var chapters = await _cache.GetOrCreateAsync("chapters:nav", async entry =>
+    // 側欄 / 首頁共用的 nav cache：只撈渲染需要的欄位 + 3 語言標題（Content 本文不進 cache）
+    private Task<List<Chapter>?> GetNavChaptersAsync() =>
+        _cache.GetOrCreateAsync("chapters:nav", async entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
             return await _db.Chapters
@@ -36,10 +35,20 @@ public class HomeController : Controller
                 {
                     Id = c.Id, Title = c.Title, Slug = c.Slug,
                     Category = c.Category, Order = c.Order,
-                    Icon = c.Icon, Level = c.Level, IsPublished = c.IsPublished
+                    Icon = c.Icon, Level = c.Level, IsPublished = c.IsPublished,
+                    TitleJa = c.TitleJa, TitleEn = c.TitleEn,  // 側欄用來切語言標題
                 })
                 .ToListAsync();
         });
+
+    public async Task<IActionResult> Index()
+    {
+        var chapters = await GetNavChaptersAsync();
+
+        // 首頁也讀 cookie lang 讓卡片標題、首屏核心路線標題跟上
+        var lang = Request.Query["lang"].ToString();
+        if (string.IsNullOrEmpty(lang)) lang = Request.Cookies["lang"] ?? "zh";
+        ViewBag.CurrentLang = lang;
 
         var now = DateTime.Now;
         ViewBag.Announcements = await _db.Announcements
@@ -64,12 +73,16 @@ public class HomeController : Controller
 
         if (chapter is null) return NotFound();
 
-        // ─── 語言切換：?lang=ja 或 cookie "lang" ───
+        // ─── 語言切換：?lang=ja/en/zh 或 cookie "lang"，fallback 到繁中 ───
         var lang = Request.Query["lang"].ToString();
         if (string.IsNullOrEmpty(lang)) lang = Request.Cookies["lang"] ?? "zh";
-        var useJa = lang == "ja" && !string.IsNullOrWhiteSpace(chapter.ContentJa);
-        var displayTitle = useJa && !string.IsNullOrWhiteSpace(chapter.TitleJa) ? chapter.TitleJa! : chapter.Title;
-        var displayContent = useJa ? chapter.ContentJa! : chapter.Content;
+        string? transTitle = null, transContent = null;
+        if (lang == "ja") { transTitle = chapter.TitleJa; transContent = chapter.ContentJa; }
+        else if (lang == "en") { transTitle = chapter.TitleEn; transContent = chapter.ContentEn; }
+        var hasTranslation = !string.IsNullOrWhiteSpace(transContent);
+        var effectiveLang = hasTranslation ? lang : "zh";   // 沒翻譯 → 走繁中
+        var displayTitle = !string.IsNullOrWhiteSpace(transTitle) ? transTitle! : chapter.Title;
+        var displayContent = hasTranslation ? transContent! : chapter.Content;
 
         // Session ID for progress tracking
         var sessionId = HttpContext.Session.GetString("SessionId");
@@ -79,22 +92,8 @@ public class HomeController : Controller
             HttpContext.Session.SetString("SessionId", sessionId);
         }
 
-        // Cache sidebar chapter list (slim projection, no Content column)
-        var allChapters = await _cache.GetOrCreateAsync("chapters:nav", async entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
-            return await _db.Chapters
-                .AsNoTracking()
-                .Where(c => c.IsPublished)
-                .OrderBy(c => c.Order)
-                .Select(c => new Chapter
-                {
-                    Id = c.Id, Title = c.Title, Slug = c.Slug,
-                    Category = c.Category, Order = c.Order,
-                    Icon = c.Icon, Level = c.Level, IsPublished = c.IsPublished
-                })
-                .ToListAsync();
-        });
+        // Cache sidebar chapter list (共用 GetNavChaptersAsync 避免跟 Index 重複寫)
+        var allChapters = await GetNavChaptersAsync();
 
         var completedIds = await _db.Progresses
             .AsNoTracking()
@@ -114,7 +113,9 @@ public class HomeController : Controller
             .FirstOrDefaultAsync();
 
         // Cache rendered Markdown HTML per chapter/lang (expensive for large content)
-        var cacheKey = useJa ? $"chapter:html:{chapter.Id}:ja" : $"chapter:html:{chapter.Id}";
+        var cacheKey = effectiveLang == "zh"
+            ? $"chapter:html:{chapter.Id}"
+            : $"chapter:html:{chapter.Id}:{effectiveLang}";
         var contentHtml = _cache.GetOrCreate(cacheKey, entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
@@ -125,8 +126,9 @@ public class HomeController : Controller
         ViewBag.CompletedChapters = completedIds;
         ViewBag.ContentHtml = contentHtml;
         ViewBag.DisplayTitle = displayTitle;
-        ViewBag.CurrentLang = lang;
+        ViewBag.CurrentLang = effectiveLang;
         ViewBag.HasJa = !string.IsNullOrWhiteSpace(chapter.ContentJa);
+        ViewBag.HasEn = !string.IsNullOrWhiteSpace(chapter.ContentEn);
         ViewBag.HasQuiz = chapter.Questions.Any();
         ViewBag.QuestionCount = chapter.Questions.Count;
         ViewBag.SessionId = sessionId;
@@ -140,13 +142,19 @@ public class HomeController : Controller
         var plain = System.Text.RegularExpressions.Regex.Replace(displayContent ?? "", @"[#*`\[\]_>\-\n\r]+", " ");
         plain = System.Text.RegularExpressions.Regex.Replace(plain, @"\s+", " ").Trim();
         if (plain.Length > 155) plain = plain.Substring(0, 155) + "…";
-        var fallback = useJa
-            ? $"DevLearn {displayTitle} — {chapter.Category} {chapter.Level} 無料日本語チュートリアル"
-            : $"DevLearn {displayTitle} — {chapter.Category} {chapter.Level} 免費中文教學";
+        var fallback = effectiveLang switch
+        {
+            "ja" => $"DevLearn {displayTitle} — {chapter.Category} {chapter.Level} 無料日本語チュートリアル",
+            "en" => $"DevLearn {displayTitle} — {chapter.Category} {chapter.Level} free English tutorial",
+            _    => $"DevLearn {displayTitle} — {chapter.Category} {chapter.Level} 免費中文教學",
+        };
         ViewData["Description"] = string.IsNullOrWhiteSpace(plain) ? fallback : plain;
-        ViewData["Keywords"] = useJa
-            ? $"{displayTitle}, {chapter.Category}, {chapter.Level}, .NET チュートリアル, プログラミング, 日本語"
-            : $"{displayTitle}, {chapter.Category}, {chapter.Level}, .NET 教學, 程式教學, 中文";
+        ViewData["Keywords"] = effectiveLang switch
+        {
+            "ja" => $"{displayTitle}, {chapter.Category}, {chapter.Level}, .NET チュートリアル, プログラミング, 日本語",
+            "en" => $"{displayTitle}, {chapter.Category}, {chapter.Level}, .NET tutorial, programming, English",
+            _    => $"{displayTitle}, {chapter.Category}, {chapter.Level}, .NET 教學, 程式教學, 中文",
+        };
         ViewData["OgType"] = "article";
 
         return View(chapter);

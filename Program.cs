@@ -296,14 +296,16 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex) { Console.WriteLine($"[DB] Table creation note: {ex.Message}"); }
 
-    // Chapter Japanese translation columns
+    // Chapter i18n translation columns (Ja + En)
     try
     {
         db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Chapters"" ADD COLUMN IF NOT EXISTS ""TitleJa"" TEXT;");
         db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Chapters"" ADD COLUMN IF NOT EXISTS ""ContentJa"" TEXT;");
-        Console.WriteLine("[DB] Chapter Ja columns ensured.");
+        db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Chapters"" ADD COLUMN IF NOT EXISTS ""TitleEn"" TEXT;");
+        db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Chapters"" ADD COLUMN IF NOT EXISTS ""ContentEn"" TEXT;");
+        Console.WriteLine("[DB] Chapter Ja/En columns ensured.");
     }
-    catch (Exception ex) { Console.WriteLine($"[DB] Chapter Ja migration note: {ex.Message}"); }
+    catch (Exception ex) { Console.WriteLine($"[DB] Chapter i18n migration note: {ex.Message}"); }
 
     // Chat reply & reaction columns/tables
     try
