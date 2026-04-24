@@ -4135,12 +4135,14 @@ function __t(key) {
 }
 
 function changeLang(lang) {
+    // 先記下 server 渲染當前頁面用的 lang（= 送過來的 cookie），再寫入新值
+    var serverLang = (document.cookie.match(/(?:^|;\s*)lang=([^;]+)/) || [])[1] || 'zh';
     localStorage.setItem('lang', lang);
-    // 讓後端讀得到（章節內文日文化）
     document.cookie = 'lang=' + lang + ';path=/;max-age=' + (60 * 60 * 24 * 365) + ';SameSite=Lax';
 
-    // 章節頁（/Home/Chapter/...）靠 server 渲染 Markdown，需要 reload 才能切語言
-    if (/^\/Home\/Chapter\//i.test(location.pathname)) {
+    // 章節頁 Markdown 是 server 渲染的，**只有語言真的變了**才 reload
+    // 否則會跟 ideas.js 等 on-load 呼叫 changeLang(current) 互相觸發無限 reload
+    if (serverLang !== lang && /^\/Home\/Chapter\//i.test(location.pathname)) {
         location.reload();
         return;
     }
@@ -4174,13 +4176,23 @@ function changeLang(lang) {
 // Load saved language
 (function() {
     var saved = localStorage.getItem('lang') || 'zh';
-    // 同步 cookie（舊使用者 localStorage 有但 cookie 沒有 → server 拿不到）
-    var cookieLang = (document.cookie.match(/(?:^|;\s*)lang=([^;]+)/) || [])[1];
+    var cookieLang = (document.cookie.match(/(?:^|;\s*)lang=([^;]+)/) || [])[1] || 'zh';
+
+    // 舊 user：localStorage 有 ja 但 cookie 還沒 → server 拿到 zh 渲染錯 → 補寫 cookie 然後 reload 一次
+    // 但必須避開剛剛 reload 過的狀態（用 sessionStorage guard 防 infinite loop）
     if (cookieLang !== saved) {
         document.cookie = 'lang=' + saved + ';path=/;max-age=' + (60 * 60 * 24 * 365) + ';SameSite=Lax';
+        if (/^\/Home\/Chapter\//i.test(location.pathname) && !sessionStorage.getItem('_langReloaded')) {
+            sessionStorage.setItem('_langReloaded', '1');
+            location.reload();
+            return;
+        }
+    } else {
+        // cookie 跟 localStorage 同步後清掉 guard，下次真正要切才會 reload
+        sessionStorage.removeItem('_langReloaded');
     }
+
     if (saved !== 'zh') {
-        // 不觸發 reload — 僅做 client-side data-i18n 切換（章節頁 server 已用 cookie 渲染好了）
         var tr = translations[saved];
         if (tr) {
             document.querySelectorAll('[data-i18n]').forEach(function(el) {
