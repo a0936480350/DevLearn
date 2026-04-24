@@ -296,6 +296,15 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex) { Console.WriteLine($"[DB] Table creation note: {ex.Message}"); }
 
+    // Chapter Japanese translation columns
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Chapters"" ADD COLUMN IF NOT EXISTS ""TitleJa"" TEXT;");
+        db.Database.ExecuteSqlRaw(@"ALTER TABLE ""Chapters"" ADD COLUMN IF NOT EXISTS ""ContentJa"" TEXT;");
+        Console.WriteLine("[DB] Chapter Ja columns ensured.");
+    }
+    catch (Exception ex) { Console.WriteLine($"[DB] Chapter Ja migration note: {ex.Message}"); }
+
     // Chat reply & reaction columns/tables
     try
     {

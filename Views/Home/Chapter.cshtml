@@ -1,21 +1,24 @@
 @model DotNetLearning.Models.Chapter
 @{
-    ViewData["Title"] = Model.Title;
+    var displayTitle = ViewBag.DisplayTitle as string ?? Model.Title;
+    var currentLang = ViewBag.CurrentLang as string ?? "zh";
+    ViewData["Title"] = displayTitle;
     var allChapters = ViewBag.AllChapters as List<DotNetLearning.Models.Chapter> ?? new();
 
     // ─── SEO: JSON-LD Course schema (rich snippet in Google) ───
     var pageUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
     var chapterDesc = ViewData["Description"] as string ?? "";
+    var pageLangCode = currentLang == "ja" ? "ja-JP" : currentLang == "en" ? "en-US" : "zh-Hant-TW";
 }
 @section Head {
     <script type="application/ld+json">
     {
       "@@context": "https://schema.org",
       "@@type": "LearningResource",
-      "name": @Html.Raw(Json.Serialize(Model.Title)),
+      "name": @Html.Raw(Json.Serialize(displayTitle)),
       "description": @Html.Raw(Json.Serialize(chapterDesc)),
       "url": @Html.Raw(Json.Serialize(pageUrl)),
-      "inLanguage": "zh-Hant-TW",
+      "inLanguage": "@pageLangCode",
       "learningResourceType": "Tutorial",
       "educationalLevel": @Html.Raw(Json.Serialize(Model.Level)),
       "teaches": @Html.Raw(Json.Serialize(Model.Category)),
@@ -154,7 +157,7 @@
 <div id="quizModal" class="modal hidden">
     <div class="modal-box">
         <div class="modal-header">
-            <h2>🎯 <span class="chapter-title-display" data-i18n="@("ch-" + Model.Slug)">@Model.Title</span> — <span data-i18n="ch-quiz-modal-title">測驗</span></h2>
+            <h2>🎯 <span class="chapter-title-display" data-i18n="@("ch-" + Model.Slug)">@displayTitle</span> — <span data-i18n="ch-quiz-modal-title">測驗</span></h2>
             <button onclick="closeQuiz()" class="modal-close">✕</button>
         </div>
         <div id="quizContent">

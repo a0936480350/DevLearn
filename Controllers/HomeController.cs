@@ -64,6 +64,13 @@ public class HomeController : Controller
 
         if (chapter is null) return NotFound();
 
+        // ─── 語言切換：?lang=ja 或 cookie "lang" ───
+        var lang = Request.Query["lang"].ToString();
+        if (string.IsNullOrEmpty(lang)) lang = Request.Cookies["lang"] ?? "zh";
+        var useJa = lang == "ja" && !string.IsNullOrWhiteSpace(chapter.ContentJa);
+        var displayTitle = useJa && !string.IsNullOrWhiteSpace(chapter.TitleJa) ? chapter.TitleJa! : chapter.Title;
+        var displayContent = useJa ? chapter.ContentJa! : chapter.Content;
+
         // Session ID for progress tracking
         var sessionId = HttpContext.Session.GetString("SessionId");
         if (string.IsNullOrEmpty(sessionId))
@@ -106,16 +113,20 @@ public class HomeController : Controller
             .OrderByDescending(a => a.Score * 100 / a.Total)
             .FirstOrDefaultAsync();
 
-        // Cache rendered Markdown HTML per chapter (expensive for large content)
-        var contentHtml = _cache.GetOrCreate($"chapter:html:{chapter.Id}", entry =>
+        // Cache rendered Markdown HTML per chapter/lang (expensive for large content)
+        var cacheKey = useJa ? $"chapter:html:{chapter.Id}:ja" : $"chapter:html:{chapter.Id}";
+        var contentHtml = _cache.GetOrCreate(cacheKey, entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
-            return Markdown.ToHtml(chapter.Content, _pipeline);
+            return Markdown.ToHtml(displayContent, _pipeline);
         });
 
         ViewBag.AllChapters = allChapters;
         ViewBag.CompletedChapters = completedIds;
         ViewBag.ContentHtml = contentHtml;
+        ViewBag.DisplayTitle = displayTitle;
+        ViewBag.CurrentLang = lang;
+        ViewBag.HasJa = !string.IsNullOrWhiteSpace(chapter.ContentJa);
         ViewBag.HasQuiz = chapter.Questions.Any();
         ViewBag.QuestionCount = chapter.Questions.Count;
         ViewBag.SessionId = sessionId;
@@ -124,15 +135,18 @@ public class HomeController : Controller
         ViewBag.BestScore = bestAttempt != null ? (int)(bestAttempt.Score * 100.0 / bestAttempt.Total) : -1;
 
         // ─── SEO per-page ───
-        ViewData["Title"] = chapter.Title;
+        ViewData["Title"] = displayTitle;
         // Strip markdown to first 150 chars for description
-        var plain = System.Text.RegularExpressions.Regex.Replace(chapter.Content ?? "", @"[#*`\[\]_>\-\n\r]+", " ");
+        var plain = System.Text.RegularExpressions.Regex.Replace(displayContent ?? "", @"[#*`\[\]_>\-\n\r]+", " ");
         plain = System.Text.RegularExpressions.Regex.Replace(plain, @"\s+", " ").Trim();
         if (plain.Length > 155) plain = plain.Substring(0, 155) + "…";
-        ViewData["Description"] = string.IsNullOrWhiteSpace(plain)
-            ? $"DevLearn {chapter.Title} — {chapter.Category} {chapter.Level} 免費中文教學"
-            : plain;
-        ViewData["Keywords"] = $"{chapter.Title}, {chapter.Category}, {chapter.Level}, .NET 教學, 程式教學, 中文";
+        var fallback = useJa
+            ? $"DevLearn {displayTitle} — {chapter.Category} {chapter.Level} 無料日本語チュートリアル"
+            : $"DevLearn {displayTitle} — {chapter.Category} {chapter.Level} 免費中文教學";
+        ViewData["Description"] = string.IsNullOrWhiteSpace(plain) ? fallback : plain;
+        ViewData["Keywords"] = useJa
+            ? $"{displayTitle}, {chapter.Category}, {chapter.Level}, .NET チュートリアル, プログラミング, 日本語"
+            : $"{displayTitle}, {chapter.Category}, {chapter.Level}, .NET 教學, 程式教學, 中文";
         ViewData["OgType"] = "article";
 
         return View(chapter);

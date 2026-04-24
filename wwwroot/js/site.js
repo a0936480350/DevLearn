@@ -4136,6 +4136,15 @@ function __t(key) {
 
 function changeLang(lang) {
     localStorage.setItem('lang', lang);
+    // 讓後端讀得到（章節內文日文化）
+    document.cookie = 'lang=' + lang + ';path=/;max-age=' + (60 * 60 * 24 * 365) + ';SameSite=Lax';
+
+    // 章節頁（/Home/Chapter/...）靠 server 渲染 Markdown，需要 reload 才能切語言
+    if (/^\/Home\/Chapter\//i.test(location.pathname)) {
+        location.reload();
+        return;
+    }
+
     var tr = translations[lang];
     if (!tr) return;
 
@@ -4164,8 +4173,26 @@ function changeLang(lang) {
 
 // Load saved language
 (function() {
-    var saved = localStorage.getItem('lang');
-    if (saved && saved !== 'zh') {
-        changeLang(saved);
+    var saved = localStorage.getItem('lang') || 'zh';
+    // 同步 cookie（舊使用者 localStorage 有但 cookie 沒有 → server 拿不到）
+    var cookieLang = (document.cookie.match(/(?:^|;\s*)lang=([^;]+)/) || [])[1];
+    if (cookieLang !== saved) {
+        document.cookie = 'lang=' + saved + ';path=/;max-age=' + (60 * 60 * 24 * 365) + ';SameSite=Lax';
+    }
+    if (saved !== 'zh') {
+        // 不觸發 reload — 僅做 client-side data-i18n 切換（章節頁 server 已用 cookie 渲染好了）
+        var tr = translations[saved];
+        if (tr) {
+            document.querySelectorAll('[data-i18n]').forEach(function(el) {
+                var key = el.getAttribute('data-i18n');
+                if (tr[key]) el.textContent = tr[key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
+                var key = el.getAttribute('data-i18n-placeholder');
+                if (tr[key]) el.placeholder = tr[key];
+            });
+            var sel = document.getElementById('langSelect');
+            if (sel) sel.value = saved;
+        }
     }
 })();
