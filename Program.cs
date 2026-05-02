@@ -291,6 +291,7 @@ using (var scope = app.Services.CreateScope())
                 ""UpdatedAt"" TIMESTAMP NOT NULL DEFAULT NOW()
             );
             CREATE UNIQUE INDEX IF NOT EXISTS ""IX_TeacherSubscriptions_UserAnonymousId"" ON ""TeacherSubscriptions"" (""UserAnonymousId"");
+            CREATE INDEX IF NOT EXISTS ""IX_Chapters_Slug"" ON ""Chapters"" (""Slug"");
         ");
         Console.WriteLine("[DB] All tables ensured.");
     }

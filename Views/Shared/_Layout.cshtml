@@ -56,9 +56,18 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/ui-upgrade.css" asp-append-version="true" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+    <!-- Prism syntax highlighting (defer = parallel download, run after parse → faster DCL on heavy chapters) -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script>
 
     <!-- Organization JSON-LD (shown on all pages) -->
     <script type="application/ld+json">
@@ -102,7 +111,7 @@
     fetch('/Promotion/TotalReferrals').then(r=>r.json()).then(d=>{
         var el=document.getElementById('marqueeCount');
         if(el) el.textContent=d.count||0;
-    });
+    }).catch(()=>{});
     </script>
 
     <!-- Top Navbar -->
@@ -160,12 +169,6 @@
 
     @RenderBody()
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/ideas.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
@@ -1019,6 +1022,9 @@
     <script>
     (function(){
         var reported = {};
+        var pageUnloading = false;
+        window.addEventListener('pagehide', function(){ pageUnloading = true; });
+        window.addEventListener('beforeunload', function(){ pageUnloading = true; });
         function reportError(msg, stack, source) {
             var key = msg + '|' + location.pathname;
             if (reported[key]) return;
@@ -1047,6 +1053,11 @@
                 }
                 return res;
             }).catch(function(err) {
+                // 過濾誤報：頁面離開、離線、或主動 abort 造成的 fetch 失敗
+                var name = err && err.name;
+                if (pageUnloading || document.visibilityState === 'hidden' || !navigator.onLine || name === 'AbortError') {
+                    throw err;
+                }
                 reportError('API Network Error: ' + (typeof url === 'string' ? url : url.url), err&&err.message||'', 'frontend-network');
                 throw err;
             });
@@ -1174,10 +1185,27 @@
         }).catch(function(){});
     })();
     </script>
-<!-- Gesture Control CDN -->
-<script src="https://cdn.jsdelivr.net/npm/@@mediapipe/hands@@0.4.1675469240/hands.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@@mediapipe/face_mesh@@0.4.1633559619/face_mesh.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@@mediapipe/camera_utils@@0.3.1675466862/camera_utils.min.js"></script>
+<!-- Gesture Control: MediaPipe libs lazy-loaded on demand to avoid ~10MB blocking page load -->
+<script>
+var _mediapipeLoaded = false, _mediapipeLoading = null;
+function loadMediaPipeScripts() {
+    if (_mediapipeLoaded) return Promise.resolve();
+    if (_mediapipeLoading) return _mediapipeLoading;
+    var urls = [
+        'https://cdn.jsdelivr.net/npm/@@mediapipe/hands@@0.4.1675469240/hands.min.js',
+        'https://cdn.jsdelivr.net/npm/@@mediapipe/face_mesh@@0.4.1633559619/face_mesh.min.js',
+        'https://cdn.jsdelivr.net/npm/@@mediapipe/camera_utils@@0.3.1675466862/camera_utils.min.js'
+    ];
+    _mediapipeLoading = Promise.all(urls.map(function(url) {
+        return new Promise(function(resolve, reject) {
+            var s = document.createElement('script');
+            s.src = url; s.onload = resolve; s.onerror = reject;
+            document.head.appendChild(s);
+        });
+    })).then(function() { _mediapipeLoaded = true; });
+    return _mediapipeLoading;
+}
+</script>
 
 <!-- Gesture Control UI -->
 <button id="gestureToggleBtn" onclick="toggleGesture()" style="
@@ -1355,6 +1383,17 @@ function toggleGesture() {
         document.getElementById('gestureCursor').style.display = 'none';
         document.getElementById('cursorProgress').style.display = 'none';
         var cl = document.getElementById('cursorLabel'); if(cl) cl.style.display = 'none';
+        return;
+    }
+
+    // Lazy-load MediaPipe libs on first activation (saves ~10MB on every page load)
+    if (typeof Hands === 'undefined' || typeof FaceMesh === 'undefined' || typeof Camera === 'undefined') {
+        btn.innerHTML = '⏳ 載入中...';
+        loadMediaPipeScripts().then(toggleGesture).catch(function(e) {
+            console.error('Failed to load MediaPipe', e);
+            btn.innerHTML = '🎥 ' + (isMobile ? '頭部控制' : '手勢控制');
+            alert('載入手勢控制失敗，請檢查網路後再試');
+        });
         return;
     }
 

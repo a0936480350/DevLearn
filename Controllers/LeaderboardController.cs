@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using DotNetLearning.Data;
 using DotNetLearning.Models;
 using DotNetLearning.Filters;
@@ -9,7 +10,8 @@ namespace DotNetLearning.Controllers;
 public class LeaderboardController : Controller
 {
     private readonly AppDbContext _db;
-    public LeaderboardController(AppDbContext db) => _db = db;
+    private readonly IMemoryCache _cache;
+    public LeaderboardController(AppDbContext db, IMemoryCache cache) { _db = db; _cache = cache; }
 
     private string GetSessionId()
     {
@@ -24,10 +26,15 @@ public class LeaderboardController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var leaders = await _db.UserProfiles
-            .OrderByDescending(u => u.TotalScore)
-            .Take(50)
-            .ToListAsync();
+        var leaders = await _cache.GetOrCreateAsync("leaderboard:top50", async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3);
+            return await _db.UserProfiles
+                .AsNoTracking()
+                .OrderByDescending(u => u.TotalScore)
+                .Take(50)
+                .ToListAsync();
+        });
         return View(leaders);
     }
 
@@ -57,6 +64,7 @@ public class LeaderboardController : Controller
         var profile = await _db.UserProfiles.FirstOrDefaultAsync(u => u.SessionId == sessionId);
         if (profile == null) return Json(new { exists = false });
 
+        // DbContext 不是 thread-safe，序列化查詢避免並發例外
         var rank = await _db.UserProfiles.CountAsync(u => u.TotalScore > profile.TotalScore) + 1;
         var totalUsers = await _db.UserProfiles.CountAsync();
 

@@ -95,22 +95,22 @@ public class HomeController : Controller
         // Cache sidebar chapter list (共用 GetNavChaptersAsync 避免跟 Index 重複寫)
         var allChapters = await GetNavChaptersAsync();
 
+        // DbContext 不是 thread-safe，這兩個查詢必須序列化執行（不能 Task.WhenAll）
         var completedIds = await _db.Progresses
             .AsNoTracking()
             .Where(p => p.SessionId == sessionId && p.IsCompleted)
             .Select(p => p.ChapterId)
             .ToListAsync();
 
-        // Total progress for navbar badge
-        var totalCount = allChapters!.Count;
-        var doneCount = completedIds.Count;
-
-        // 最佳成績
         var bestAttempt = await _db.QuizAttempts
             .AsNoTracking()
             .Where(a => a.SessionId == sessionId && a.ChapterId == chapter.Id && a.Total > 0)
             .OrderByDescending(a => a.Score * 100 / a.Total)
             .FirstOrDefaultAsync();
+
+        // Total progress for navbar badge
+        var totalCount = allChapters!.Count;
+        var doneCount = completedIds.Count;
 
         // Cache rendered Markdown HTML per chapter/lang (expensive for large content)
         var cacheKey = effectiveLang == "zh"

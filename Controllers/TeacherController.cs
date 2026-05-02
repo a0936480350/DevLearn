@@ -32,12 +32,57 @@ public class TeacherController : Controller
         if (maxPrice.HasValue)
             query = query.Where(t => t.HourlyRate <= maxPrice.Value);
 
-        ViewBag.Teachers = await query.OrderByDescending(t => t.AverageRating).ThenByDescending(t => t.TotalStudents).ToListAsync();
+        // 排除 base64 PhotoUrl/DiplomaFileName/Bio 等大欄位，避免內嵌 MB 級資料拖慢頁面
+        var teachers = await query
+            .OrderByDescending(t => t.AverageRating).ThenByDescending(t => t.TotalStudents)
+            .Select(t => new Teacher
+            {
+                Id = t.Id,
+                Name = t.Name,
+                Title = t.Title,
+                SkillsJson = t.SkillsJson,
+                AverageRating = t.AverageRating,
+                TotalStudents = t.TotalStudents,
+                TotalLessons = t.TotalLessons,
+                HourlyRate = t.HourlyRate,
+                TrialPrice = t.TrialPrice,
+                PhotoUrl = (t.PhotoUrl != null && t.PhotoUrl != "") ? "HAS_PHOTO" : ""
+            })
+            .ToListAsync();
+
+        foreach (var t in teachers)
+        {
+            if (t.PhotoUrl == "HAS_PHOTO") t.PhotoUrl = $"/Teacher/Photo/{t.Id}";
+        }
+
+        ViewBag.Teachers = teachers;
         ViewBag.Search = search;
         ViewBag.Skill = skill;
         ViewBag.MinPrice = minPrice;
         ViewBag.MaxPrice = maxPrice;
         return View();
+    }
+
+    // 老師頭像（從 base64 data URL 解析後直接回傳 image bytes，比內嵌 base64 大幅減少 HTML 體積）
+    [HttpGet]
+    public async Task<IActionResult> Photo(int id)
+    {
+        var photoUrl = await _db.Teachers.Where(t => t.Id == id).Select(t => t.PhotoUrl).FirstOrDefaultAsync();
+        if (string.IsNullOrEmpty(photoUrl) || !photoUrl.StartsWith("data:")) return NotFound();
+
+        var commaIdx = photoUrl.IndexOf(',');
+        if (commaIdx < 0) return NotFound();
+
+        var meta = photoUrl.Substring(5, commaIdx - 5); // e.g. "image/jpeg;base64"
+        var contentType = meta.Split(';')[0];
+        if (string.IsNullOrEmpty(contentType)) contentType = "image/jpeg";
+
+        byte[] bytes;
+        try { bytes = Convert.FromBase64String(photoUrl.Substring(commaIdx + 1)); }
+        catch { return NotFound(); }
+
+        Response.Headers["Cache-Control"] = "public, max-age=86400";
+        return File(bytes, contentType);
     }
 
     // 老師詳情（公開）

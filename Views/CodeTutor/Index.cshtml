@@ -569,12 +569,13 @@
 
     // Load lessons
     fetch('/CodeTutor/GetLessons')
-        .then(r => r.json())
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .then(data => {
             lessons = data;
             renderCategoryFilter();
             renderLessonGrid();
-        });
+        })
+        .catch(err => console.error('GetLessons failed:', err));
 
     function renderCategoryFilter() {
         const filterEl = document.getElementById('categoryFilter');
@@ -608,11 +609,12 @@
 
     window._startLesson = function(id) {
         fetch('/CodeTutor/GetLesson?id=' + id)
-            .then(r => r.json())
+            .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
             .then(lesson => {
                 currentLesson = lesson;
                 beginGame();
-            });
+            })
+            .catch(err => console.error('GetLesson failed:', err));
     };
 
     function beginGame() {
