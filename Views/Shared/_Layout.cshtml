@@ -59,15 +59,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" />
+    <link rel="stylesheet" href="~/lib/prism/themes/prism-okaidia.min.css" asp-append-version="true" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
     <!-- Prism syntax highlighting (defer = parallel download, run after parse → faster DCL on heavy chapters) -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script>
+    <script defer src="~/lib/prism/prism.min.js" asp-append-version="true"></script>
+    <script defer src="~/lib/prism/components/prism-csharp.min.js" asp-append-version="true"></script>
+    <script defer src="~/lib/prism/components/prism-sql.min.js" asp-append-version="true"></script>
+    <script defer src="~/lib/prism/components/prism-bash.min.js" asp-append-version="true"></script>
+    <script defer src="~/lib/prism/components/prism-yaml.min.js" asp-append-version="true"></script>
+    <script defer src="~/lib/prism/components/prism-docker.min.js" asp-append-version="true"></script>
+    <script defer src="~/js/prism-config.js" asp-append-version="true"></script>
 
     <!-- Organization JSON-LD (shown on all pages) -->
     <script type="application/ld+json">
@@ -375,7 +376,22 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script>
+    // SignalR lazy-loader — chat 是 opt-in，避免 ~50KB blocking script 拖慢首屏 DCL
+    var _signalRLoaded = false, _signalRLoading = null;
+    function loadSignalR() {
+        if (_signalRLoaded) return Promise.resolve();
+        if (_signalRLoading) return _signalRLoading;
+        _signalRLoading = new Promise(function(resolve, reject) {
+            var s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js';
+            s.onload = function() { _signalRLoaded = true; resolve(); };
+            s.onerror = reject;
+            document.head.appendChild(s);
+        });
+        return _signalRLoading;
+    }
+    </script>
     <script>
     (function(){
         let chatNick = localStorage.getItem('chatNick') || '';
@@ -509,7 +525,7 @@
             if(chatOpen){
                 unreadCount = 0;
                 unreadBadge.style.display = 'none';
-                if(!connection) initSignalR();
+                if(!connection) loadSignalR().then(initSignalR);
                 if(chatJoined) msgInput.focus();
                 checkAndFillNickname();
             }
@@ -526,7 +542,7 @@
             setupDiv.style.display = 'none';
             msgsDiv.style.display = 'flex';
             inputArea.style.display = 'flex';
-            if(!connection) initSignalR();
+            if(!connection) loadSignalR().then(initSignalR);
             msgInput.focus();
         };
 
