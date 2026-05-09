@@ -4,7 +4,7 @@
 DevLearn 是 ASP.NET Core MVC .NET 8 學習平台。
 - 本地路徑：`C:\Users\user\DotNetLearning\DotNetLearning\`
 - 網站：https://devlearn-dotnet.azurewebsites.net
-- 資料庫：PostgreSQL (devlearn-pg.postgres.database.azure.com, DB: devlearn)
+- 資料庫：PostgreSQL (`leadflow-mike-tw-pg.postgres.database.azure.com`, DB: `devlearn`, user: `leadflowadmin`) — 2026-05-10 從舊 `devlearn-pg` 整併過來，與 LeadFlow / nihon-dev 共用同一台 server。腳本端走 `db_config.py` 單一來源。
 - 部署：Azure App Service (devlearn-dotnet, devlearn-rg, East Asia)
 
 ## 部署指令（在 ~/DotNetLearning 目錄執行）

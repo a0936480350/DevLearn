@@ -193,8 +193,11 @@ Full schema lives in `Data/AppDbContext.cs`.  The interesting groups:
              │
              ▼
   Azure PostgreSQL Flexible Server
-  `devlearn-pg` · devadmin user
+  `leadflow-mike-tw-pg` · leadflowadmin user
   Single region (East Asia)
+  Shared with LeadFlow.SaaS + nihon-dev (2026-05-10
+  consolidation; saves ~NT$430/mo). Old `devlearn-pg`
+  is being decommissioned.
 
   Keep-alive cron (GitHub Actions, every 10 min)
   pings /health to fight cold starts.
