@@ -170,7 +170,10 @@
 
     @RenderBody()
 
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <!-- defer = 不阻塞 HTML 解析；218KB site.js 過大、不該在 4G 下卡住 DCL。
+         site.js 內所有頂層程式只操作 DOM 元素（在 defer 下保證 DOM 已就緒），
+         其它 inline IIFE 不在 top-level 呼叫 site.js 函式（onclick handler 延遲求值，安全） -->
+    <script defer src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/ideas.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 
@@ -1041,17 +1044,21 @@
         var pageUnloading = false;
         window.addEventListener('pagehide', function(){ pageUnloading = true; });
         window.addEventListener('beforeunload', function(){ pageUnloading = true; });
+        var origFetch = window.fetch;
         function reportError(msg, stack, source) {
             var key = msg + '|' + location.pathname;
             if (reported[key]) return;
             reported[key] = true;
-            fetch('/api/ErrorLog/report', {method:'POST', headers:{'Content-Type':'application/json'},
+            origFetch.call(window, '/api/ErrorLog/report', {method:'POST', headers:{'Content-Type':'application/json'},
                 body: JSON.stringify({pageUrl: location.href, errorMessage: msg, stackTrace: stack || '', source: source || 'frontend'})
             }).catch(function(){});
         }
 
         // 1. JS 執行錯誤
         window.onerror = function(msg, url, line, col, err) {
+            // Prism component 拋的 "Prism is not defined" 一定是 prism core 載入失敗的衍生錯誤，
+            // 已由資源錯誤 handler 回報；過濾以避免重複噪音
+            if (typeof msg === 'string' && msg.indexOf('Prism is not defined') !== -1) return;
             reportError(msg, (err&&err.stack||'') + ' at ' + url + ':' + line + ':' + col, 'frontend-js');
         };
 
@@ -1061,11 +1068,15 @@
         });
 
         // 3. API 呼叫失敗偵測（攔截 fetch）
-        var origFetch = window.fetch;
         window.fetch = function(url, opts) {
+            var urlStr = typeof url === 'string' ? url : (url && url.url) || '';
+            // 略過 ErrorLog 端點本身，避免回報錯誤的 fetch 失敗時又觸發回報
+            if (urlStr.indexOf('/api/ErrorLog/') !== -1) {
+                return origFetch.apply(this, arguments);
+            }
             return origFetch.apply(this, arguments).then(function(res) {
                 if (!res.ok && res.status >= 500) {
-                    reportError('API 500: ' + (typeof url === 'string' ? url : url.url) + ' [' + res.status + ']', 'Status: ' + res.status + ' ' + res.statusText, 'frontend-api');
+                    reportError('API 500: ' + urlStr + ' [' + res.status + ']', 'Status: ' + res.status + ' ' + res.statusText, 'frontend-api');
                 }
                 return res;
             }).catch(function(err) {
@@ -1074,7 +1085,7 @@
                 if (pageUnloading || document.visibilityState === 'hidden' || !navigator.onLine || name === 'AbortError') {
                     throw err;
                 }
-                reportError('API Network Error: ' + (typeof url === 'string' ? url : url.url), err&&err.message||'', 'frontend-network');
+                reportError('API Network Error: ' + urlStr, err&&err.message||'', 'frontend-network');
                 throw err;
             });
         };
@@ -1090,14 +1101,29 @@
             }
         }, true);
 
-        // 5. 頁面載入效能（超過 10 秒警告）
+        // 5. 頁面載入效能（超過 25 秒警告；排除伺服器冷啟動 + 客戶端慢網路）
         window.addEventListener('load', function() {
             setTimeout(function() {
                 if (window.performance) {
                     var timing = performance.timing;
                     var loadTime = timing.loadEventEnd - timing.navigationStart;
-                    if (loadTime > 10000) {
-                        reportError('Slow Page Load: ' + (loadTime/1000).toFixed(1) + 's on ' + location.pathname, 'domContentLoaded: ' + (timing.domContentLoadedEventEnd - timing.navigationStart) + 'ms', 'frontend-performance');
+                    var serverTime = timing.responseEnd - timing.requestStart;
+                    // 過濾誤報 1：Azure 冷啟動可拖到 10s+，那是後端問題不是前端慢
+                    // 過濾誤報 2：客戶端慢網路（2g/3g/save-data）導致 38s 載入屬正常，不是程式問題
+                    var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                    var slowNetwork = conn && (
+                        conn.saveData === true ||
+                        conn.effectiveType === 'slow-2g' ||
+                        conn.effectiveType === '2g' ||
+                        conn.effectiveType === '3g'
+                    );
+                    // 只回報「伺服器很快、網路也快、但前端仍然慢」的真實前端效能問題
+                    if (loadTime > 25000 && serverTime < 3000 && !slowNetwork) {
+                        reportError(
+                            'Slow Page Load: ' + (loadTime/1000).toFixed(1) + 's on ' + location.pathname,
+                            'domContentLoaded: ' + (timing.domContentLoadedEventEnd - timing.navigationStart) + 'ms, server: ' + serverTime + 'ms, conn: ' + (conn && conn.effectiveType || 'unknown'),
+                            'frontend-performance'
+                        );
                     }
                 }
             }, 100);
