@@ -272,8 +272,16 @@ function downloadBlob(blob, filename) {
     document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
-// 載入此章節的想法
-loadChapterIdeas(CHAPTER_ID);
+// 載入此章節的想法 — ideas.js (defer) 比 inline script 晚執行，
+// 故包在 DOMContentLoaded 內確保 loadChapterIdeas 已定義
+function _loadChapterIdeas() {
+    loadChapterIdeas(CHAPTER_ID);
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _loadChapterIdeas);
+} else {
+    _loadChapterIdeas();
+}
 </script>
-<script src="~/js/quiz.js" asp-append-version="true"></script>
+<script defer src="~/js/quiz.js" asp-append-version="true"></script>
 }

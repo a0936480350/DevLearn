@@ -542,18 +542,26 @@ public class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> Me()
     {
-        var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == GetAnonId());
-        if (user == null) return Json(new { exists = false });
-        return Json(new {
-            exists = true,
-            user.Nickname,
-            user.Email,
-            user.IsRegistered,
-            user.TotalScore,
-            user.BadgeLevel,
-            user.ChaptersCompleted,
-            user.QuizzesTaken
-        });
+        try
+        {
+            var user = await _db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == GetAnonId());
+            if (user == null) return Json(new { exists = false });
+            return Json(new {
+                exists = true,
+                user.Nickname,
+                user.Email,
+                user.IsRegistered,
+                user.TotalScore,
+                user.BadgeLevel,
+                user.ChaptersCompleted,
+                user.QuizzesTaken
+            });
+        }
+        catch
+        {
+            // DB 尚未就緒（冷啟動），回傳未登入狀態避免 500
+            return Json(new { exists = false });
+        }
     }
 
     // API: 用暱稱查詢用戶 AnonymousId（供私訊功能使用）

@@ -570,37 +570,41 @@ app.Use(async (context, next) =>
     context.Session.SetString("SessionId", anonymousId);
     context.Session.SetString("sid", anonymousId);
 
-    // 確保資料庫有這個用戶
-    using var scope = context.RequestServices.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<DotNetLearning.Data.AppDbContext>();
-    var user = await db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == anonymousId);
-    if (user == null)
+    // 確保資料庫有這個用戶（冷啟動時 DB 可能尚未就緒，加 try/catch 避免整個請求變成 500）
+    try
     {
-        user = new DotNetLearning.Models.SiteUser { AnonymousId = anonymousId };
-        db.SiteUsers.Add(user);
-        await db.SaveChangesAsync();
-    }
-    else
-    {
-        // Throttle LastActiveAt DB write to once per 5 minutes per user
-        var now = DateTime.Now;
-        if (!_lastActiveSeen.TryGetValue(anonymousId, out var lastSeen) || (now - lastSeen).TotalMinutes >= 5)
+        using var scope = context.RequestServices.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<DotNetLearning.Data.AppDbContext>();
+        var user = await db.SiteUsers.FirstOrDefaultAsync(u => u.AnonymousId == anonymousId);
+        if (user == null)
         {
-            user.LastActiveAt = now;
+            user = new DotNetLearning.Models.SiteUser { AnonymousId = anonymousId };
+            db.SiteUsers.Add(user);
             await db.SaveChangesAsync();
-            _lastActiveSeen[anonymousId] = now;
+        }
+        else
+        {
+            // Throttle LastActiveAt DB write to once per 5 minutes per user
+            var now = DateTime.Now;
+            if (!_lastActiveSeen.TryGetValue(anonymousId, out var lastSeen) || (now - lastSeen).TotalMinutes >= 5)
+            {
+                user.LastActiveAt = now;
+                await db.SaveChangesAsync();
+                _lastActiveSeen[anonymousId] = now;
+            }
+        }
+
+        // Store user info in HttpContext.Items for easy access
+        context.Items["CurrentUser"] = user;
+        context.Items["AnonymousId"] = anonymousId;
+
+        // Check if user is banned
+        if (user.IsBanned)
+        {
+            context.Items["IsBanned"] = true;
         }
     }
-
-    // Store user info in HttpContext.Items for easy access
-    context.Items["CurrentUser"] = user;
-    context.Items["AnonymousId"] = anonymousId;
-
-    // Check if user is banned
-    if (user.IsBanned)
-    {
-        context.Items["IsBanned"] = true;
-    }
+    catch { /* DB 尚未就緒（冷啟動），略過；Controller 自行處理 */ }
 
     await next();
 });

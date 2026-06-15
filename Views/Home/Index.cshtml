@@ -742,22 +742,33 @@ function closeQuizModal() {
     document.body.style.overflow = '';
 }
 
-// 用 ideas.js 的統一功能載入知識牆
-loadIdeaWall();
+// __t 來自 site.js (defer)，inline script 比 defer 早執行 → 提供 fallback 避免 ReferenceError
+var _t = (typeof __t === 'function') ? __t : function(k){ return (typeof window !== 'undefined' && typeof window.__t === 'function') ? window.__t(k) : k; };
 
-// 載入老師免費分享
-(function() {
+// 用 ideas.js 的統一功能載入知識牆 — ideas.js (defer) 比 inline script 晚執行，
+// 故包在 DOMContentLoaded 內確保 loadIdeaWall 已定義
+function _loadIdeaWall() {
+    loadIdeaWall();
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _loadIdeaWall);
+} else {
+    _loadIdeaWall();
+}
+
+// 載入老師免費分享 — 包在 DOMContentLoaded 內，確保 site.js (defer) 已執行，__t 已定義
+function _loadTeacherPosts() {
     fetch('/Teacher/LatestPosts')
         .then(r => r.json())
         .then(posts => {
             var grid = document.getElementById('teacherPostsGrid');
             if (!posts || posts.length === 0) {
-                grid.innerHTML = '<div style="color:var(--text-muted);font-size:13px;">' + __t('home-posts-empty') + '</div>';
+                grid.innerHTML = '<div style="color:var(--text-muted);font-size:13px;">' + _t('home-posts-empty') + '</div>';
                 return;
             }
             var html = '';
             posts.forEach(function(p) {
-                var typeName = p.type === 'video' ? '🎬 ' + __t('home-post-video') : p.type === 'resource' ? '📦 ' + __t('home-post-resource') : '📝 ' + __t('home-post-article');
+                var typeName = p.type === 'video' ? '🎬 ' + _t('home-post-video') : p.type === 'resource' ? '📦 ' + _t('home-post-resource') : '📝 ' + _t('home-post-article');
                 html += '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;transition:border-color 0.2s;cursor:pointer;" onclick="window.location.href=\'/Teacher/Detail/' + p.teacherId + '\'">';
                 html += '  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
                 html += '    <span style="font-size:11px;padding:2px 10px;border-radius:10px;background:rgba(99,102,241,0.1);color:var(--accent);">' + typeName + '</span>';
@@ -767,16 +778,22 @@ loadIdeaWall();
                 html += '  <div style="font-size:13px;color:var(--text-muted);line-height:1.5;margin-bottom:12px;">' + p.preview + '</div>';
                 html += '  <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-muted);">';
                 html += '    <span>👨‍🏫 ' + p.teacherName + '</span>';
-                html += '    <span>❤️ ' + p.likes + ' ' + __t('home-post-likes') + '</span>';
+                html += '    <span>❤️ ' + p.likes + ' ' + _t('home-post-likes') + '</span>';
                 html += '  </div>';
-                html += '  <div style="margin-top:10px;text-align:right;"><span style="font-size:13px;color:var(--accent);">' + __t('home-read-more') + ' &rarr;</span></div>';
+                html += '  <div style="margin-top:10px;text-align:right;"><span style="font-size:13px;color:var(--accent);">' + _t('home-read-more') + ' &rarr;</span></div>';
                 html += '</div>';
             });
             grid.innerHTML = html;
         })
         .catch(function() {
-            document.getElementById('teacherPostsGrid').innerHTML = '<div style="color:var(--text-muted);font-size:13px;">' + __t('home-load-failed') + '</div>';
+            var fallback = (typeof __t === 'function') ? __t('home-load-failed') : 'home-load-failed';
+            document.getElementById('teacherPostsGrid').innerHTML = '<div style="color:var(--text-muted);font-size:13px;">' + fallback + '</div>';
         });
-})();
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _loadTeacherPosts);
+} else {
+    _loadTeacherPosts();
+}
 </script>
 }

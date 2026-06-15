@@ -814,10 +814,18 @@ const sqlGame = (function() {
 
     // Load challenges
     fetch('/SqlGame/GetChallenges')
-        .then(r => r.json())
+        .then(r => {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        })
         .then(data => {
             challenges = data;
             renderLobby();
+        })
+        .catch(err => {
+            console.error('Failed to load SQL challenges:', err);
+            levelSections.innerHTML = '<p style="color:#f85149;text-align:center;padding:40px;">無法載入關卡，請重新整理頁面。</p>';
+            progressSummary.textContent = '載入失敗';
         });
 
     // Line number updater

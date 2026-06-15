@@ -174,7 +174,9 @@
          site.js 內所有頂層程式只操作 DOM 元素（在 defer 下保證 DOM 已就緒），
          其它 inline IIFE 不在 top-level 呼叫 site.js 函式（onclick handler 延遲求值，安全） -->
     <script defer src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/ideas.js" asp-append-version="true"></script>
+    <!-- ideas.js 也 defer：避免同步載入卡住 DCL。頂層呼叫 loadIdeaWall()/loadChapterIdeas()
+         的頁面已改為等 DOMContentLoaded 後才呼叫，onclick handler 延遲求值不受影響 -->
+    <script defer src="~/js/ideas.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 
     <!-- Chat Sidebar Widget -->
@@ -1082,22 +1084,42 @@
             }).catch(function(err) {
                 // 過濾誤報：頁面離開、離線、或主動 abort 造成的 fetch 失敗
                 var name = err && err.name;
+                var msg = (err && err.message) || '';
                 if (pageUnloading || document.visibilityState === 'hidden' || !navigator.onLine || name === 'AbortError') {
                     throw err;
                 }
-                reportError('API Network Error: ' + urlStr, err&&err.message||'', 'frontend-network');
+                // 過濾瀏覽器在頁面導航/網路瞬斷時拋的錯誤，這些都不是真正的程式錯誤
+                // Chrome: "Failed to fetch", Firefox: "NetworkError when attempting to fetch resource", Safari: "Load failed"
+                // 不限定 err.name === 'TypeError'，某些瀏覽器或環境（PWA、舊版 Safari）name 可能不同
+                if (/Failed to fetch|NetworkError|Load failed|network ?request failed/i.test(msg)) {
+                    throw err;
+                }
+                reportError('API Network Error: ' + urlStr, msg, 'frontend-network');
                 throw err;
             });
         };
 
         // 4. 資源載入失敗（CSS/JS/圖片）
+        // 過濾誤報：用戶端離線、頁面離開、批次網路抖動造成的 same-origin 資源失敗
+        // （之前發現 sql-subquery 頁面 4 秒內 6 個 prism script 同時失敗，但伺服器全部 200 OK）
         window.addEventListener('error', function(e) {
-            if (e.target && e.target !== window && e.target.tagName) {
-                var tag = e.target.tagName;
-                var src = e.target.src || e.target.href || '';
-                if (src && (tag === 'SCRIPT' || tag === 'LINK' || tag === 'IMG')) {
-                    reportError('Resource Load Failed: [' + tag + '] ' + src, '', 'frontend-resource');
-                }
+            if (!(e.target && e.target !== window && e.target.tagName)) return;
+            var tag = e.target.tagName;
+            var src = e.target.src || e.target.href || '';
+            if (!src || (tag !== 'SCRIPT' && tag !== 'LINK' && tag !== 'IMG')) return;
+            // 過濾客戶端狀況（與 fetch handler 對齊）
+            if (pageUnloading || document.visibilityState === 'hidden' || !navigator.onLine) return;
+            // same-origin 資源用 HEAD 自我驗證：若伺服器仍能回 2xx，代表是用戶端問題，不回報
+            // 405 (Method Not Allowed) / 401 / 403 代表 URL 存在且伺服器有回應，僅 GET-only 或權限差異，視為非真實錯誤
+            var isSameOrigin = src.indexOf(location.origin) === 0 || src.charAt(0) === '/';
+            if (isSameOrigin) {
+                origFetch.call(window, src, {method:'HEAD', cache:'no-store'}).then(function(res){
+                    if (!res.ok && res.status !== 405 && res.status !== 401 && res.status !== 403) {
+                        reportError('Resource Load Failed: [' + tag + '] ' + src, 'HEAD verify status: ' + res.status, 'frontend-resource');
+                    }
+                }).catch(function(){ /* HEAD 也失敗 = 用戶端網路問題，靜默 */ });
+            } else {
+                reportError('Resource Load Failed: [' + tag + '] ' + src, '', 'frontend-resource');
             }
         }, true);
 
@@ -1390,9 +1412,24 @@ var lastHandX = null;
 var gestureThrottle = 800;
 var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-// 跳頁後自動重連手勢控制
+// 跳頁後自動重連手勢控制（先確認有攝影機，否則清掉 flag 避免每次都丟 NotFoundError）
 if (localStorage.getItem('gestureOn') === 'true') {
-    setTimeout(function(){ toggleGesture(); }, 1500);
+    setTimeout(function(){
+        if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+            localStorage.removeItem('gestureOn');
+            return;
+        }
+        navigator.mediaDevices.enumerateDevices().then(function(devices){
+            var hasCamera = devices.some(function(d){ return d.kind === 'videoinput'; });
+            if (hasCamera) {
+                toggleGesture();
+            } else {
+                localStorage.removeItem('gestureOn');
+            }
+        }).catch(function(){
+            localStorage.removeItem('gestureOn');
+        });
+    }, 1500);
 }
 if (localStorage.getItem('voiceOn') === 'true') {
     setTimeout(function(){ toggleVoice(); }, 2000);
@@ -1563,7 +1600,17 @@ function toggleGesture() {
             width: 280,
             height: 210
         });
-        gestureCamera.start();
+        var startResult = gestureCamera.start();
+        if (startResult && typeof startResult.catch === 'function') {
+            startResult.catch(function(e){
+                console.warn('Camera start failed', e);
+                gestureActive = false;
+                localStorage.removeItem('gestureOn');
+                panel.style.display = 'none';
+                btn.style.background = 'linear-gradient(135deg,#6366f1,#8b5cf6)';
+                btn.innerHTML = '🎥 ' + (isMobile ? '頭部控制' : '手勢控制');
+            });
+        }
 
     } else {
         // Desktop: existing hand gesture code
@@ -1726,7 +1773,17 @@ function toggleGesture() {
             width: 280,
             height: 210
         });
-        gestureCamera.start();
+        var startResult = gestureCamera.start();
+        if (startResult && typeof startResult.catch === 'function') {
+            startResult.catch(function(e){
+                console.warn('Camera start failed', e);
+                gestureActive = false;
+                localStorage.removeItem('gestureOn');
+                panel.style.display = 'none';
+                btn.style.background = 'linear-gradient(135deg,#6366f1,#8b5cf6)';
+                btn.innerHTML = '🎥 ' + (isMobile ? '頭部控制' : '手勢控制');
+            });
+        }
     }
 }
 

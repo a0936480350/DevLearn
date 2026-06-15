@@ -90,9 +90,17 @@ public class MessageController : Controller
     [HttpGet]
     public async Task<IActionResult> UnreadCount()
     {
-        var myId = GetAnonId();
-        var count = await _db.PrivateMessages.CountAsync(m => m.ReceiverId == myId && !m.IsRead);
-        return Json(new { count });
+        try
+        {
+            var myId = GetAnonId();
+            if (string.IsNullOrEmpty(myId)) return Json(new { count = 0 });
+            var count = await _db.PrivateMessages.CountAsync(m => m.ReceiverId == myId && !m.IsRead);
+            return Json(new { count });
+        }
+        catch
+        {
+            return Json(new { count = 0 });
+        }
     }
 }
 

@@ -36,7 +36,8 @@ if (searchInput) {
 
 // ── 手機版 Navbar Toggle ────────────────────────────────
 function toggleMobileNav() {
-    document.getElementById('navRight')?.classList.toggle('open');
+    var navRight = document.getElementById('navRight');
+    if (navRight) navRight.classList.toggle('open');
 }
 
 // ── 手機版側邊欄 Drawer ─────────────────────────────────
@@ -63,11 +64,15 @@ const sideSearch = document.getElementById('sidebarSearch');
 if (sideSearch) {
     sideSearch.addEventListener('input', () => {
         const q = sideSearch.value.toLowerCase();
-        document.querySelectorAll('.nav-item').forEach(item => {
-            const title = item.querySelector('.nav-title')?.textContent.toLowerCase() ?? '';
-            const match = !q || title.includes(q);
+        document.querySelectorAll('.nav-item').forEach(function (item) {
+            var titleEl = item.querySelector('.nav-title');
+            var title = titleEl ? titleEl.textContent.toLowerCase() : '';
+            var match = !q || title.includes(q);
             item.style.display = match ? '' : 'none';
-            if (match && q) item.closest('.nav-group')?.classList.add('open');
+            if (match && q) {
+                var group = item.closest('.nav-group');
+                if (group) group.classList.add('open');
+            }
         });
     });
 }

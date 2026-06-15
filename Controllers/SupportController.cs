@@ -65,10 +65,18 @@ public class SupportController : Controller
     [HttpGet]
     public async Task<IActionResult> UnreadReplies()
     {
-        var userId = GetAnonId();
-        var count = await _db.SupportTickets.CountAsync(t =>
-            t.UserId == userId && t.AdminReply != "" && t.Status == "resolved" && !t.IsReplyRead);
-        return Json(new { count });
+        try
+        {
+            var userId = GetAnonId();
+            if (string.IsNullOrEmpty(userId)) return Json(new { count = 0 });
+            var count = await _db.SupportTickets.CountAsync(t =>
+                t.UserId == userId && t.AdminReply != "" && t.Status == "resolved" && !t.IsReplyRead);
+            return Json(new { count });
+        }
+        catch
+        {
+            return Json(new { count = 0 });
+        }
     }
 
     // 標記工單回覆為已讀

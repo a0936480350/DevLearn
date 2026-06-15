@@ -46,7 +46,7 @@ public class TeacherController : Controller
                 TotalLessons = t.TotalLessons,
                 HourlyRate = t.HourlyRate,
                 TrialPrice = t.TrialPrice,
-                PhotoUrl = (t.PhotoUrl != null && t.PhotoUrl != "") ? "HAS_PHOTO" : ""
+                PhotoUrl = (t.PhotoUrl != null && t.PhotoUrl.StartsWith("data:")) ? "HAS_PHOTO" : ""
             })
             .ToListAsync();
 
@@ -64,14 +64,27 @@ public class TeacherController : Controller
     }
 
     // 老師頭像（從 base64 data URL 解析後直接回傳 image bytes，比內嵌 base64 大幅減少 HTML 體積）
-    [HttpGet]
+    // 同時支援 HEAD，避免前端資源驗證時收到 405 而被誤判為失敗
+    [AcceptVerbs("GET", "HEAD")]
     public async Task<IActionResult> Photo(int id)
     {
         var photoUrl = await _db.Teachers.Where(t => t.Id == id).Select(t => t.PhotoUrl).FirstOrDefaultAsync();
-        if (string.IsNullOrEmpty(photoUrl) || !photoUrl.StartsWith("data:")) return NotFound();
+        if (string.IsNullOrEmpty(photoUrl) || !photoUrl.StartsWith("data:"))
+        {
+            // 髒資料（非 data: 開頭或空）→ 清空避免 Index 再產出 404 link
+            if (!string.IsNullOrEmpty(photoUrl))
+            {
+                try { await _db.Teachers.Where(t => t.Id == id).ExecuteUpdateAsync(s => s.SetProperty(t => t.PhotoUrl, (string?)null)); } catch { }
+            }
+            return NotFound();
+        }
 
         var commaIdx = photoUrl.IndexOf(',');
-        if (commaIdx < 0) return NotFound();
+        if (commaIdx < 0)
+        {
+            await _db.Teachers.Where(t => t.Id == id).ExecuteUpdateAsync(s => s.SetProperty(t => t.PhotoUrl, (string?)null));
+            return NotFound();
+        }
 
         var meta = photoUrl.Substring(5, commaIdx - 5); // e.g. "image/jpeg;base64"
         var contentType = meta.Split(';')[0];
@@ -79,7 +92,11 @@ public class TeacherController : Controller
 
         byte[] bytes;
         try { bytes = Convert.FromBase64String(photoUrl.Substring(commaIdx + 1)); }
-        catch { return NotFound(); }
+        catch
+        {
+            await _db.Teachers.Where(t => t.Id == id).ExecuteUpdateAsync(s => s.SetProperty(t => t.PhotoUrl, (string?)null));
+            return NotFound();
+        }
 
         Response.Headers["Cache-Control"] = "public, max-age=86400";
         return File(bytes, contentType);
