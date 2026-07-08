@@ -98,22 +98,24 @@ function toggleTheme() {
     if (html.getAttribute('data-theme') === 'light') {
         html.removeAttribute('data-theme');
         btn.textContent = '🌙';
-        localStorage.setItem('theme', 'dark');
+        try { localStorage.setItem('theme', 'dark'); } catch(e) {}
     } else {
         html.setAttribute('data-theme', 'light');
         btn.textContent = '☀️';
-        localStorage.setItem('theme', 'light');
+        try { localStorage.setItem('theme', 'light'); } catch(e) {}
     }
 }
 
 // Load saved theme
 (function() {
-    var saved = localStorage.getItem('theme');
-    if (saved === 'light') {
-        document.documentElement.setAttribute('data-theme', 'light');
-        var btn = document.getElementById('themeToggle');
-        if (btn) btn.textContent = '☀️';
-    }
+    try {
+        var saved = localStorage.getItem('theme');
+        if (saved === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            var btn = document.getElementById('themeToggle');
+            if (btn) btn.textContent = '☀️';
+        }
+    } catch(e) {}
 })();
 
 // Multi-language
@@ -4134,7 +4136,8 @@ var translations = {
 
 // Helper: get translated string for JS usage
 function __t(key) {
-    var lang = localStorage.getItem('lang') || 'zh';
+    var lang = 'zh';
+    try { lang = localStorage.getItem('lang') || 'zh'; } catch(e) {}
     var dict = translations[lang];
     return (dict && dict[key]) ? dict[key] : (translations.zh[key] || key);
 }
@@ -4142,7 +4145,7 @@ function __t(key) {
 function changeLang(lang) {
     // 先記下 server 渲染當前頁面用的 lang（= 送過來的 cookie），再寫入新值
     var serverLang = (document.cookie.match(/(?:^|;\s*)lang=([^;]+)/) || [])[1] || 'zh';
-    localStorage.setItem('lang', lang);
+    try { localStorage.setItem('lang', lang); } catch(e) {}
     document.cookie = 'lang=' + lang + ';path=/;max-age=' + (60 * 60 * 24 * 365) + ';SameSite=Lax';
 
     // 章節頁 Markdown 是 server 渲染的，**只有語言真的變了**才 reload
@@ -4180,21 +4183,24 @@ function changeLang(lang) {
 
 // Load saved language
 (function() {
-    var saved = localStorage.getItem('lang') || 'zh';
-    var cookieLang = (document.cookie.match(/(?:^|;\s*)lang=([^;]+)/) || [])[1] || 'zh';
+    var saved, cookieLang;
+    try { saved = localStorage.getItem('lang') || 'zh'; } catch(e) { saved = 'zh'; }
+    cookieLang = (document.cookie.match(/(?:^|;\s*)lang=([^;]+)/) || [])[1] || 'zh';
 
     // 舊 user：localStorage 有 ja 但 cookie 還沒 → server 拿到 zh 渲染錯 → 補寫 cookie 然後 reload 一次
     // 但必須避開剛剛 reload 過的狀態（用 sessionStorage guard 防 infinite loop）
     if (cookieLang !== saved) {
         document.cookie = 'lang=' + saved + ';path=/;max-age=' + (60 * 60 * 24 * 365) + ';SameSite=Lax';
-        if (/^\/Home\/Chapter\//i.test(location.pathname) && !sessionStorage.getItem('_langReloaded')) {
-            sessionStorage.setItem('_langReloaded', '1');
+        var langReloaded = false;
+        try { langReloaded = !!sessionStorage.getItem('_langReloaded'); } catch(e) {}
+        if (/^\/Home\/Chapter\//i.test(location.pathname) && !langReloaded) {
+            try { sessionStorage.setItem('_langReloaded', '1'); } catch(e) {}
             location.reload();
             return;
         }
     } else {
         // cookie 跟 localStorage 同步後清掉 guard，下次真正要切才會 reload
-        sessionStorage.removeItem('_langReloaded');
+        try { sessionStorage.removeItem('_langReloaded'); } catch(e) {}
     }
 
     if (saved !== 'zh') {

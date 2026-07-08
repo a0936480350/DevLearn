@@ -143,7 +143,7 @@
         var TOTAL=6;
         var defaults={register:false,profile:false,chapter:false,quiz:false,game:false,line:false};
         function load(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||Object.assign({},defaults);}catch(e){return Object.assign({},defaults);}}
-        function save(t){localStorage.setItem(STORAGE_KEY,JSON.stringify(t));}
+        function save(t){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(t));}catch(e){}}
         function countDone(t){return Object.values(t).filter(Boolean).length;}
 
         // Auto-detect completed tasks
@@ -158,7 +158,7 @@
 
         function render(tasks){
             var card=document.getElementById('newbieTaskCard');
-            if(localStorage.getItem(DISMISS_KEY)){card.style.display='none';return;}
+            var dismissed; try{dismissed=localStorage.getItem(DISMISS_KEY);}catch(e){} if(dismissed){card.style.display='none';return;}
             var done=countDone(tasks);
             if(done>=TOTAL){
                 document.getElementById('taskCelebration').classList.add('show');
@@ -167,7 +167,7 @@
                 document.getElementById('taskBar').style.width='100%';
                 document.getElementById('taskProgressText').textContent=TOTAL+' / '+TOTAL+' 完成';
                 card.style.display='block';
-                setTimeout(function(){card.style.display='none';localStorage.setItem(DISMISS_KEY,'true');},4000);
+                setTimeout(function(){card.style.display='none';try{localStorage.setItem(DISMISS_KEY,'true');}catch(e){}},4000);
                 return;
             }
             document.getElementById('taskBar').style.width=(done/TOTAL*100)+'%';
@@ -198,7 +198,7 @@
         }).catch(function(){save(tasks);render(tasks);});
 
         window.dismissTasks=function(){
-            localStorage.setItem(DISMISS_KEY,'true');
+            try{localStorage.setItem(DISMISS_KEY,'true');}catch(e){}
             document.getElementById('newbieTaskCard').style.display='none';
         };
     })();

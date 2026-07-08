@@ -89,6 +89,16 @@
     @await RenderSectionAsync("Head", required: false)
 </head>
 <body>
+    <script>
+    /* Safe storage: prevents SecurityError in private/restricted browser contexts */
+    (function(){
+        try { window.localStorage.length; } catch(e) {
+            function _mem(){ var s={}; return { getItem:function(k){return s.hasOwnProperty(k)?s[k]:null;}, setItem:function(k,v){s[k]=String(v);}, removeItem:function(k){delete s[k];}, clear:function(){s={};}, key:function(i){return Object.keys(s)[i]||null;}, get length(){return Object.keys(s).length;} }; }
+            try{Object.defineProperty(window,'localStorage',{value:_mem(),configurable:true});}catch(ee){}
+            try{Object.defineProperty(window,'sessionStorage',{value:_mem(),configurable:true});}catch(ee){}
+        }
+    })();
+    </script>
     <!-- Promotion Marquee Banner -->
     <style>
         @@keyframes marqueeScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-100%)} }
@@ -399,8 +409,8 @@
     </script>
     <script>
     (function(){
-        let chatNick = localStorage.getItem('chatNick') || '';
-        let chatEmoji = localStorage.getItem('chatEmoji') || '\u{1F600}';
+        let chatNick = '', chatEmoji = '\u{1F600}';
+        try { chatNick = localStorage.getItem('chatNick') || ''; chatEmoji = localStorage.getItem('chatEmoji') || '\u{1F600}'; } catch(e) {}
         let chatOpen = false;
         let chatJoined = !!chatNick;
         let unreadCount = 0;
@@ -1119,6 +1129,9 @@
                     }
                 }).catch(function(){ /* HEAD 也失敗 = 用戶端網路問題，靜默 */ });
             } else {
+                // Google Fonts/gstatic failures are cosmetic — browser falls back to system fonts.
+                // Blocked by regional networks, privacy extensions, or transient CDN issues; not a code bug.
+                if (/fonts\.googleapis\.com|fonts\.gstatic\.com/.test(src)) return;
                 reportError('Resource Load Failed: [' + tag + '] ' + src, '', 'frontend-resource');
             }
         }, true);
@@ -1413,27 +1426,29 @@ var gestureThrottle = 800;
 var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 // 跳頁後自動重連手勢控制（先確認有攝影機，否則清掉 flag 避免每次都丟 NotFoundError）
-if (localStorage.getItem('gestureOn') === 'true') {
-    setTimeout(function(){
-        if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
-            localStorage.removeItem('gestureOn');
-            return;
-        }
-        navigator.mediaDevices.enumerateDevices().then(function(devices){
-            var hasCamera = devices.some(function(d){ return d.kind === 'videoinput'; });
-            if (hasCamera) {
-                toggleGesture();
-            } else {
-                localStorage.removeItem('gestureOn');
+try {
+    if (localStorage.getItem('gestureOn') === 'true') {
+        setTimeout(function(){
+            if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+                try { localStorage.removeItem('gestureOn'); } catch(e) {}
+                return;
             }
-        }).catch(function(){
-            localStorage.removeItem('gestureOn');
-        });
-    }, 1500);
-}
-if (localStorage.getItem('voiceOn') === 'true') {
-    setTimeout(function(){ toggleVoice(); }, 2000);
-}
+            navigator.mediaDevices.enumerateDevices().then(function(devices){
+                var hasCamera = devices.some(function(d){ return d.kind === 'videoinput'; });
+                if (hasCamera) {
+                    toggleGesture();
+                } else {
+                    try { localStorage.removeItem('gestureOn'); } catch(e) {}
+                }
+            }).catch(function(){
+                try { localStorage.removeItem('gestureOn'); } catch(e) {}
+            });
+        }, 1500);
+    }
+    if (localStorage.getItem('voiceOn') === 'true') {
+        setTimeout(function(){ toggleVoice(); }, 2000);
+    }
+} catch(e) {}
 
 // Set button label and guide based on device
 document.getElementById('gestureToggleBtnLabel').textContent = isMobile ? '頭部控制' : '手勢控制';

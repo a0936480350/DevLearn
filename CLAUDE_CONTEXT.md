@@ -5,13 +5,13 @@ DevLearn 是 ASP.NET Core MVC .NET 8 學習平台。
 - 本地路徑：`C:\Users\user\DotNetLearning\DotNetLearning\`
 - 網站：https://devlearn-dotnet.azurewebsites.net
 - 資料庫：PostgreSQL (`leadflow-mike-tw-pg.postgres.database.azure.com`, DB: `devlearn`, user: `leadflowadmin`) — 2026-05-10 從舊 `devlearn-pg` 整併過來，與 LeadFlow / nihon-dev 共用同一台 server。腳本端走 `db_config.py` 單一來源。
-- 部署：Azure App Service (devlearn-dotnet, devlearn-rg, East Asia)
+- 部署：Azure App Service (devlearn-dotnet, leadflow-staging-rg, East Asia)
 
 ## 部署指令（在 ~/DotNetLearning 目錄執行）
 ```
 dotnet publish DotNetLearning/DotNetLearning.csproj -c Release -o publish-out --nologo
 python -c "import zipfile,os; z=zipfile.ZipFile('deploy-new.zip','w',zipfile.ZIP_DEFLATED); [z.write(os.path.join(r,f),os.path.relpath(os.path.join(r,f),'publish-out')) for r,d,fs in os.walk('publish-out') for f in fs]; z.close(); print('done')"
-az webapp deploy --resource-group devlearn-rg --name devlearn-dotnet --src-path "C:/Users/user/DotNetLearning/deploy-new.zip" --type zip --async true
+az webapp deploy --resource-group leadflow-staging-rg --name devlearn-dotnet --src-path "C:/Users/user/DotNetLearning/deploy-new.zip" --type zip --async true
 ```
 驗證：`python -c "import urllib.request,json,subprocess; t=json.loads(subprocess.run(['C:/Program Files/Microsoft SDKs/Azure/CLI2/wbin/az.cmd','account','get-access-token','--output','json'],capture_output=True,text=True).stdout)['accessToken']; r=urllib.request.urlopen(urllib.request.Request('https://devlearn-dotnet.scm.azurewebsites.net/api/deployments/latest',headers={'Authorization':'Bearer '+t}),timeout=30); print(json.loads(r.read()))"`
 

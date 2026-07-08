@@ -216,7 +216,7 @@ const SESSION_ID = "@ViewBag.SessionId";
 function shareChapter() {
     var url = window.location.href;
     if (navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(function() { alert(__t('ch-share-copied')); });
+        navigator.clipboard.writeText(url).then(function() { alert(__t('ch-share-copied')); }).catch(function() { prompt(__t('ch-share-prompt'), url); });
     } else {
         prompt(__t('ch-share-prompt'), url);
     }
@@ -272,10 +272,17 @@ function downloadBlob(blob, filename) {
     document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
-// 載入此章節的想法 — ideas.js (defer) 比 inline script 晚執行，
-// 故包在 DOMContentLoaded 內確保 loadChapterIdeas 已定義
+// 載入此章節的想法 — ideas.js 以 defer 載入，理應在 DOMContentLoaded 前執行；
+// 但若 ideas.js 載入失敗（404/快取版本不符），loadChapterIdeas 將未定義。
+// 加入 typeof 防呆 + window.load fallback 確保不會拋出 ReferenceError。
 function _loadChapterIdeas() {
-    loadChapterIdeas(CHAPTER_ID);
+    if (typeof loadChapterIdeas === 'function') {
+        loadChapterIdeas(CHAPTER_ID);
+    } else {
+        window.addEventListener('load', function() {
+            if (typeof loadChapterIdeas === 'function') loadChapterIdeas(CHAPTER_ID);
+        }, { once: true });
+    }
 }
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', _loadChapterIdeas);
